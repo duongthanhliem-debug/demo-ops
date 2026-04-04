@@ -2463,6 +2463,7 @@
     }
     function openStoreModal(mode) {
       currentStoreEdit = null;
+
       ['ns-id', 'ns-name', 'ns-owner', 'ns-phone', 'ns-email', 'ns-addr', 'ns-storeNo', 'ns-province', 'ns-coords', 'ns-note'].forEach(id => { $(id).value = ''; });
       ['ns-dob', 'ns-setup-start', 'ns-launch'].forEach(id => { $(id).value = ''; });
       $('ns-brand').value = 'Phúc Tea'; $('ns-model').value = 'Tiêu chuẩn'; $('ns-type').value = 'Nhượng quyền';
@@ -2482,8 +2483,8 @@
       $('ns-province').value = s.province || ''; $('ns-region').value = s.region || 'Miền Tây';
       $('ns-coords').value = s.coords || ''; $('ns-addr').value = s.address || '';
       $('ns-note').value = s.note || '';
-      if (s.ownerDob) $('ns-dob').value = s.ownerDob.split('/').reverse().join('-');
-      if (s.launchDate) $('ns-launch').value = s.launchDate.split('/').reverse().join('-');
+      if (s.ownerDob) { let p = s.ownerDob.split('/'); $('ns-dob').value = (p.length === 3) ? `${p[2]}-${p[0].padStart(2,'0')}-${p[1].padStart(2,'0')}` : s.ownerDob; }
+      if (s.launchDate) { let p = s.launchDate.split('/'); $('ns-launch').value = (p.length === 3) ? `${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}` : s.launchDate; }
       toggleSetupExtra(s.status);
       $('store-modal-title').textContent = '✏️ Sửa: ' + s.name;
       openModal('modal-store');
@@ -2513,11 +2514,6 @@
         toast(`✅ Đã lưu: ${name}`);
         closeModal('modal-store');
         await loadStores();
-        // If new setup store: create timeline
-        if (d.status === 'Đang setup' && res.storeId) {
-          const tlRes = await api({ action: 'createTimeline', storeId: res.storeId, storeName: name, launchDate: d.launchDate || '' });
-          if (tlRes.ok && !tlRes.alreadyExists) toast('📋 Đã tạo timeline cho ' + name, 'tok');
-        }
         loadSetupPage();
         renderDashboard();
       } else toast('❌ ' + (res.error || 'Lỗi'), 'terr');
@@ -2530,281 +2526,136 @@
       if (res.ok) { toast('🗑 Đã xóa ' + name, 'tok'); await loadStores(); }
       else toast('❌ ' + res.error, 'terr');
     }
-    function exportStores() {
-      if (!_allStores.length) { toast('Không có dữ liệu', 'twarn'); return; }
-      const rows = [['Store ID', 'Tên', 'Thương hiệu', 'Mô hình', 'Loại', 'Chủ', 'SĐT', 'Trạng thái', 'Khai trương', 'Tỉnh/TP', 'Địa chỉ', 'Khu vực']];
-      _allStores.forEach(s => rows.push([s.storeId, s.name, s.brand, s.model, s.type, s.owner, s.phone, s.status, s.launchDate, s.province, s.address, s.region]));
-      exportXLSX(rows, 'DanhSachCuaHang');
-    }
 
-    // ════════════════════════════════════════
-    //  SETUP
-    // ════════════════════════════════════════
     async function loadStaff() {
       if (!CFG.scriptUrl) return;
-      const data = await api({ action: 'getStaff' });
-      if (data.ok) {
-        D.staffList = data.staff || [];
-        console.log('✅ Đã nạp STAFF:', D.staffList.length);
-      }
-    }
-
-    async function loadSetupPage() {
-      if (!CFG.scriptUrl) return;
-      load('Đang tải dữ liệu setup...');
       try {
-        await loadStaff(); // Nạp nhân sự trước
-        const tData = await api({ action: 'getSetupTemplate' });
-        if (tData.ok) D.template = tData.template || [];
-
-        const phases = [...new Set(D.template.map(t => (t.phase || '').trim().toUpperCase()).filter(Boolean))];
-        const phSel = $('setup-phase-filter');
-        phSel.innerHTML = '<option value="all">Tất cả giai đoạn</option>' + phases.map(p => `<option value="${p}">${p}</option>`).join('');
-
-        const data = await api({ action: 'getSetupStores' });
-        if (data.ok) D.setupStores = data.setupStores || [];
-
-        $('setup-cnt').textContent = D.setupStores.length;
-        renderSetupList();
-      } catch (e) { toast('Lỗi: ' + e.message, 'terr'); }
-      unload();
-    }
-
-    function filterSetupPhase() {
-      // Refresh current visible tasks in cards
-      renderSetupList();
-    }
-
-    function getTaskDates(deltaS, deltaE, openStr) {
-      if (!openStr) return { s: '–', e: '–' };
-      try {
-        const d = new Date(openStr.includes('/') ? openStr.split('/').reverse().join('-') : openStr);
-        if (isNaN(d.getTime())) return { s: '–', e: '–' };
-        const s = new Date(d); s.setDate(d.getDate() + (deltaS || 0));
-        const e = new Date(d); e.setDate(d.getDate() + (deltaE || 0));
-        return { s: s.toLocaleDateString('vi-VN'), e: e.toLocaleDateString('vi-VN') };
-      } catch (_) { return { s: '–', e: '–' }; }
+        const data = await api({ action: 'getStaff' });
+        if (data.ok) { D.staffList = data.staff || []; }
+      } catch (e) { console.error('Staff Load Error:', e); }
     }
 
     function staffOpt(current) {
       let h = '<option value="">-- Chọn nhân sự --</option>';
-      const sList = (D.staffList || []);
-      if (sList.length) h += sList.map(s => `<option value="${s.name}" ${s.name === current ? 'selected' : ''}>${s.name}</option>`).join('');
-      if (current && !sList.some(s => s.name === current)) h += `<option value="${current}" selected>${current}</option>`;
+      const list = D.staffList || [];
+      list.forEach(s => { h += `<option value="${s.name}" ${s.name === current ? 'selected' : ''}>${s.name}</option>`; });
+      if (current && !list.some(s => s.name === current)) h += `<option value="${current}" selected>${current} (Cũ)</option>`;
       return h;
+    }
+
+    async function loadSetupPage() {
+      if (!CFG.scriptUrl) return;
+      load('Đang nạp dữ liệu Setup...');
+      try {
+        await loadStaff();
+        const tData = await api({ action: 'getSetupTemplate' });
+        if (tData.ok) D.template = tData.template || [];
+        
+        const phases = [...new Set(D.template.map(t => (t.phase || '').trim().toUpperCase()).filter(Boolean))];
+        const phSel = $('setup-phase-filter');
+        if (phSel) phSel.innerHTML = '<option value="all">Tất cả giai đoạn</option>' + phases.map(p => `<option value="${p}">${p}</option>`).join('');
+
+        const data = await api({ action: 'getSetupStores' });
+        if (data.ok) { 
+          D.setupStores = data.setupStores || []; 
+          renderSetupList(); 
+        }
+        const cnt = $('setup-cnt'); if (cnt) cnt.textContent = D.setupStores.length;
+      } catch (e) { toast('Lỗi tải trang Setup: ' + e.message, 'terr'); }
+      unload();
     }
 
     function renderSetupList() {
-      const list = $('setup-stores-list');
-      const phase = $('setup-phase-filter').value;
-      if (!D.setupStores.length) {
-        list.innerHTML = '<div class="empty-state"><div class="ei">🏪</div>Không có cửa hàng đang setup.</div>';
-        return;
-      }
+      const list = $('setup-stores-list'); if (!list) return;
+      if (!D.setupStores.length) { list.innerHTML = '<div class="empty-state">Không có cửa hàng đang Setup.</div>'; return; }
+      
       list.innerHTML = D.setupStores.map((s, si) => {
-        const sid = 's_' + si;
-        const pct = s.progress || 0;
+        const sid = 's_' + si; const pct = s.progress || 0;
         const c = pct >= 85 ? 'var(--green)' : pct >= 50 ? 'var(--blue)' : 'var(--red)';
-
-        return `<div class="setup-card" id="card_${sid}">
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
-        <div>
-          <div style="font-weight:700;font-size:16px">${s.name}</div>
-          <div style="font-size:12px;color:var(--gray);margin-top:2px">
-            <code>${s.storeId || '–'}</code> · ${s.partner || '–'} 
-            ${s.openDate ? ' · <span style="color:var(--gold);font-weight:600">KT: ' + s.openDate + '</span>' : ''}
+        return `
+        <div class="setup-card" id="card_${sid}">
+          <div style="display:flex;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:10px">
+            <div>
+              <div style="font-weight:700;font-size:17px;color:var(--text)">${s.name}</div>
+              <div style="font-size:12px;color:var(--gray);margin-top:4px;display:flex;align-items:center;gap:12px">
+                <code>${s.storeId}</code>
+                <span style="display:flex;align-items:center;gap:5px">
+                  📅 KT: 
+                  <input type="date" class="fc bsm t-open-date" value="${s.openDate ? s.openDate.split('/').reverse().join('-') : ''}" 
+                    onchange="recalcStoreTimelineDates('${sid}', this.value)" style="padding:1px 4px;height:24px;width:120px;font-size:11px">
+                </span>
+              </div>
+            </div>
+            <div style="text-align:right">
+              <span class="bdg ${pct >= 100 ? 'bg2' : 'by2'}" id="bdg_${sid}">${pct >= 100 ? 'Sẵn sàng' : 'Chưa xong'}</span>
+              <div id="pct_${sid}" style="font-weight:800;font-size:18px;color:${c};margin-top:2px">${pct}%</div>
+            </div>
           </div>
-        </div>
-        <div style="text-align:right">
-           <span class="bdg ${pct >= 100 ? 'bg2' : 'by2'}" id="bdg_${sid}">${pct >= 100 ? 'Sẵn sàng' : 'Đang setup'}</span>
-           <div id="pct_${sid}" style="color:${c};font-weight:800;font-size:18px;margin-top:4px">${pct}%</div>
-        </div>
-      </div>
-      <div class="prog-bg" style="height:6px;margin-bottom:15px"><div class="prog-bar" id="bar_${sid}" style="width:${pct}%;background:${c}"></div></div>
-      
-      <div class="tbl-wrap" style="max-height:400px;overflow-y:auto;border:1px solid var(--border);border-radius:8px">
-        <table class="tbl" style="font-size:12px">
-          <thead style="position:sticky;top:0;background:var(--card);z-index:2">
-            <tr>
-              <th style="width:40px">ID</th>
-              <th>Công việc</th>
-              <th style="width:120px">Phụ trách</th>
-              <th style="width:120px">Hỗ trợ</th>
-              <th style="width:90px">Bắt đầu</th>
-              <th style="width:90px">Deadline</th>
-              <th style="width:40px">OK?</th>
-            </tr>
-          </thead>
-          <tbody id="tbl_${sid}">
-            <tr><td colspan="7"><div class="empty-state">Nhấn "Tải/Tạo Timeline" để xem tasks</div></td></tr>
-          </tbody>
-        </table>
-      </div>
-      
-      <div style="margin-top:15px;display:flex;gap:7px;flex-wrap:wrap;justify-content:space-between;align-items:center">
-        <div style="display:flex;gap:7px">
-          <button class="btn bp bsm" onclick="saveSetupTasks('${s.storeId}','${sid}')">💾 Lưu Tiền độ</button>
-          <button class="btn bo bsm" onclick="loadStoreTasks('${s.storeId}','${sid}')">🔄 Tải/Tạo Timeline</button>
-          <button class="btn bo bsm" onclick="addSetupTaskRow('${sid}')">+ Thêm việc mới</button>
-        </div>
-        <div style="display:flex;gap:7px">
-          <button class="btn bo bsm" onclick="markStoreAsLaunched('${s.storeId}','${s.name}','${sid}')">🎉 Đã KT</button>
-          <button class="btn bo bsm" onclick="aiSetupAdvice('${s.name}',${pct})">🤖 AI gợi ý</button>
-        </div>
-      </div>
-    </div>`;
+          <div class="prog-bg" style="height:6px;margin-bottom:15px;background:#eee"><div class="prog-bar" id="bar_${sid}" style="width:${pct}%;background:${c}"></div></div>
+          
+          <div class="tbl-wrap" style="max-height:400px;overflow-y:auto;border:1px solid var(--border);border-radius:8px">
+            <table class="tbl" style="font-size:11px">
+              <thead style="position:sticky;top:0;background:var(--card);z-index:2">
+                <tr>
+                  <th style="width:40px">ID</th>
+                  <th>Hạng mục công việc</th>
+                  <th style="width:110px">Phụ trách</th>
+                  <th style="width:110px">Hỗ trợ</th>
+                  <th style="width:90px">Bắt đầu</th>
+                  <th style="width:90px">Deadline</th>
+                  <th style="width:35px">OK</th>
+                </tr>
+              </thead>
+              <tbody id="tbl_${sid}"><tr><td colspan="7" class="empty-state">Đang nạp timeline...</td></tr></tbody>
+            </table>
+          </div>
+          
+          <div style="margin-top:15px;display:flex;gap:8px;justify-content:space-between;align-items:center">
+            <div style="display:flex;gap:8px">
+              <button class="btn bp bsm" onclick="saveSetupTasks('${s.storeId}','${sid}')">💾 Lưu tiến độ</button>
+              <button class="btn bo bsm" onclick="addSetupTaskRow('${sid}')">+ Thêm việc</button>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button class="btn bo bsm" onclick="exportTimelineStore('${s.storeId}','${s.name}')">📥 Xuất Excel</button>
+              <button class="btn bo bsm" onclick="markStoreAsLaunched('${s.storeId}','${s.name}','${sid}')">🎉 Đã KT</button>
+            </div>
+          </div>
+        </div>`;
       }).join('');
-    }
 
-    function defaultTasks() {
-      return [
-        { task: 'Xác nhận mặt bằng & ký hợp đồng', phase: 'Giai đoạn 1 – Chuẩn bị', deltaText: 'KT-25', owner: 'Operations Leader' },
-        { task: 'Lên kế hoạch thi công', phase: 'Giai đoạn 1 – Chuẩn bị', deltaText: 'KT-20', owner: 'Operations Leader' },
-        { task: 'Giám sát thi công', phase: 'Giai đoạn 2 – Thi công', deltaText: 'KT-14', owner: 'NV Setup' },
-        { task: 'Lắp đặt thiết bị', phase: 'Giai đoạn 2 – Thi công', deltaText: 'KT-7', owner: 'NV Setup' },
-        { task: 'Giao đồng phục nhân viên', phase: 'Giai đoạn 2 – Thi công', deltaText: 'KT-7', owner: 'Operations Staff' },
-        { task: 'Đào tạo công thức & vận hành', phase: 'Giai đoạn 3 – Đào tạo', deltaText: 'KT-5', owner: 'Operations Leader' },
-        { task: 'Soft opening & điều chỉnh', phase: 'Giai đoạn 4 – Khai trương', deltaText: 'KT-3', owner: 'Operations Leader' },
-        { task: 'Audit trước KT (≥85đ)', phase: 'Giai đoạn 4 – Khai trương', deltaText: 'KT-2', owner: 'Operations Leader' },
-        { task: 'Khai trương chính thức', phase: 'Giai đoạn 4 – Khai trương', deltaText: 'KT', owner: 'Operations Leader' },
-      ];
-    }
-
-    function toggleSetupTaskRow(btn) {
-      btn.classList.toggle('bg2');
-      btn.textContent = btn.classList.contains('bg2') ? '✓' : '';
-      const sid = btn.closest('.setup-card').id.replace('card_', '');
-      const si = parseInt(sid.replace('s_', ''));
-      recalcSetupProgressTable(sid, si);
-    }
-
-    function recalcSetupProgressTable(sid, si) {
-      const rows = $(`tbl_${sid}`).querySelectorAll('tr.t-row');
-      const done = [...rows].filter(r => r.querySelector('.t-done').classList.contains('bg2')).length;
-      const pct = rows.length ? Math.round(done / rows.length * 100) : 0;
-      const c = pct >= 85 ? 'var(--green)' : pct >= 50 ? 'var(--blue)' : 'var(--red)';
-      $(`pct_${sid}`).textContent = pct + '%';
-      $(`pct_${sid}`).style.color = c;
-      $(`bar_${sid}`).style.width = pct + '%';
-      $(`bar_${sid}`).style.background = c;
-      if (D.setupStores[si]) D.setupStores[si].progress = pct;
-    }
-
-    function addSetupTaskRow(sid, t = {}) {
-      const tbody = $(`tbl_${sid}`);
-      if (tbody.querySelector('.empty-state')) tbody.innerHTML = '';
-      const phase = $('setup-phase-filter').value;
-      const tr = document.createElement('tr');
-      tr.className = 't-row ' + (phase !== 'all' && t.phase && t.phase !== phase ? 'hidden' : '');
-      const s = D.setupStores[parseInt(sid.replace('s_', ''))] || {};
-      const dates = t.startDelta !== undefined ? getTaskDates(t.startDelta, t.endDelta, s.openDate) : { s: t.startDate || '', e: t.deadline || '' };
-
-      tr.innerHTML = `
-        <td><input class="fc t-id" value="${t.id || ''}" style="padding:2px;font-size:10px"></td>
-        <td><input class="fc t-task" value="${t.task || ''}" style="padding:2px">
-            <input type="hidden" class="t-phase" value="${t.phase || 'Khai trương'}"></td>
-        <td><select class="fc t-owner" style="padding:2px">${staffOpt(t.owner)}</select></td>
-        <td><select class="fc t-support" style="padding:2px">${staffOpt(t.support)}</select></td>
-        <td><input type="date" class="fc t-s" value="${dates.s ? dates.s.split('/').reverse().join('-') : ''}" style="padding:2px"></td>
-        <td><input type="date" class="fc t-e" value="${dates.e ? dates.e.split('/').reverse().join('-') : ''}" style="padding:2px"></td>
-        <td><button class="btn bo bsm t-done ${t.done ? 'bg2' : ''}" onclick="toggleSetupTaskRow(this)" style="min-width:30px;height:30px">${t.done ? '✓' : ''}</button></td>
-      `;
-      tbody.appendChild(tr);
-    }
-
-    async function loadSetupPage() {
-      if (!CFG.scriptUrl) return;
-      load('Đang tải dữ liệu setup...');
-      try {
-        await loadStaff(); // Đảm bảo nạp nhân sự trước
-        const tData = await api({ action: 'getSetupTemplate' });
-        if (tData.ok) D.template = tData.template || [];
-
-        const phases = [...new Set(D.template.map(t => (t.phase || '').trim().toUpperCase()).filter(Boolean))];
-        const phSel = $('setup-phase-filter');
-        phSel.innerHTML = '<option value="all">Tất cả giai đoạn</option>' + phases.map(p => `<option value="${p}">${p}</option>`).join('');
-
-        const data = await api({ action: 'getSetupStores' });
-        if (data.ok) D.setupStores = data.setupStores || [];
-        renderSetupList();
-      } catch (e) { toast('Lỗi: ' + e.message, 'terr'); }
-      unload();
-    }
-
-    function filterSetupPhase() {
-      const fVal = $('setup-phase-filter').value.trim().toUpperCase();
-      const rows = document.querySelectorAll('tr.t-row');
-      rows.forEach(row => {
-        let pEl = row.querySelector('.t-phase');
-        let p = pEl ? pEl.value.trim().toUpperCase() : '';
-        if (fVal === 'ALL' || p === fVal) row.classList.remove('hidden');
-        else row.classList.add('hidden');
-      });
-    }
-
-    function staffOpt(current) {
-      let h = '<option value="">-- Chọn nhân sự --</option>';
-      const sList = (D.staffList || []);
-      if (sList.length) h += sList.map(s => `<option value="${s.name}" ${s.name === current ? 'selected' : ''}>${s.name}</option>`).join('');
-      if (current && !sList.some(s => s.name === current)) h += `<option value="${current}" selected>${current}</option>`;
-      return h;
+      // Auto-load tasks for each store silently
+      D.setupStores.forEach((s, si) => { if(s.storeId) loadStoreTasks(s.storeId, 's_'+si, true); });
     }
 
     function getTaskDates(dS, dE, openStr) {
       if (!openStr) return { s: '', e: '' };
       try {
         let p = openStr.includes('/') ? openStr.split('/').reverse() : openStr.split('-');
-        if (p[0].length < 4) { // Dạng DD/MM/YYYY
-          p = [p[2], p[1], p[0]]; // Đảo lại thành YYYY, MM, DD
-        }
+        if (p[0].length < 4) p = [p[2], p[1], p[0]]; 
         const d = new Date(parseInt(p[0]), parseInt(p[1]) - 1, parseInt(p[2]));
         if (isNaN(d.getTime())) return { s: '', e: '' };
-
-        // Tính toán dựa trên độ lệch (delta)
-        let ds = new Date(d); ds.setDate(d.getDate() + (dS || 0));
-        let de = new Date(d); de.setDate(d.getDate() + (dE || 0));
-
-        // Định dạng YYYY-MM-DD cho input type="date"
-        const pad = (n) => String(n).padStart(2, '0');
-        return {
-          s: `${ds.getFullYear()}-${pad(ds.getMonth() + 1)}-${pad(ds.getDate())}`,
-          e: `${de.getFullYear()}-${pad(de.getMonth() + 1)}-${pad(de.getDate())}`
-        };
-      } catch (e) { return { s: '', e: '' }; }
+        let s = new Date(d); s.setDate(d.getDate() + (dS || 0));
+        let e = new Date(d); e.setDate(d.getDate() + (dE || 0));
+        const f = date => `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+        return { s: f(s), e: f(e) };
+      } catch (_) { return { s: '', e: '' }; }
     }
 
     function addSetupTaskRow(sid, t = {}) {
-      const tbody = $(`tbl_${sid}`);
-      if (!tbody) return;
+      const tbody = $(`tbl_${sid}`); if (!tbody) return;
       if (tbody.querySelector('.empty-state')) tbody.innerHTML = '';
-      const fVal = (document.getElementById('setup-phase-filter').value || 'all').trim().toUpperCase();
-      const tr = document.createElement('tr');
-      tr.className = 't-row';
-
-      const taskPhase = (t.phase || '').trim();
-      if (fVal !== 'ALL' && taskPhase.toUpperCase() !== fVal) tr.classList.add('hidden');
-
-      const si = parseInt(sid.replace('s_', ''));
-      const s = D.setupStores[si] || {};
-
-      // Nếu là task nạp từ sheet (t.startDate có giá trị) thì nạp ngày đó, 
-      // nếu là task mới/từ template (t.startDelta có giá trị) thì tính theo delta
+      const tr = document.createElement('tr'); tr.className = 't-row';
+      const s = D.setupStores[parseInt(sid.replace('s_',''))] || {};
       let dates = { s: '', e: '' };
-      if (t.startDelta !== undefined) {
-        dates = getTaskDates(t.startDelta, t.endDelta, s.openDate);
-      } else {
-        const toISO = (dStr) => {
-          if (!dStr) return '';
-          let p = dStr.split('/'); if (p.length < 3) return dStr;
-          return `${p[2]}-${p[1].padStart(2, '0')}-${p[0].padStart(2, '0')}`;
-        };
+      if (t.startDelta !== undefined) dates = getTaskDates(t.startDelta, t.endDelta, s.openDate);
+      else {
+        const toISO = str => { if(!str) return ''; let p=str.split('/'); return p.length<3?str:`${p[2]}-${p[0].padStart(2,'0')}-${p[1].padStart(2,'0')}`; };
         dates = { s: toISO(t.startDate), e: toISO(t.deadline) };
       }
-
       tr.innerHTML = `
-        <td style="text-align:center"><input class="fc t-id" value="${t.id || ''}" style="padding:2px;font-size:10px;text-align:center"></td>
+        <td style="text-align:center"><input class="fc t-id" value="${t.id || ''}" style="padding:2px;font-size:9px;text-align:center"></td>
         <td><input class="fc t-task" value="${t.task || ''}" style="padding:2px;font-weight:600">
-            <input type="hidden" class="t-phase" value="${taskPhase.toUpperCase()}"></td>
+            <input type="hidden" class="t-phase" value="${(t.phase||'Khai trương').toUpperCase()}"></td>
         <td><select class="fc t-owner" style="padding:2px">${staffOpt(t.owner)}</select></td>
         <td><select class="fc t-support" style="padding:2px">${staffOpt(t.support)}</select></td>
         <td><input type="date" class="fc t-s" value="${dates.s}" style="padding:2px"></td>
@@ -2814,89 +2665,100 @@
       tbody.appendChild(tr);
     }
 
-    async function loadStoreTasks(storeId, sid) {
-      if (!storeId || storeId === 'undefined') { toast('⚠️ Cửa hàng chưa có Store ID', 'twarn'); return; }
-      load('Đang nạp timeline...');
+    async function loadStoreTasks(storeId, sid, silent = false) {
+      if (!silent) load('Đang tải danh sách...');
       try {
-        let data = await api({ action: 'getStoreTasks', storeId });
-        if (data.ok && (!data.tasks || data.tasks.length === 0)) {
-          const si = parseInt(sid.replace('s_', ''));
-          const s = D.setupStores[si];
+        let res = await api({ action: 'getStoreTasks', storeId });
+        if (res.ok && (!res.tasks || !res.tasks.length)) {
+          const s = D.setupStores[parseInt(sid.replace('s_',''))];
           await api({ action: 'createTimeline', storeId, storeName: s.name, launchDate: s.openDate });
-          data = await api({ action: 'getStoreTasks', storeId });
+          res = await api({ action: 'getStoreTasks', storeId });
         }
-        unload();
-        if (!data.ok) { toast('❌ ' + (data.error || 'Lỗi tải'), 'terr'); return; }
+        if (!silent) unload();
+        const tbody = $(`tbl_${sid}`); if (tbody && res.ok) {
+          tbody.innerHTML = ''; (res.tasks || []).forEach(t => addSetupTaskRow(sid, t));
+          recalcSetupProgressTable(sid, parseInt(sid.replace('s_','')));
+        }
+      } catch (e) { if (!silent) unload(); console.error(e); }
+    }
 
-        const tbody = $(`tbl_${sid}`);
-        if (!tbody) return;
-        tbody.innerHTML = '';
-        data.tasks.forEach(t => addSetupTaskRow(sid, t));
-        recalcSetupProgressTable(sid, parseInt(sid.replace('s_', '')));
-        toast(`✅ Đã nạp ${data.tasks.length} hạng mục`);
-      } catch (e) { unload(); toast('❌ Lỗi kết nối API', 'terr'); }
+    function recalcStoreTimelineDates(sid, newLaunch) {
+      if(!confirm('Tính lại toàn bộ Deadline theo ngày khai trương mới?')) return;
+      const rows = $(`tbl_${sid}`).querySelectorAll('tr.t-row');
+      rows.forEach(r => {
+        const tid = r.querySelector('.t-id').value;
+        const itm = D.template.find(v => v.id === tid);
+        if (itm && itm.startDelta !== undefined) {
+          const d = getTaskDates(itm.startDelta, itm.endDelta, newLaunch);
+          r.querySelector('.t-s').value = d.s; r.querySelector('.t-e').value = d.e;
+        }
+      });
+      toast('📅 Đã tính lại Deadline!');
     }
 
     async function saveSetupTasks(storeId, sid) {
-      if (!storeId || storeId === 'undefined') { toast('⚠️ Thiếu Store ID', 'twarn'); return; }
       const rows = $(`tbl_${sid}`).querySelectorAll('tr.t-row');
-      const tasks = [];
-      rows.forEach(r => {
-        tasks.push({
-          id: r.querySelector('.t-id').value,
-          task: r.querySelector('.t-task').value,
-          phase: r.querySelector('.t-phase').value,
-          owner: r.querySelector('.t-owner').value,
-          support: r.querySelector('.t-support').value,
-          startDate: r.querySelector('.t-s').value ? r.querySelector('.t-s').value.split('-').reverse().join('/') : '',
-          deadline: r.querySelector('.t-e').value ? r.querySelector('.t-e').value.split('-').reverse().join('/') : '',
-          done: r.querySelector('.t-done').classList.contains('bg2')
-        });
-      });
+      const tasks = Array.from(rows).map(r => ({
+        id: r.querySelector('.t-id').value, task: r.querySelector('.t-task').value, phase: r.querySelector('.t-phase').value,
+        owner: r.querySelector('.t-owner').value, support: r.querySelector('.t-support').value,
+        startDate: r.querySelector('.t-s').value.split('-').reverse().join('/'),
+        deadline: r.querySelector('.t-e').value.split('-').reverse().join('/'),
+        done: r.querySelector('.t-done').classList.contains('bg2')
+      }));
       load('Đang lưu...');
-      try {
-        const res = await api({ action: 'saveStoreTasks', storeId, tasks });
-        unload();
-        if (res.ok) {
-          toast('✅ Đã lưu tiến độ thành công!');
-          const si = parseInt(sid.replace('s_', ''));
-          recalcSetupProgressTable(sid, si);
-        } else toast('❌ ' + (res.error || 'Lỗi lưu'), 'terr');
-      } catch (e) { unload(); toast('❌ Lỗi kết nối', 'terr'); }
+      const res = await api({ action: 'saveStoreTasks', storeId, tasks });
+      const lnch = $(`card_${sid}`).querySelector('.t-open-date').value.split('-').reverse().join('/');
+      await api({ action: 'updateStoreLaunchDate', storeId, launchDate: lnch });
+      unload(); if(res.ok) { toast('✅ Đã lưu thành công!'); recalcSetupProgressTable(sid, parseInt(sid.replace('s_',''))); }
+    }
+
+    function toggleSetupTaskRow(btn) {
+      btn.classList.toggle('bg2'); btn.textContent = btn.classList.contains('bg2') ? '✓' : '';
+      const sid = btn.closest('.setup-card').id.replace('card_', '');
+      recalcSetupProgressTable(sid, parseInt(sid.replace('s_', '')));
+    }
+
+    function recalcSetupProgressTable(sid, si) {
+      const rows = $(`tbl_${sid}`).querySelectorAll('tr.t-row');
+      const done = [...rows].filter(r => r.querySelector('.t-done').classList.contains('bg2')).length;
+      const pct = rows.length ? Math.round(done / rows.length * 100) : 0;
+      const c = pct >= 85 ? 'var(--green)' : pct >= 50 ? 'var(--blue)' : 'var(--red)';
+      const card = $(`card_${sid}`);
+      if (card) {
+        const pctEl = card.querySelector('#pct_'+sid); if (pctEl) { pctEl.textContent = pct + '%'; pctEl.style.color = c; }
+        const bar = card.querySelector('#bar_'+sid); if (bar) { bar.style.width = pct + '%'; bar.style.background = c; }
+        const bdg = card.querySelector('#bdg_'+sid); if (bdg) { bdg.className = 'bdg ' + (pct>=100?'bg2':'by2'); bdg.textContent = pct>=100?'Sẵn sàng':'Đang làm'; }
+      }
+      if (D.setupStores[si]) D.setupStores[si].progress = pct;
     }
 
     async function markStoreAsLaunched(storeId, name, sid) {
       if (!confirm(`Xác nhận ${name} đã khai trương thành công?`)) return;
-      // Mark all tasks done
-      const cl = $('cl_' + sid); if (cl) { cl.querySelectorAll('.chk-item').forEach(i => { i.classList.add('done'); i.querySelector('.chk-box').textContent = '✓'; }); }
-      await saveSetupTasks(storeId, sid);
-      toast(`🎉 ${name} đã khai trương!`);
-      D.kpi.newStores = (D.kpi.newStores || 0) + 1;
-      renderDashboard();
-      loadSetupPage();
+      load('Đang cập nhật...');
+      await api({ action: 'markStoreAsLaunched', storeId });
+      unload(); toast(`🎉 Chúc mừng ${name} đã khai trương!`);
+      loadSetupPage(); renderDashboard();
+    }
+
+    async function exportTimelineStore(storeId, storeName) {
+      load('Đang nạp dữ liệu xuất...');
+      const res = await api({ action: 'getStoreTasks', storeId });
+      unload();
+      if (!res.ok || !res.tasks || !res.tasks.length) { toast('Không có dữ liệu để xuất', 'twarn'); return; }
+      const rows = [['Mã', 'Giai đoạn', 'Hạng mục công việc', 'Bắt đầu', 'Deadline', 'Phụ trách', 'Hỗ trợ', 'Trạng thái']];
+      res.tasks.forEach(t => rows.push([t.id, t.phase, t.task, t.startDate, t.deadline, t.owner, t.support, t.done?'Hoàn thành':'Chưa']));
+      exportXLSX(rows, `Timeline_PhucTea_${storeName.replace(/\s/g, '_')}`);
     }
 
     async function aiSetupAdvice(name, pct) {
-      load('AI đang tư vấn...');
-      const r = await callAI(`Cửa hàng ${name} đang setup, tiến độ ${pct}%. Đưa 5 việc cần làm ngay để khai trương đúng hẹn. Ngắn gọn, bullet points.`);
+      load('AI đang phân tích...');
+      const r = await callAI(`Cửa hàng ${name} tiến độ setup ${pct}%. Đưa 5 action plan quan trọng nhất để khai trương đúng kế hoạch. Ngắn gọn.`);
       unload();
       $('ai-advice-title').textContent = `💡 AI gợi ý – ${name} (${pct}%)`;
       $('ai-advice-body').innerHTML = r.replace(/\n/g, '<br>');
       openModal('modal-ai-advice');
     }
 
-    async function exportTimelineStore(storeId, storeName) {
-      if (!storeId) { toast('⚠️ Thiếu Store ID', 'twarn'); return; }
-      load('Đang tải timeline...');
-      const data = await api({ action: 'getStoreTasks', storeId });
-      unload();
-      if (!data.ok || !data.tasks || !data.tasks.length) {
-        toast('Chưa có tasks để xuất', 'twarn'); return;
-      }
-      const rows = [['Task ID', 'Giai đoạn', 'Công việc', 'Ngày bắt đầu', 'Deadline', 'Người phụ trách', 'Hoàn thành', 'Ngày HT', 'Ghi chú']];
-      data.tasks.forEach(t => rows.push([t.id, t.phase, t.task, t.startDate, t.deadline, t.owner, t.done ? 'Xong' : 'Chưa', t.doneDate, t.note]));
-      exportXLSX(rows, `Timeline_${storeName.replace(/\s/g, '_')}`);
-    }
 
     // ════════════════════════════════════════
     //  AUDIT
