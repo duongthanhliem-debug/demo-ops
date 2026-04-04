@@ -2536,52 +2536,53 @@
     // ════════════════════════════════════════
     //  SETUP
     // ════════════════════════════════════════
-    async function loadSetupPage() {
+        async function loadSetupPage() {
       if (!CFG.scriptUrl) return;
       load('Đang tải setup...');
-      // Load template
+      await loadStaff(); // Đảm bảo nạp nhân sự trước
       const tplData = await api({ action: 'getSetupTemplate' });
       if (tplData.ok) D.template = tplData.template || [];
 
-      // Build phase filter
       const phases = [...new Set(D.template.map(t => t.phase).filter(Boolean))];
       const phSel = $('setup-phase-filter');
       phSel.innerHTML = '<option value="all">Tất cả giai đoạn</option>' + phases.map(p => `<option value="${p}">${p}</option>`).join('');
 
-      // Load setup stores (from getSetupStores action)
       const data = await api({ action: 'getSetupStores' });
       if (data.ok) D.setupStores = data.setupStores || [];
       unload();
 
       $('setup-cnt').textContent = D.setupStores.length;
-      $('target-2026').textContent = D.kpi.targetStores || 30;
-      const pct = D.kpi.targetStores ? Math.round((D.kpi.newStores || 0) / D.kpi.targetStores * 100) : 0;
-      $('target-sub').textContent = `${D.kpi.newStores || 0}/${D.kpi.targetStores || 30} (${pct}%)`;
-      $('kt-cnt').textContent = D.kpi.newStores || 0;
-
-      // Monthly plan KT
-      if (D.plans.length > 0) {
-        const plan = D.plans[0];
-        $('kt-plan').textContent = `KH tháng này: ${plan.targetStores || 0} CH · Q2: ${(plan.targetStores || 0) * 3} CH`;
-      }
-
       renderSetupList();
     }
 
     function filterSetupPhase() {
-      // Refresh current visible tasks in cards
-      renderSetupList();
+      const phase = $('setup-phase-filter').value;
+      const rows = document.querySelectorAll('.t-row');
+      rows.forEach(row => {
+        const rowPhase = row.querySelector('.t-phase').value;
+        if (phase === 'all' || rowPhase === phase) row.classList.remove('hidden');
+        else row.classList.add('hidden');
+      });
     }
 
     function getTaskDates(deltaS, deltaE, openStr) {
-      if (!openStr) return { s: '–', e: '–' };
+      if (!openStr) return { s: '', e: '' };
       try {
-        const d = new Date(openStr.includes('/') ? openStr.split('/').reverse().join('-') : openStr);
-        if (isNaN(d.getTime())) return { s: '–', e: '–' };
-        const s = new Date(d); s.setDate(d.getDate() + (deltaS || 0));
-        const e = new Date(d); e.setDate(d.getDate() + (deltaE || 0));
-        return { s: s.toLocaleDateString('vi-VN'), e: e.toLocaleDateString('vi-VN') };
-      } catch (_) { return { s: '–', e: '–' }; }
+        let parts = openStr.includes('/') ? openStr.split('/').reverse() : openStr.split('-');
+        const d = new Date(parts[0], parts[1]-1, parts[2]);
+        if (isNaN(d.getTime())) return { s: '', e: '' };
+        let ds = new Date(d); ds.setDate(d.getDate() + (deltaS || 0));
+        let de = new Date(d); de.setDate(d.getDate() + (deltaE || 0));
+        return { s: ds.toISOString().split('T')[0], e: de.toISOString().split('T')[0] };
+      } catch (e) { return { s: '', e: '' }; }
+    }
+
+    function staffOpt(current) {
+      let html = '<option value="">-- Chọn nhân sự --</option>';
+      const staff = (D.staffList || []);
+      if (staff.length > 0) html += staff.map(s => `<option value="${s.name}" ${s.name === current ? 'selected' : ''}>${s.name}</option>`).join('');
+      if (current && !staff.some(s => s.name === current)) html += `<option value="${current}" selected>${current}</option>`;
+      return html;
     }
 
     function staffOpt(current) {
