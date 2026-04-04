@@ -2569,62 +2569,79 @@
     }
 
     function filterSetupPhase() {
+      // Refresh current visible tasks in cards
       renderSetupList();
+    }
+
+    function getTaskDates(deltaS, deltaE, openStr) {
+      if (!openStr) return { s: '–', e: '–' };
+      try {
+        const d = new Date(openStr.includes('/') ? openStr.split('/').reverse().join('-') : openStr);
+        if (isNaN(d.getTime())) return { s: '–', e: '–' };
+        const s = new Date(d); s.setDate(d.getDate() + (deltaS || 0));
+        const e = new Date(d); e.setDate(d.getDate() + (deltaE || 0));
+        return { s: s.toLocaleDateString('vi-VN'), e: e.toLocaleDateString('vi-VN') };
+      } catch (_) { return { s: '–', e: '–' }; }
+    }
+
+    function staffOpt(current) {
+      return (D.staffList || []).map(s => `<option value="${s.name}" ${s.name === current ? 'selected' : ''}>${s.name}</option>`).join('');
     }
 
     function renderSetupList() {
       const list = $('setup-stores-list');
       const phase = $('setup-phase-filter').value;
       if (!D.setupStores.length) {
-        list.innerHTML = '<div class="empty-state"><div class="ei">🏪</div>Không có cửa hàng đang setup.<br>Nhấn "+ Thêm cửa hàng setup" để bắt đầu.</div>';
+        list.innerHTML = '<div class="empty-state"><div class="ei">🏪</div>Không có cửa hàng đang setup.</div>';
         return;
       }
-      const tasks = D.template.length ? D.template : defaultTasks();
-
       list.innerHTML = D.setupStores.map((s, si) => {
         const sid = 's_' + si;
         const pct = s.progress || 0;
-        const c = pct >= 70 ? 'var(--gold)' : pct >= 40 ? 'var(--blue)' : 'var(--gray)';
+        const c = pct >= 85 ? 'var(--green)' : pct >= 50 ? 'var(--blue)' : 'var(--red)';
         
-        // Render all tasks, hide non-matching ones via CSS to keep indices stable
-        const checks = tasks.map((t, ti) => {
-          const isHidden = (phase !== 'all' && t.phase !== phase);
-          return `
-      <div class="chk-item ${isHidden ? 'hidden' : ''}" id="${sid}_${ti}" onclick="toggleSetupTask('${sid}_${ti}','${s.storeId || si}',${si},${ti})">
-        <div class="chk-box"></div>
-        <div>
-          <div class="chk-text">${t.task}</div>
-          <div class="chk-sub">${t.phase ? t.phase + ' · ' : ''}${t.owner || ''} ${t.deltaText ? '· ' + t.deltaText : ''}</div>
-        </div>
-      </div>`;
-        }).join('');
-        
-        const visibleTasksCount = phase === 'all' ? tasks.length : tasks.filter(t => t.phase === phase).length;
-
         return `<div class="setup-card" id="card_${sid}">
       <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
         <div>
-          <div style="font-weight:700;font-size:15px">${s.name}</div>
+          <div style="font-weight:700;font-size:16px">${s.name}</div>
           <div style="font-size:12px;color:var(--gray);margin-top:2px">
-            <code>${s.storeId || '–'}</code>
-            ${s.partner ? ' · Đối tác: ' + s.partner : ''}
-            ${s.openDate ? ' · KT: ' + s.openDate : ''}
-            ${s.setupStart ? ' · Setup: ' + s.setupStart : ''}
+            <code>${s.storeId || '–'}</code> · ${s.partner || '–'} 
+            ${s.openDate ? ' · <span style="color:var(--gold);font-weight:600">KT: ' + s.openDate + '</span>' : ''}
           </div>
         </div>
-        <span class="bdg ${pct >= 100 ? 'bg2' : 'by2'}" id="bdg_${sid}">${pct >= 100 ? 'Hoàn thành' : 'Đang setup'} · ${pct}%</span>
+        <div style="text-align:right">
+           <span class="bdg ${pct >= 100 ? 'bg2' : 'by2'}" id="bdg_${sid}">${pct >= 100 ? 'Sẵn sàng' : 'Đang setup'}</span>
+           <div id="pct_${sid}" style="color:${c};font-weight:800;font-size:18px;margin-top:4px">${pct}%</div>
+        </div>
       </div>
-      <div class="prog-item">
-        <div class="prog-hd"><span style="font-size:12px">Tiến độ (${visibleTasksCount} tasks${phase !== 'all' ? ' – giai đoạn này' : ''})</span><span id="pct_${sid}" style="color:${c};font-weight:700">${pct}%</span></div>
-        <div class="prog-bg"><div class="prog-bar" id="bar_${sid}" style="width:${pct}%;background:${c}"></div></div>
+      <div class="prog-bg" style="height:6px;margin-bottom:15px"><div class="prog-bar" id="bar_${sid}" style="width:${pct}%;background:${c}"></div></div>
+      
+      <div class="tbl-wrap" style="max-height:400px;overflow-y:auto;border:1px solid var(--border);border-radius:8px">
+        <table class="tbl" style="font-size:12px">
+          <thead style="position:sticky;top:0;background:var(--card);z-index:2">
+            <tr>
+              <th style="width:40px">ID</th>
+              <th>Công việc</th>
+              <th style="width:120px">Phụ trách</th>
+              <th style="width:120px">Hỗ trợ</th>
+              <th style="width:90px">Bắt đầu</th>
+              <th style="width:90px">Deadline</th>
+              <th style="width:40px">OK?</th>
+            </tr>
+          </thead>
+          <tbody id="tbl_${sid}">
+            <tr><td colspan="7"><div class="empty-state">Nhấn "Tải/Tạo Timeline" để xem tasks</div></td></tr>
+          </tbody>
+        </table>
       </div>
-      <div id="cl_${sid}">${checks}</div>
-      <div style="margin-top:12px">
-        <div class="fg"><label class="fl">Ghi chú</label><textarea class="fc" rows="2" id="note_${sid}" placeholder="Ghi chú tiến độ...">${s.note || ''}</textarea></div>
-        <div style="display:flex;gap:7px;flex-wrap:wrap">
-          <button class="btn bp bsm" onclick="saveSetupTasks('${s.storeId || si}','${sid}')">💾 Lưu lên Sheets</button>
-          <button class="btn bo bsm" onclick="loadStoreTasks('${s.storeId}','${sid}')">🔄 Tải tasks</button>
-          <button class="btn bo bsm" onclick="exportTimelineStore('${s.storeId}','${s.name}')">📥 Xuất Excel</button>
+      
+      <div style="margin-top:15px;display:flex;gap:7px;flex-wrap:wrap;justify-content:space-between;align-items:center">
+        <div style="display:flex;gap:7px">
+          <button class="btn bp bsm" onclick="saveSetupTasks('${s.storeId}','${sid}')">💾 Lưu Tiền độ</button>
+          <button class="btn bo bsm" onclick="loadStoreTasks('${s.storeId}','${sid}')">🔄 Tải/Tạo Timeline</button>
+          <button class="btn bo bsm" onclick="addSetupTaskRow('${sid}')">+ Thêm việc mới</button>
+        </div>
+        <div style="display:flex;gap:7px">
           <button class="btn bo bsm" onclick="markStoreAsLaunched('${s.storeId}','${s.name}','${sid}')">🎉 Đã KT</button>
           <button class="btn bo bsm" onclick="aiSetupAdvice('${s.name}',${pct})">🤖 AI gợi ý</button>
         </div>
@@ -2647,73 +2664,92 @@
       ];
     }
 
-    function toggleSetupTask(checkId, storeId, storeIdx, taskIdx) {
-      const el = $(checkId); if (!el) return;
-      el.classList.toggle('done');
-      el.querySelector('.chk-box').textContent = el.classList.contains('done') ? '✓' : '';
-      recalcSetupProgress(storeIdx, 's_' + storeIdx);
+    function toggleSetupTaskRow(btn) {
+      btn.classList.toggle('bg2');
+      btn.textContent = btn.classList.contains('bg2') ? '✓' : '';
+      const sid = btn.closest('.setup-card').id.replace('card_', '');
+      const si = parseInt(sid.replace('s_',''));
+      recalcSetupProgressTable(sid, si);
     }
 
-    function recalcSetupProgress(idx, sid) {
-      const cl = $('cl_' + sid); if (!cl) return;
-      const items = cl.querySelectorAll('.chk-item');
-      const done = [...items].filter(i => i.classList.contains('done')).length;
-      const pct = items.length ? Math.round(done / items.length * 100) : 0;
-      const pe = $('pct_' + sid); if (pe) pe.textContent = pct + '%';
-      const be = $('bar_' + sid); if (be) be.style.width = pct + '%';
-      const bdg = $('bdg_' + sid); if (bdg) bdg.textContent = (pct >= 100 ? 'Hoàn thành' : 'Đang setup') + ' · ' + pct + '%';
-      if (D.setupStores[idx]) D.setupStores[idx].progress = pct;
+    function recalcSetupProgressTable(sid, si) {
+      const rows = $(`tbl_${sid}`).querySelectorAll('tr.t-row');
+      const done = [...rows].filter(r => r.querySelector('.t-done').classList.contains('bg2')).length;
+      const pct = rows.length ? Math.round(done / rows.length * 100) : 0;
+      const c = pct >= 85 ? 'var(--green)' : pct >= 50 ? 'var(--blue)' : 'var(--red)';
+      $(`pct_${sid}`).textContent = pct + '%';
+      $(`pct_${sid}`).style.color = c;
+      $(`bar_${sid}`).style.width = pct + '%';
+      $(`bar_${sid}`).style.background = c;
+      if (D.setupStores[si]) D.setupStores[si].progress = pct;
+    }
+
+    function addSetupTaskRow(sid, t = {}) {
+      const tbody = $(`tbl_${sid}`);
+      if (tbody.querySelector('.empty-state')) tbody.innerHTML = '';
+      const phase = $('setup-phase-filter').value;
+      const tr = document.createElement('tr');
+      tr.className = 't-row ' + (phase!=='all' && t.phase && t.phase!==phase ? 'hidden' : '');
+      const s = D.setupStores[parseInt(sid.replace('s_',''))] || {};
+      const dates = t.startDelta !== undefined ? getTaskDates(t.startDelta, t.endDelta, s.openDate) : { s: t.startDate || '', e: t.deadline || '' };
+      
+      tr.innerHTML = `
+        <td><input class="fc t-id" value="${t.id || ''}" style="padding:2px;font-size:10px"></td>
+        <td><input class="fc t-task" value="${t.task || ''}" style="padding:2px">
+            <input type="hidden" class="t-phase" value="${t.phase || 'Khai trương'}"></td>
+        <td><select class="fc t-owner" style="padding:2px">${staffOpt(t.owner)}</select></td>
+        <td><select class="fc t-support" style="padding:2px">${staffOpt(t.support)}</select></td>
+        <td><input type="date" class="fc t-s" value="${dates.s ? dates.s.split('/').reverse().join('-') : ''}" style="padding:2px"></td>
+        <td><input type="date" class="fc t-e" value="${dates.e ? dates.e.split('/').reverse().join('-') : ''}" style="padding:2px"></td>
+        <td><button class="btn bo bsm t-done ${t.done ? 'bg2' : ''}" onclick="toggleSetupTaskRow(this)" style="min-width:30px;height:30px">${t.done ? '✓' : ''}</button></td>
+      `;
+      tbody.appendChild(tr);
     }
 
     async function loadStoreTasks(storeId, sid) {
-      if (!storeId || storeId === 'undefined') return;
-      load('Đang tải tasks từ Sheets...');
-      const data = await api({ action: 'getStoreTasks', storeId });
-      unload();
-      if (!data.ok || !data.tasks || !data.tasks.length) {
-        toast('Chưa có tasks lưu trên Sheets. Tích task và nhấn Lưu.', 'twarn');
-        return;
+      if (!storeId) return;
+      load('Đang nạp timeline...');
+      let data = await api({ action: 'getStoreTasks', storeId });
+      if (data.ok && (!data.tasks || !data.tasks.length)) {
+        // Auto create from template if empty
+        const s = D.setupStores[parseInt(sid.replace('s_',''))];
+        await api({ action: 'createTimeline', storeId: s.storeId, storeName: s.name, launchDate: s.openDate });
+        data = await api({ action: 'getStoreTasks', storeId });
       }
-      // Apply done status to UI
-      const cl = $('cl_' + sid); if (!cl) return;
-      const items = cl.querySelectorAll('.chk-item');
-      items.forEach((item, i) => {
-        const t = data.tasks[i];
-        if (t && t.done) {
-          item.classList.add('done');
-          item.querySelector('.chk-box').textContent = '✓';
-        } else {
-          item.classList.remove('done');
-          item.querySelector('.chk-box').textContent = '';
-        }
-      });
-      const si = parseInt(sid.replace('s_', ''));
-      recalcSetupProgress(si, sid);
-      toast(`✅ Đã tải ${data.tasks.length} tasks (${data.done}/${data.total} hoàn thành)`);
+      unload();
+      if (!data.ok) { toast('❌ ' + data.error, 'terr'); return; }
+      
+      const tbody = $(`tbl_${sid}`);
+      tbody.innerHTML = '';
+      data.tasks.forEach(t => addSetupTaskRow(sid, t));
+      recalcSetupProgressTable(sid, parseInt(sid.replace('s_','')));
+      toast(`✅ Đã tải ${data.tasks.length} hạng mục`);
     }
 
     async function saveSetupTasks(storeId, sid) {
       if (!storeId || storeId === 'undefined') { toast('⚠️ Thiếu Store ID', 'twarn'); return; }
-      const cl = $('cl_' + sid); if (!cl) return;
-      const items = cl.querySelectorAll('.chk-item');
+      const rows = $(`tbl_${sid}`).querySelectorAll('tr.t-row');
       const tasks = [];
-      const tpl = D.template.length ? D.template : defaultTasks();
-      items.forEach((item, i) => {
-        const t = tpl[i] || {};
+      rows.forEach(r => {
         tasks.push({
-          id: t.id || 'T' + (i + 1), phase: t.phase || '', task: t.task || item.querySelector('.chk-text').textContent,
-          startDate: '', deadline: '', owner: t.owner || '', done: item.classList.contains('done'),
-          doneDate: item.classList.contains('done') ? new Date().toLocaleDateString('vi-VN') : '',
-          note: ''
+          id: r.querySelector('.t-id').value,
+          task: r.querySelector('.t-task').value,
+          phase: r.querySelector('.t-phase').value,
+          owner: r.querySelector('.t-owner').value,
+          support: r.querySelector('.t-support').value,
+          startDate: r.querySelector('.t-s').value ? r.querySelector('.t-s').value.split('-').reverse().join('/') : '',
+          deadline: r.querySelector('.t-e').value ? r.querySelector('.t-e').value.split('-').reverse().join('/') : '',
+          done: r.querySelector('.t-done').classList.contains('bg2')
         });
       });
-      load('Đang lưu tasks lên Sheets...');
+      load('Đang lưu...');
       const res = await api({ action: 'saveStoreTasks', storeId, tasks });
       unload();
       if (res.ok) {
-        toast(`✅ Đã lưu ${tasks.length} tasks, tiến độ ${res.progress || 0}%`);
-        if (D.setupStores) { const idx = D.setupStores.findIndex(s => s.storeId === storeId); if (idx >= 0) D.setupStores[idx].progress = res.progress || 0; }
-      } else toast('❌ ' + (res.error || 'Lỗi lưu'), 'terr');
+        toast('✅ Đã lưu tiến độ thành công!');
+        const si = parseInt(sid.replace('s_',''));
+        recalcSetupProgressTable(sid, si);
+      } else toast('❌ ' + (res.error || 'Lỗi'), 'terr');
     }
 
     async function markStoreAsLaunched(storeId, name, sid) {
