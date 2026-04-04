@@ -1468,8 +1468,6 @@
         <div class="kc warn" id="target-sub">–</div>
       </div>
     </div>
-    <div class="alert ab">💡 <span>Timeline setup được tạo tự động từ sheet <strong>MẪU TIMELINE SETUP</strong>. Mỗi cửa
-        hàng có 1 sheet TL_[StoreID] riêng. Tick xong → Lưu lên Sheets ngay.</span></div>
     <!-- Filter by phase -->
     <div class="filter-row">
       <select class="fc" id="setup-phase-filter" onchange="filterSetupPhase()" style="min-width:180px">
@@ -2531,17 +2529,30 @@
       if (!CFG.scriptUrl) return;
       try {
         const data = await api({ action: 'getStaff' });
-        if (data.ok) { D.staffList = data.staff || []; }
+        if (data.ok) { 
+          // Cố gắng lấy danh sách nhân viên từ nhiều nguồn thuộc tính khác nhau cho chắc chắn
+          const rawStaff = data.staff || data.staffList || data.data || [];
+          D.staffList = rawStaff.filter(s => s && (s.name || s.HoTen));
+          // Chuẩn hóa tên trường nếu cần (ví dụ từ HoTen sang name)
+          D.staffList.forEach(s => { if (s.HoTen && !s.name) s.name = s.HoTen; });
+          console.log('✅ Staff list ready:', D.staffList.length, D.staffList[0]);
+        }
       } catch (e) { console.error('Staff Load Error:', e); }
     }
 
     function staffOpt(current) {
       let h = '<option value="">-- Chọn nhân sự --</option>';
       const list = D.staffList || [];
-      list.forEach(s => { h += `<option value="${s.name}" ${s.name === current ? 'selected' : ''}>${s.name}</option>`; });
-      if (current && !list.some(s => s.name === current)) h += `<option value="${current}" selected>${current} (Cũ)</option>`;
+      list.forEach(s => { 
+        if (s && s.name) {
+          h += `<option value="${s.name}" ${s.name === current ? 'selected' : ''}>${s.name}</option>`; 
+        }
+      });
+      if (current && !list.some(s => s && s.name === current)) h += `<option value="${current}" selected>${current} (Cũ)</option>`;
       return h;
     }
+
+    function filterSetupPhase() { renderSetupList(); }
 
     async function loadSetupPage() {
       if (!CFG.scriptUrl) return;
@@ -2600,7 +2611,6 @@
             <table class="tbl" style="font-size:11px">
               <thead style="position:sticky;top:0;background:var(--card);z-index:2;box-shadow:0 1px 2px rgba(0,0,0,0.1)">
                 <tr>
-                  <th style="width:40px">ID</th>
                   <th>Hạng mục công việc</th>
                   <th style="width:110px">Phụ trách</th>
                   <th style="width:110px">Hỗ trợ</th>
@@ -2670,8 +2680,8 @@
       }
 
       tr.innerHTML = `
-        <td style="text-align:center"><input class="fc t-id" value="${t.id || ''}" style="padding:2px;font-size:9px;text-align:center"></td>
         <td><input class="fc t-task" value="${t.task || ''}" style="padding:2px;font-weight:600">
+            <input type="hidden" class="t-id" value="${t.id || ''}">
             <input type="hidden" class="t-phase" value="${phase}"></td>
         <td><select class="fc t-owner" style="padding:2px">${staffOpt(t.owner)}</select></td>
         <td><select class="fc t-support" style="padding:2px">${staffOpt(t.support)}</select></td>
@@ -2758,30 +2768,35 @@
     }
 
     async function exportTimelineStore(storeId, name, type) {
+      load('Đang nạp dữ liệu xuất...');
+      const res = await api({ action: 'getStoreTasks', storeId });
+      unload();
+      if (!res.ok || !res.tasks || !res.tasks.length) { toast('Không có dữ liệu', 'twarn'); return; }
+
       if (type === 'excel') {
-        load('Đang xuất Excel...');
-        const res = await api({ action: 'getStoreTasks', storeId });
-        unload();
-        if (!res.ok || !res.tasks.length) { toast('Không có dữ liệu', 'twarn'); return; }
         const rows = [['ID', 'Giai đoạn', 'Công việc', 'Bắt đầu', 'Deadline', 'Phụ trách', 'Hỗ trợ', 'Trạng thái']];
         res.tasks.forEach(t => rows.push([t.id, t.phase, t.task, t.startDate, t.deadline, t.owner, t.support, t.done ? 'Hoàn thành' : 'Chưa xong']));
         exportXLSX(rows, `Setup_${name}`);
       } else {
-        const idx = D.setupStores.findIndex(s => s.storeId === storeId);
-        const card = document.getElementById('card_s_' + idx);
-        if (!card) return;
         const pWin = window.open('', '', 'height=800,width=1100');
         pWin.document.write(`<html><head><title>Phuc Tea Timeline - ${name}</title>`);
         pWin.document.write('<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap" rel="stylesheet">');
-        pWin.document.write('<style>body{font-family:"Outfit",sans-serif;padding:30px;color:#333}.no-print{display:none}table{width:100%;border-collapse:collapse;margin-top:20px}th,td{border:1px solid #ddd;padding:10px;text-align:left;font-size:12px}th{background:#f8f9fa;font-weight:700}.fc{border:none;background:none;width:100%;outline:none;font-family:inherit}input[type=date]{width:auto}select.fc{appearance:none}</style>');
+        pWin.document.write('<style>body{font-family:"Outfit",sans-serif;padding:30px;color:#333}table{width:100%;border-collapse:collapse;margin-top:20px}th,td{border:1px solid #ddd;padding:8px;text-align:left;font-size:11px}th{background:#f4f4f4;font-weight:700}.phase-row{background:#fafafa;font-weight:700;color:var(--brown)} .done-st{color:green;font-weight:bold} .not-done{color:#999} h1,h2{margin:5px 0}</style>');
         pWin.document.write('</head><body>');
-        pWin.document.write('<div style="text-align:center;border-bottom:3px solid #c0392b;padding-bottom:10px;margin-bottom:20px"><h1 style="margin:0;color:#c0392b">PHÚC TEA OPERATIONS HUB</h1><p style="margin:5px 0;opacity:0.8;letter-spacing:1px">HỆ THỐNG QUẢN LÝ SETUP & VẬN HÀNH KHAI TRƯƠNG</p></div>');
-        pWin.document.write('<h2 style="margin-top:0">BÁO CÁO TIẾN ĐỘ: '+ name.toUpperCase() +'</h2>');
-        pWin.document.write(card.innerHTML);
-        pWin.document.write('<div style="margin-top:50px;display:flex;justify-content:space-between"><div style="text-align:center;width:250px;border-top:1px solid #333;padding-top:10px">Người lập biểu</div><div style="text-align:center;width:250px;border-top:1px solid #333;padding-top:10px">Quản lý Vận hành</div></div>');
+        pWin.document.write('<div style="text-align:center;border-bottom:3px solid #c0392b;padding-bottom:10px;margin-bottom:20px"><h1 style="color:#c0392b">PHÚC TEA OPERATIONS HUB</h1><p style="margin:0;letter-spacing:1px">HỆ THỐNG QUẢN LÝ SETUP & KHAI TRƯƠNG</p></div>');
+        pWin.document.write(`<h2>BÁO CÁO TIẾN ĐỘ: ${name.toUpperCase()}</h2>`);
+        const s = D.setupStores.find(st => st.storeId === storeId) || {};
+        pWin.document.write(`<div style="display:flex;justify-content:space-between;margin-top:10px"><span>Mã CH: <b>${storeId}</b></span><span>Ngày khai trương: <b>${s.openDate || '–'}</b></span><span>Tiến độ: <b>${s.progress || 0}%</b></span></div>`);
+        
+        pWin.document.write('<table><thead><tr><th>Giai đoạn</th><th>Hạng mục công việc</th><th>Phụ trách</th><th>Bắt đầu</th><th>Deadline</th><th>Trạng thái</th></tr></thead><tbody>');
+        res.tasks.forEach(t => {
+          pWin.document.write(`<tr><td>${t.phase}</td><td style="font-weight:600">${t.task}</td><td>${t.owner || ''}</td><td>${t.startDate}</td><td>${t.deadline}</td><td class="${t.done?'done-st':'not-done'}">${t.done?'✓ Xong':'– Chưa'}</td></tr>`);
+        });
+        pWin.document.write('</tbody></table>');
+        pWin.document.write('<div style="margin-top:60px;display:flex;justify-content:space-between"><div style="text-align:center;width:200px;border-top:1px solid #333;padding-top:10px">Người lập biểu</div><div style="text-align:center;width:200px;border-top:1px solid #333;padding-top:10px">Bộ phận Setup</div><div style="text-align:center;width:200px;border-top:1px solid #333;padding-top:10px">Quản lý Vận hành</div></div>');
         pWin.document.write('</body></html>');
         pWin.document.close();
-        setTimeout(() => { pWin.print(); pWin.close(); }, 500);
+        setTimeout(() => { pWin.print(); pWin.close(); }, 700);
       }
     }
 
