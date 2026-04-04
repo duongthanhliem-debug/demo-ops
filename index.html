@@ -137,6 +137,10 @@
       color: var(--brown)
     }
 
+    .hidden {
+      display: none !important;
+    }
+
     /* NAV */
     .nav {
       background: var(--brown);
@@ -2536,53 +2540,52 @@
     // ════════════════════════════════════════
     //  SETUP
     // ════════════════════════════════════════
-        async function loadSetupPage() {
+    async function loadSetupPage() {
       if (!CFG.scriptUrl) return;
       load('Đang tải setup...');
-      await loadStaff(); // Đảm bảo nạp nhân sự trước
+      // Load template
       const tplData = await api({ action: 'getSetupTemplate' });
       if (tplData.ok) D.template = tplData.template || [];
 
+      // Build phase filter
       const phases = [...new Set(D.template.map(t => t.phase).filter(Boolean))];
       const phSel = $('setup-phase-filter');
       phSel.innerHTML = '<option value="all">Tất cả giai đoạn</option>' + phases.map(p => `<option value="${p}">${p}</option>`).join('');
 
+      // Load setup stores (from getSetupStores action)
       const data = await api({ action: 'getSetupStores' });
       if (data.ok) D.setupStores = data.setupStores || [];
       unload();
 
       $('setup-cnt').textContent = D.setupStores.length;
+      $('target-2026').textContent = D.kpi.targetStores || 30;
+      const pct = D.kpi.targetStores ? Math.round((D.kpi.newStores || 0) / D.kpi.targetStores * 100) : 0;
+      $('target-sub').textContent = `${D.kpi.newStores || 0}/${D.kpi.targetStores || 30} (${pct}%)`;
+      $('kt-cnt').textContent = D.kpi.newStores || 0;
+
+      // Monthly plan KT
+      if (D.plans.length > 0) {
+        const plan = D.plans[0];
+        $('kt-plan').textContent = `KH tháng này: ${plan.targetStores || 0} CH · Q2: ${(plan.targetStores || 0) * 3} CH`;
+      }
+
       renderSetupList();
     }
 
     function filterSetupPhase() {
-      const phase = $('setup-phase-filter').value;
-      const rows = document.querySelectorAll('.t-row');
-      rows.forEach(row => {
-        const rowPhase = row.querySelector('.t-phase').value;
-        if (phase === 'all' || rowPhase === phase) row.classList.remove('hidden');
-        else row.classList.add('hidden');
-      });
+      // Refresh current visible tasks in cards
+      renderSetupList();
     }
 
     function getTaskDates(deltaS, deltaE, openStr) {
-      if (!openStr) return { s: '', e: '' };
+      if (!openStr) return { s: '–', e: '–' };
       try {
-        let parts = openStr.includes('/') ? openStr.split('/').reverse() : openStr.split('-');
-        const d = new Date(parts[0], parts[1]-1, parts[2]);
-        if (isNaN(d.getTime())) return { s: '', e: '' };
-        let ds = new Date(d); ds.setDate(d.getDate() + (deltaS || 0));
-        let de = new Date(d); de.setDate(d.getDate() + (deltaE || 0));
-        return { s: ds.toISOString().split('T')[0], e: de.toISOString().split('T')[0] };
-      } catch (e) { return { s: '', e: '' }; }
-    }
-
-    function staffOpt(current) {
-      let html = '<option value="">-- Chọn nhân sự --</option>';
-      const staff = (D.staffList || []);
-      if (staff.length > 0) html += staff.map(s => `<option value="${s.name}" ${s.name === current ? 'selected' : ''}>${s.name}</option>`).join('');
-      if (current && !staff.some(s => s.name === current)) html += `<option value="${current}" selected>${current}</option>`;
-      return html;
+        const d = new Date(openStr.includes('/') ? openStr.split('/').reverse().join('-') : openStr);
+        if (isNaN(d.getTime())) return { s: '–', e: '–' };
+        const s = new Date(d); s.setDate(d.getDate() + (deltaS || 0));
+        const e = new Date(d); e.setDate(d.getDate() + (deltaE || 0));
+        return { s: s.toLocaleDateString('vi-VN'), e: e.toLocaleDateString('vi-VN') };
+      } catch (_) { return { s: '–', e: '–' }; }
     }
 
     function staffOpt(current) {
@@ -2600,7 +2603,7 @@
         const sid = 's_' + si;
         const pct = s.progress || 0;
         const c = pct >= 85 ? 'var(--green)' : pct >= 50 ? 'var(--blue)' : 'var(--red)';
-        
+
         return `<div class="setup-card" id="card_${sid}">
       <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
         <div>
@@ -2669,7 +2672,7 @@
       btn.classList.toggle('bg2');
       btn.textContent = btn.classList.contains('bg2') ? '✓' : '';
       const sid = btn.closest('.setup-card').id.replace('card_', '');
-      const si = parseInt(sid.replace('s_',''));
+      const si = parseInt(sid.replace('s_', ''));
       recalcSetupProgressTable(sid, si);
     }
 
@@ -2690,10 +2693,10 @@
       if (tbody.querySelector('.empty-state')) tbody.innerHTML = '';
       const phase = $('setup-phase-filter').value;
       const tr = document.createElement('tr');
-      tr.className = 't-row ' + (phase!=='all' && t.phase && t.phase!==phase ? 'hidden' : '');
-      const s = D.setupStores[parseInt(sid.replace('s_',''))] || {};
+      tr.className = 't-row ' + (phase !== 'all' && t.phase && t.phase !== phase ? 'hidden' : '');
+      const s = D.setupStores[parseInt(sid.replace('s_', ''))] || {};
       const dates = t.startDelta !== undefined ? getTaskDates(t.startDelta, t.endDelta, s.openDate) : { s: t.startDate || '', e: t.deadline || '' };
-      
+
       tr.innerHTML = `
         <td><input class="fc t-id" value="${t.id || ''}" style="padding:2px;font-size:10px"></td>
         <td><input class="fc t-task" value="${t.task || ''}" style="padding:2px">
@@ -2707,50 +2710,80 @@
       tbody.appendChild(tr);
     }
 
-    async function loadStoreTasks(storeId, sid) {
-      if (!storeId) return;
-      load('Đang nạp timeline...');
-      let data = await api({ action: 'getStoreTasks', storeId });
-      if (data.ok && (!data.tasks || !data.tasks.length)) {
-        // Auto create from template if empty
-        const s = D.setupStores[parseInt(sid.replace('s_',''))];
-        await api({ action: 'createTimeline', storeId: s.storeId, storeName: s.name, launchDate: s.openDate });
-        data = await api({ action: 'getStoreTasks', storeId });
-      }
+    async function loadSetupPage() {
+      if (!CFG.scriptUrl) return;
+      load('Đang tải dữ liệu setup...');
+      try {
+        await loadStaff(); // Đảm bảo nạp nhân sự trước
+        const tData = await api({ action: 'getSetupTemplate' });
+        if (tData.ok) D.template = tData.template || [];
+
+        const phases = [...new Set(D.template.map(t => (t.phase || '').trim().toUpperCase()).filter(Boolean))];
+        const phSel = $('setup-phase-filter');
+        phSel.innerHTML = '<option value="all">Tất cả giai đoạn</option>' + phases.map(p => `<option value="${p}">${p}</option>`).join('');
+
+        const data = await api({ action: 'getSetupStores' });
+        if (data.ok) D.setupStores = data.setupStores || [];
+        renderSetupList();
+      } catch (e) { toast('Lỗi: ' + e.message, 'terr'); }
       unload();
-      if (!data.ok) { toast('❌ ' + data.error, 'terr'); return; }
-      
-      const tbody = $(`tbl_${sid}`);
-      tbody.innerHTML = '';
-      data.tasks.forEach(t => addSetupTaskRow(sid, t));
-      recalcSetupProgressTable(sid, parseInt(sid.replace('s_','')));
-      toast(`✅ Đã tải ${data.tasks.length} hạng mục`);
     }
 
-    async function saveSetupTasks(storeId, sid) {
-      if (!storeId || storeId === 'undefined') { toast('⚠️ Thiếu Store ID', 'twarn'); return; }
-      const rows = $(`tbl_${sid}`).querySelectorAll('tr.t-row');
-      const tasks = [];
-      rows.forEach(r => {
-        tasks.push({
-          id: r.querySelector('.t-id').value,
-          task: r.querySelector('.t-task').value,
-          phase: r.querySelector('.t-phase').value,
-          owner: r.querySelector('.t-owner').value,
-          support: r.querySelector('.t-support').value,
-          startDate: r.querySelector('.t-s').value ? r.querySelector('.t-s').value.split('-').reverse().join('/') : '',
-          deadline: r.querySelector('.t-e').value ? r.querySelector('.t-e').value.split('-').reverse().join('/') : '',
-          done: r.querySelector('.t-done').classList.contains('bg2')
-        });
+    function filterSetupPhase() {
+      const fVal = $('setup-phase-filter').value.trim().toUpperCase();
+      const rows = document.querySelectorAll('tr.t-row');
+      rows.forEach(row => {
+        let pEl = row.querySelector('.t-phase');
+        let p = pEl ? pEl.value.trim().toUpperCase() : '';
+        if (fVal === 'ALL' || p === fVal) row.classList.remove('hidden');
+        else row.classList.add('hidden');
       });
-      load('Đang lưu...');
-      const res = await api({ action: 'saveStoreTasks', storeId, tasks });
-      unload();
-      if (res.ok) {
-        toast('✅ Đã lưu tiến độ thành công!');
-        const si = parseInt(sid.replace('s_',''));
-        recalcSetupProgressTable(sid, si);
-      } else toast('❌ ' + (res.error || 'Lỗi'), 'terr');
+    }
+
+    function staffOpt(current) {
+      let h = '<option value="">-- Chọn nhân sự --</option>';
+      const sList = (D.staffList || []);
+      if (sList.length) h += sList.map(s => `<option value="${s.name}" ${s.name === current ? 'selected' : ''}>${s.name}</option>`).join('');
+      if (current && !sList.some(s => s.name === current)) h += `<option value="${current}" selected>${current}</option>`;
+      return h;
+    }
+
+    function getTaskDates(dS, dE, openStr) {
+      if (!openStr) return { s: '', e: '' };
+      try {
+        let p = openStr.includes('/') ? openStr.split('/').reverse() : openStr.split('-');
+        const d = new Date(p[0], p[1] - 1, p[2]);
+        if (isNaN(d.getTime())) return { s: '', e: '' };
+        let ds = new Date(d); ds.setDate(d.getDate() + (dS || 0));
+        let de = new Date(d); de.setDate(d.getDate() + (dE || 0));
+        return { s: ds.toISOString().split('T')[0], e: de.toISOString().split('T')[0] };
+      } catch (e) { return { s: '', e: '' }; }
+    }
+
+    function addSetupTaskRow(sid, t = {}) {
+      const tbody = $(`tbl_${sid}`);
+      if (tbody.querySelector('.empty-state')) tbody.innerHTML = '';
+      const fVal = $('setup-phase-filter').value.trim().toUpperCase();
+      const tr = document.createElement('tr');
+      tr.className = 't-row';
+
+      const taskPhase = (t.phase || '').trim();
+      if (fVal !== 'ALL' && taskPhase.toUpperCase() !== fVal) tr.classList.add('hidden');
+
+      const s = D.setupStores[parseInt(sid.replace('s_', ''))] || {};
+      const dates = t.startDelta !== undefined ? getTaskDates(t.startDelta, t.endDelta, s.openDate) : { s: t.startDate || '', e: t.deadline || '' };
+
+      tr.innerHTML = `
+        <td style="text-align:center"><input class="fc t-id" value="${t.id || ''}" style="padding:2px;font-size:10px"></td>
+        <td><input class="fc t-task" value="${t.task || ''}" style="padding:2px;font-weight:600">
+            <input type="hidden" class="t-phase" value="${taskPhase.toUpperCase()}"></td>
+        <td><select class="fc t-owner" style="padding:2px">${staffOpt(t.owner)}</select></td>
+        <td><select class="fc t-support" style="padding:2px">${staffOpt(t.support)}</select></td>
+        <td><input type="date" class="fc t-s" value="${dates.s}" style="padding:2px"></td>
+        <td><input type="date" class="fc t-e" value="${dates.e}" style="padding:2px"></td>
+        <td><button class="btn bo bsm t-done ${t.done ? 'bg2' : ''}" onclick="toggleSetupTaskRow(this)" style="min-width:30px">${t.done ? '✓' : ''}</button></td>
+      `;
+      tbody.appendChild(tr);
     }
 
     async function markStoreAsLaunched(storeId, name, sid) {
@@ -2802,13 +2835,13 @@
     function renderAuditForm() {
       const crit = D.auditCriteria;
       if (!crit.length) { $('audit-criteria-container').innerHTML = '<div class="empty-state">Tải tiêu chí thất bại</div>'; return; }
-      
+
       // Group by Major Title (ID before first dot)
       const sections = {};
       crit.forEach(c => {
         const fullId = String(c.id).trim();
         const majorId = fullId.split('.')[0];
-        if(!sections[majorId]) {
+        if (!sections[majorId]) {
           sections[majorId] = {
             id: majorId,
             name: c.section || 'Hạng mục ' + majorId,
@@ -2819,12 +2852,12 @@
         }
         // Collect sub-IDs for parentheses note (e.g. 1.1, 1.2)
         const parts = fullId.split('.');
-        if(parts.length === 2) {
+        if (parts.length === 2) {
           sections[majorId].subIds.push(fullId);
-          if(!c.section || c.section.includes('Giai đoạn')) sections[majorId].name = c.criterion;
+          if (!c.section || c.section.includes('Giai đoạn')) sections[majorId].name = c.criterion;
         }
         // Include leaf nodes or scoreable items in totals
-        if(c.maxScore > 0) {
+        if (c.maxScore > 0) {
           sections[majorId].max += c.maxScore;
           sections[majorId].std += c.standardScore;
         }
@@ -2832,9 +2865,9 @@
 
       let html = '';
       let maxTotal = 0, stdTotal = 0;
-      Object.keys(sections).sort((a,b)=>Number(a)-Number(b)).forEach(key => {
+      Object.keys(sections).sort((a, b) => Number(a) - Number(b)).forEach(key => {
         const s = sections[key];
-        if(s.max === 0) return;
+        if (s.max === 0) return;
         maxTotal += s.max; stdTotal += s.std;
         const subNote = s.subIds.length ? ` <span style="font-weight:400;color:var(--gray);font-size:11px">(${s.subIds.join('; ')})</span>` : '';
         html += `<div class="audit-row">
@@ -2937,20 +2970,20 @@
       const scores = {};
       let total = 0;
       const inps = document.querySelectorAll('.audit-inp');
-      inps.forEach(inp => { 
+      inps.forEach(inp => {
         const id = inp.id.replace('ac_', '');
-        const v = parseInt(inp.value) || 0; 
-        scores[id] = v; 
-        total += v; 
+        const v = parseInt(inp.value) || 0;
+        scores[id] = v;
+        total += v;
       });
       load('Đang lưu audit...');
-      const res = await api({ 
-        action: 'saveAudit', 
-        data: { 
-          store, score: total, date: $('audit-date').value, 
-          type: $('audit-type').value, actionPlan: $('action-plan').value, 
-          scores, auditor: 'Dương Thanh Liêm' 
-        } 
+      const res = await api({
+        action: 'saveAudit',
+        data: {
+          store, score: total, date: $('audit-date').value,
+          type: $('audit-type').value, actionPlan: $('action-plan').value,
+          scores, auditor: 'Dương Thanh Liêm'
+        }
       });
       unload();
       if (res.ok) {
