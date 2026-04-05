@@ -2336,68 +2336,96 @@
     //  DASHBOARD
     // ════════════════════════════════════════
     function renderDashboard() {
-      const k = D.kpi;
-      // KPI
-      $('kpi-stores').textContent = k.stores || 0;
-      $('kpi-new').textContent = `${k.newStores || 0}/${k.targetStores || 30}`;
+      const k = D.kpi || {};
+      const safeScore = (v) => { let n = parseFloat(v); return isNaN(n) ? 0 : n; };
+      
+      const updateEl = (id, val, color) => {
+        const el = $(id); if (!el) return;
+        el.textContent = val; if (color) el.style.color = color;
+      };
+
+      updateEl('kpi-stores', k.stores || 0);
+      updateEl('kpi-new', `${k.newStores || 0}/${k.targetStores || 30}`);
+      
       const p = k.targetStores ? Math.round((k.newStores || 0) / k.targetStores * 100) : 0;
-      $('kpi-new-sub').textContent = p + '% mục tiêu 2026';
-      $('kpi-new-sub').className = 'kc ' + (p >= 40 ? 'up' : 'warn');
-      const avg = k.auditAvg || 0;
-      $('kpi-audit').textContent = avg || '–';
-      $('kpi-audit').style.color = scoreColor(avg);
-      $('kpi-audit-sub').textContent = avg >= 85 ? '↑ Đạt mục tiêu ≥85' : '↓ Dưới mục tiêu';
-      $('kpi-audit-sub').className = 'kc ' + (avg >= 85 ? 'up' : 'dn');
-      $('kpi-reaudit').textContent = k.reauditCount || 0;
-      $('kpi-reaudit').style.color = (k.reauditCount || 0) > 0 ? 'var(--red)' : 'var(--green)';
+      const subNew = $('kpi-new-sub');
+      if (subNew) {
+        subNew.textContent = p + '% mục tiêu 2026';
+        subNew.className = 'kc ' + (p >= 40 ? 'up' : 'warn');
+      }
+      
+      const avg = safeScore(k.auditAvg);
+      updateEl('kpi-audit', avg || '–', scoreColor(avg));
+      const subAud = $('kpi-audit-sub');
+      if (subAud) {
+        subAud.textContent = avg >= 85 ? '↑ Đạt mục tiêu ≥85' : '↓ Dưới mục tiêu';
+        subAud.className = 'kc ' + (avg >= 85 ? 'up' : 'dn');
+      }
+      
+      const reCount = parseInt(k.reauditCount) || 0;
+      updateEl('kpi-reaudit', reCount, reCount > 0 ? 'var(--red)' : 'var(--green)');
 
       // Alerts
       let ah = '';
-      if ((k.reauditCount || 0) > 0) {
-        const names = D.auditList.filter(a => a.score < 85).map(a => `${a.name}(${a.score}đ)`).slice(0, 5).join(', ');
-        ah += `<div class="alert ay">⚠️ <span><strong>${k.reauditCount} cửa hàng</strong> cần tái audit trong 15 ngày: ${names}</span></div>`;
+      if (reCount > 0) {
+        const names = (D.auditList || []).filter(a => a.score < 85).map(a => `${a.name}(${a.score}đ)`).slice(0, 5).join(', ');
+        ah += `<div class="alert ay">⚠️ <span><strong>${reCount} cửa hàng</strong> cần tái audit: ${names}</span></div>`;
       }
-      $('alerts-container').innerHTML = ah;
+      const alContainer = $('alerts-container');
+      if (alContainer) alContainer.innerHTML = ah;
 
       // Setup progress
-      const sl = D.setupStores.slice(0, 5);
-      $('setup-progress-dash').innerHTML = sl.length === 0
-        ? '<div class="empty-state"><div class="ei">🏪</div>Chưa có cửa hàng đang setup</div>'
-        : sl.map(s => {
-          const c = s.progress >= 70 ? 'var(--gold)' : s.progress >= 40 ? 'var(--blue)' : 'var(--gray)';
-          return `<div class="prog-item"><div class="prog-hd"><span>${s.name}</span><span style="color:${c};font-weight:700">${s.progress}%</span></div><div class="prog-bg"><div class="prog-bar" style="width:${s.progress}%;background:${c}"></div></div></div>`;
-        }).join('');
-
-      // Audit list
-      $('audit-list-dash').innerHTML = D.auditList.length === 0
-        ? '<div class="empty-state"><div class="ei">✅</div>Chưa có dữ liệu audit</div>'
-        : D.auditList.slice(0, 8).map(a => {
-          const c = scoreColor(a.score);
-          return `<div class="store-item"><div class="store-dot" style="background:${c}"></div><div class="store-name">${a.name}</div><div class="store-score" style="color:${c}">${a.score}/100</div></div>`;
-        }).join('');
-
-      // Timeline
-      $('timeline-dash').innerHTML = D.timeline.length === 0
-        ? '<div class="empty-state"><div class="ei">📅</div>Chưa có hoạt động</div>'
-        : D.timeline.map(t => `<div class="tl-item"><div class="tl-dot" style="background:${t.color || 'var(--gray)'}"></div><div><div class="tl-txt">${t.text}</div><div class="tl-time">${t.time}</div></div></div>`).join('');
-
-      // OKR từ kế hoạch tháng gần nhất
-      if (D.plans.length > 0) {
-        const plan = D.plans[0];
-        const newP = D.kpi.newStores && plan.targetStores ? Math.round(D.kpi.newStores / plan.targetStores * 100) : 0;
-        const auditP = D.kpi.auditAvg && plan.targetAudit ? Math.round(D.kpi.auditAvg / plan.targetAudit * 100) : 0;
-        $('okr-container').innerHTML = `
-      <div style="font-size:11px;color:var(--gray);margin-bottom:10px">Kế hoạch: <strong>${plan.month || '–'}</strong></div>
-      <div class="prog-item"><div class="prog-hd"><span>Mở CH mới (Mục tiêu: ${plan.targetStores || '–'})</span><span style="color:var(--gold);font-weight:700">${D.kpi.newStores || 0}/${plan.targetStores || '–'}</span></div><div class="prog-bg"><div class="prog-bar" style="width:${Math.min(newP, 100)}%;background:var(--gold)"></div></div></div>
-      <div class="prog-item"><div class="prog-hd"><span>Audit TB (Mục tiêu: ≥${plan.targetAudit || 85}đ)</span><span style="color:var(--blue);font-weight:700">${D.kpi.auditAvg || 0}/100</span></div><div class="prog-bg"><div class="prog-bar" style="width:${Math.min(auditP, 100)}%;background:var(--blue)"></div></div></div>
-      <div style="margin-top:10px;font-size:12px;color:var(--gray)">Ngân sách dự kiến: <strong style="color:var(--brown)">${plan.budget || 0}tr</strong></div>`;
+      const sl = (D.setupStores || []).slice(0, 5);
+      const spDash = $('setup-progress-dash');
+      if (spDash) {
+        spDash.innerHTML = sl.length === 0
+          ? '<div class="empty-state"><div class="ei">🏪</div>Chưa có cửa hàng đang setup</div>'
+          : sl.map(s => {
+            const c = s.progress >= 70 ? 'var(--gold)' : s.progress >= 40 ? 'var(--blue)' : 'var(--gray)';
+            return `<div class="prog-item"><div class="prog-hd"><span>${s.name}</span><span style="color:${c};font-weight:700">${s.progress}%</span></div><div class="prog-bg"><div class="prog-bar" style="width:${s.progress}%;background:${c}"></div></div></div>`;
+          }).join('');
       }
 
-      // Date
-      const days = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
-      const now = new Date();
-      $('today-str').textContent = `${days[now.getDay()]}, ${now.toLocaleDateString('vi-VN')} · Mục tiêu 2026: ${k.targetStores || 30} cửa hàng mới`;
-      $('greeting').textContent = `${getH()}, Liêm 👋`;
+      // Audit list
+      const alDash = $('audit-list-dash');
+      if (alDash) {
+        alDash.innerHTML = (D.auditList || []).length === 0
+          ? '<div class="empty-state"><div class="ei">✅</div>Chưa có dữ liệu audit</div>'
+          : D.auditList.slice(0, 8).map(a => {
+            const c = scoreColor(a.score);
+            return `<div class="store-item"><div class="store-dot" style="background:${c}"></div><div class="store-name">${a.name}</div><div class="store-score" style="color:${c}">${a.score}/100</div></div>`;
+          }).join('');
+      }
+
+      // Timeline
+      const tlDash = $('timeline-dash');
+      if (tlDash) {
+        tlDash.innerHTML = (D.timeline || []).length === 0
+          ? '<div class="empty-state"><div class="ei">📅</div>Chưa có hoạt động</div>'
+          : D.timeline.map(t => `<div class="tl-item"><div class="tl-dot" style="background:${t.color || 'var(--gray)'}"></div><div><div class="tl-txt">${t.text}</div><div class="tl-time">${t.time}</div></div></div>`).join('');
+      }
+
+      // OKR
+      const okrCon = $('okr-container');
+      if (okrCon && D.plans && D.plans.length > 0) {
+        const plan = D.plans[0];
+        const newP = k.newStores && plan.targetStores ? Math.round(k.newStores / plan.targetStores * 100) : 0;
+        const auditP = k.auditAvg && plan.targetAudit ? Math.round(k.auditAvg / plan.targetAudit * 100) : 0;
+        okrCon.innerHTML = `
+          <div style="font-size:11px;color:var(--gray);margin-bottom:10px">Kế hoạch: <strong>${plan.month || '–'}</strong></div>
+          <div class="prog-item"><div class="prog-hd"><span>Mở CH mới (Mục tiêu: ${plan.targetStores || '–'})</span><span style="color:var(--gold);font-weight:700">${k.newStores || 0}/${plan.targetStores || '–'}</span></div><div class="prog-bg"><div class="prog-bar" style="width:${Math.min(newP, 100)}%;background:var(--gold)"></div></div></div>
+          <div class="prog-item"><div class="prog-hd"><span>Audit TB (Mục tiêu: ≥${plan.targetAudit || 85}đ)</span><span style="color:var(--blue);font-weight:700">${k.auditAvg || 0}/100</span></div><div class="prog-bg"><div class="prog-bar" style="width:${Math.min(auditP, 100)}%;background:var(--blue)"></div></div></div>
+          <div style="margin-top:10px;font-size:12px;color:var(--gray)">Ngân sách dự kiến: <strong style="color:var(--brown)">${plan.budget || 0}tr</strong></div>`;
+      }
+
+      // Date update with safety
+      try {
+        const days = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
+        const now = new Date();
+        const tStr = $('today-str');
+        if (tStr) tStr.textContent = `${days[now.getDay()]}, ${now.toLocaleDateString('vi-VN')} · Mục tiêu 2026: ${k.targetStores || 30} cửa hàng mới`;
+        if ($('greeting')) $('greeting').textContent = `${getH()}, Liêm 👋`;
+      } catch(e) {}
     }
 
     // ════════════════════════════════════════
@@ -2660,28 +2688,23 @@
     function getTaskDates(dS, dE, openStr) {
       if (!openStr) return { s: '', e: '' };
       try {
-        let p = openStr.includes('/') ? openStr.split('/').reverse() : openStr.split('-');
+        let p = String(openStr).includes('/') ? openStr.split('/').reverse() : openStr.split('-');
+        if (p.length < 3) return { s: '', e: '' };
         if (p[0].length < 4) p = [p[2], p[1], p[0]]; 
         const d = new Date(parseInt(p[0]), parseInt(p[1]) - 1, parseInt(p[2]));
-        if (isNaN(d.getTime())) {
-          console.warn('Invalid openDate:', openStr);
-          return { s: '', e: '' };
-        }
+        if (isNaN(d.getTime())) return { s: '', e: '' };
+        
         let s = new Date(d); s.setDate(d.getDate() + (parseInt(dS) || 0));
         let e = new Date(d); e.setDate(d.getDate() + (parseInt(dE) || 0));
         
         const f = date => {
-          if (!date || isNaN(date.getTime())) return '';
-          const y = date.getFullYear();
-          const m = String(date.getMonth()+1).padStart(2,'0');
-          const day = String(date.getDate()).padStart(2,'0');
-          return `${y}-${m}-${day}`;
+          try {
+            if (!date || isNaN(date.getTime())) return '';
+            return date.toISOString().split('T')[0];
+          } catch(err) { return ''; }
         };
         return { s: f(s), e: f(e) };
-      } catch (err) { 
-        console.error('getTaskDates error:', err);
-        return { s: '', e: '' }; 
-      }
+      } catch (err) { return { s: '', e: '' }; }
     }
 
     function addSetupTaskRow(sid, t = {}) {
