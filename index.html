@@ -2648,12 +2648,25 @@
         let p = openStr.includes('/') ? openStr.split('/').reverse() : openStr.split('-');
         if (p[0].length < 4) p = [p[2], p[1], p[0]]; 
         const d = new Date(parseInt(p[0]), parseInt(p[1]) - 1, parseInt(p[2]));
-        if (isNaN(d.getTime())) return { s: '', e: '' };
-        let s = new Date(d); s.setDate(d.getDate() + (dS || 0));
-        let e = new Date(d); e.setDate(d.getDate() + (dE || 0));
-        const f = date => `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+        if (isNaN(d.getTime())) {
+          console.warn('Invalid openDate:', openStr);
+          return { s: '', e: '' };
+        }
+        let s = new Date(d); s.setDate(d.getDate() + (parseInt(dS) || 0));
+        let e = new Date(d); e.setDate(d.getDate() + (parseInt(dE) || 0));
+        
+        const f = date => {
+          if (!date || isNaN(date.getTime())) return '';
+          const y = date.getFullYear();
+          const m = String(date.getMonth()+1).padStart(2,'0');
+          const day = String(date.getDate()).padStart(2,'0');
+          return `${y}-${m}-${day}`;
+        };
         return { s: f(s), e: f(e) };
-      } catch (_) { return { s: '', e: '' }; }
+      } catch (err) { 
+        console.error('getTaskDates error:', err);
+        return { s: '', e: '' }; 
+      }
     }
 
     function addSetupTaskRow(sid, t = {}) {
@@ -2674,10 +2687,12 @@
         dates = getTaskDates(t.startDelta, t.endDelta, s.openDate);
       } else {
         const toISO = str => { 
-          if(!str) return ''; if(str.includes('-')) return str; 
-          let p=str.split('/'); return p.length<3?str:`${p[2]}-${p[0].padStart(2,'0')}-${p[1].padStart(2,'0')}`; 
+          if(!str) return ''; if(str.includes('-') && str.length >=10) return str; 
+          let p=str.split('/'); 
+          if(p.length < 3) return '';
+          return `${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`; 
         };
-        dates = { s: toISO(t.startDate), e: toISO(t.deadline) };
+        dates = { s: toISO(t.startDate || ''), e: toISO(t.deadline || '') };
       }
 
       tr.innerHTML = `
