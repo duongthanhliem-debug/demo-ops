@@ -1091,11 +1091,22 @@
       box-shadow: var(--sh)
     }
 
-    .task-overdue { background: rgba(229,62,62,0.06); border-left: 3px solid var(--red) !important; }
-    .task-today { background: rgba(245,166,35,0.07); border-left: 3px solid var(--gold) !important; }
+    .task-overdue {
+      background: rgba(229, 62, 62, 0.06);
+      border-left: 3px solid var(--red) !important;
+    }
+
+    .task-today {
+      background: rgba(245, 166, 35, 0.07);
+      border-left: 3px solid var(--gold) !important;
+    }
+
     .mytask-store-header {
-      font-weight: 700; font-size: 13px; color: var(--brown);
-      padding: 7px 12px; background: var(--gold-l);
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--brown);
+      padding: 7px 12px;
+      background: var(--gold-l);
       border-radius: var(--rs) var(--rs) 0 0;
       border: 1px solid var(--border);
     }
@@ -1377,11 +1388,14 @@
             <option value="">-- Chọn nhân sự --</option>
           </select>
           <button class="btn bo bsm" onclick="loadMyTasks()">🔄</button>
-          <button class="btn bo bsm" onclick="goPage('mytasks',document.querySelectorAll('.ntab')[8]);loadMyTasks()">Xem tất cả →</button>
+          <button class="btn bo bsm" onclick="goPage('mytasks',document.querySelectorAll('.ntab')[8]);loadMyTasks()">Xem
+            tất cả →</button>
         </div>
       </div>
       <div class="cb" id="my-tasks-dash">
-        <div class="empty-state" style="padding:16px"><div class="ei">📌</div>Chọn tên nhân sự để xem việc cần làm</div>
+        <div class="empty-state" style="padding:16px">
+          <div class="ei">📌</div>Chọn tên nhân sự để xem việc cần làm
+        </div>
       </div>
     </div>
   </div>
@@ -1757,75 +1771,68 @@
   <div class="page" id="pg-kehoach">
     <div class="ph">
       <div>
-        <div class="pt">Kế hoạch Tháng</div>
-        <div class="ps">AI phân tích & đề xuất kế hoạch – lưu + gửi BOD</div>
+        <div class="pt">Kế hoạch Vận hành</div>
+        <div class="ps">Kế hoạch theo tháng/quý – cấu trúc nhóm công việc – lưu DB & gửi BOD</div>
       </div>
       <div class="fb">
-        <select class="fc" id="plan-history-sel" style="min-width:180px" onchange="loadPlanById(this.value)">
+        <select class="fc" id="plan-period-type" style="min-width:120px" onchange="updatePlanPeriodLabel()">
+          <option value="month">Tháng</option>
+          <option value="quarter">Quý</option>
+        </select>
+        <select class="fc" id="plan-history-sel" style="min-width:200px" onchange="loadPlanById(this.value)">
           <option value="">-- Xem kế hoạch cũ --</option>
         </select>
-        <button class="btn bp" onclick="aiGenPlan()">🤖 AI Lập kế hoạch</button>
+        <button class="btn bo bsm" onclick="aiGenPlan()">🤖 AI Lập KH</button>
+        <button class="btn bp" onclick="newPlan()">+ Kế hoạch mới</button>
       </div>
     </div>
-    <div class="g2">
-      <div class="card">
-        <div class="ch"><span class="ct">Soạn kế hoạch</span></div>
-        <div class="cb">
-          <div class="fr">
-            <div class="fg"><label class="fl">Tháng kế hoạch *</label><input class="fc" id="plan-month"
-                placeholder="Tháng 5/2026"></div>
-            <div class="fg"><label class="fl">Tiêu đề</label><input class="fc" id="plan-title"
-                placeholder="Kế hoạch tháng 5/2026"></div>
-          </div>
-          <div class="fr">
-            <div class="fg"><label class="fl">Mục tiêu cửa hàng mới</label><input class="fc" type="number"
-                id="plan-target-stores" value="2" min="0"></div>
-            <div class="fg"><label class="fl">Điểm audit mục tiêu</label><input class="fc" type="number"
-                id="plan-target-audit" value="85" min="0" max="100"></div>
-          </div>
-          <div class="fg"><label class="fl">Ngân sách dự kiến (triệu đồng)</label><input class="fc" type="number"
-              id="plan-budget" value="0" step="0.1"></div>
-          <div class="fg"><label class="fl">Nội dung kế hoạch</label><textarea class="fc" id="plan-content" rows="6"
-              placeholder="AI sẽ phân tích và đề xuất. Bạn có thể chỉnh sửa trước khi lưu..."></textarea></div>
-          <div class="fg"><label class="fl">Ghi chú</label><textarea class="fc" id="plan-note" rows="2"></textarea>
-          </div>
-          <div style="display:flex;gap:7px;flex-wrap:wrap">
-            <button class="btn bp" onclick="savePlan()">💾 Lưu kế hoạch</button>
-            <button class="btn bo" onclick="openEmailModal('plan')">✉️ Gửi BOD</button>
-            <button class="btn bo bsm" onclick="exportPlan()">📥 Xuất Excel</button>
-          </div>
-        </div>
+
+    <!-- Plan meta -->
+    <div class="card" style="margin-bottom:12px">
+      <div class="ch">
+        <span class="ct">Thông tin kế hoạch</span>
+        <span id="plan-id-label" style="font-size:11px;color:var(--gray)"></span>
       </div>
-      <div class="card">
-        <div class="ch"><span class="ct">Xem trước</span><span id="plan-id-label"
-            style="font-size:11px;color:var(--gray)"></span></div>
-        <div class="cb">
-          <pre id="plan-preview"
-            style="font-size:12px;line-height:1.8;color:var(--gray);min-height:200px;white-space:pre-wrap">← AI sẽ phân tích kế hoạch tháng trước và đề xuất kế hoạch mới</pre>
+      <div class="cb">
+        <div class="fr">
+          <div class="fg"><label class="fl"><span id="plan-period-label">Tháng</span> kế hoạch *</label>
+            <input class="fc" id="plan-month" placeholder="VD: Tháng 5/2026 hoặc Quý 2/2026"></div>
+          <div class="fg"><label class="fl">Tiêu đề</label>
+            <input class="fc" id="plan-title" placeholder="Kế hoạch tháng 5/2026"></div>
         </div>
+        <div class="fg"><label class="fl">Ghi chú chung</label>
+          <textarea class="fc" id="plan-note" rows="2" placeholder="Ghi chú..."></textarea></div>
       </div>
     </div>
+
+    <!-- Plan task rows -->
+    <div class="card">
+      <div class="ch">
+        <span class="ct">Nội dung kế hoạch (Nhóm & Đầu việc)</span>
+        <div class="fb">
+          <button class="btn bo bsm" onclick="addPlanGroup()">+ Thêm nhóm</button>
+        </div>
+      </div>
+      <div class="cb" id="plan-tasks-container">
+        <div class="empty-state" style="padding:14px">Nhấn "+ Thêm nhóm" hoặc "🤖 AI Lập KH" để bắt đầu</div>
+      </div>
+      <div class="cb" style="border-top:1px solid var(--border);display:flex;gap:7px;flex-wrap:wrap">
+        <button class="btn bp" onclick="savePlan()">💾 Lưu kế hoạch</button>
+        <button class="btn bo" onclick="openEmailModal('plan')">✉️ Gửi BOD</button>
+        <button class="btn bo bsm" onclick="exportPlan()">📥 Xuất Excel</button>
+      </div>
+    </div>
+
+    <!-- History -->
     <div class="card">
       <div class="ch"><span class="ct">Lịch sử kế hoạch</span></div>
       <div class="tbl-wrap">
         <table class="tbl">
           <thead>
-            <tr>
-              <th>Tháng</th>
-              <th>CH mục tiêu</th>
-              <th>Audit MT</th>
-              <th>Ngân sách</th>
-              <th>Trạng thái</th>
-              <th>Ngày tạo</th>
-              <th>Thao tác</th>
-            </tr>
+            <tr><th>Kỳ kế hoạch</th><th>Tiêu đề</th><th>Số nhóm CV</th><th>Trạng thái</th><th>Ngày tạo</th><th>Thao tác</th></tr>
           </thead>
           <tbody id="plan-history-body">
-            <tr>
-              <td colspan="7">
-                <div class="empty-state" style="padding:16px">Đồng bộ để xem</div>
-              </td>
-            </tr>
+            <tr><td colspan="6"><div class="empty-state" style="padding:16px">Đồng bộ để xem</div></td></tr>
           </tbody>
         </table>
       </div>
@@ -1837,81 +1844,112 @@
     <div class="ph">
       <div>
         <div class="pt">Báo cáo kết quả</div>
-        <div class="ps">So sánh thực tế vs kế hoạch – lưu + gửi BOD</div>
+        <div class="ps">Mode 1: Tự do | Mode 2: Theo kế hoạch – so sánh KPI thực tế – lưu DB & gửi BOD</div>
       </div>
       <div class="fb">
-        <select class="fc" id="report-history-sel" style="min-width:180px" onchange="loadReportById(this.value)">
+        <select class="fc" id="report-history-sel" style="min-width:200px" onchange="loadReportById(this.value)">
           <option value="">-- Xem báo cáo cũ --</option>
         </select>
-        <button class="btn bp" onclick="aiGenReport()">🤖 AI soạn báo cáo</button>
+        <button class="btn bo bsm" onclick="aiGenReport()">🤖 AI soạn BC</button>
+        <button class="btn bp" onclick="newReport()">+ Báo cáo mới</button>
       </div>
     </div>
-    <div class="g2">
-      <div class="card">
-        <div class="ch"><span class="ct">Thông tin báo cáo</span></div>
-        <div class="cb">
-          <div class="fr">
-            <div class="fg"><label class="fl">Tháng báo cáo *</label><input class="fc" id="rpt-month"
-                placeholder="Tháng 4/2026"></div>
-            <div class="fg"><label class="fl">So sánh với kế hoạch</label><select class="fc" id="rpt-plan-ref">
-                <option value="">-- Không so sánh --</option>
-              </select></div>
-          </div>
-          <div class="fr">
-            <div class="fg"><label class="fl">Cửa hàng khai trương TT</label><input class="fc" type="number"
-                id="rpt-actual-stores" value="0" min="0"></div>
-            <div class="fg"><label class="fl">Điểm audit TB TT</label><input class="fc" type="number"
-                id="rpt-actual-audit" min="0" max="100"></div>
-          </div>
-          <div class="fr">
-            <div class="fg"><label class="fl">Ngân sách đã dùng (tr)</label><input class="fc" type="number"
-                id="rpt-budget-used" value="0" step="0.1"></div>
-            <div class="fg"><label class="fl">Lượt audit TT</label><input class="fc" type="number" id="rpt-audit-cnt"
-                value="0" min="0"></div>
-          </div>
-          <div class="fg"><label class="fl">Thành tựu nổi bật</label><textarea class="fc" id="rpt-highlight" rows="3"
-              placeholder="Nhập thành tựu..."></textarea></div>
-          <div class="fg"><label class="fl">Thách thức & kế hoạch tiếp theo</label><textarea class="fc"
-              id="rpt-challenge" rows="3" placeholder="Nhập thách thức..."></textarea></div>
-          <div style="display:flex;gap:7px;flex-wrap:wrap">
-            <button class="btn bp" onclick="genReport()">📝 Tạo báo cáo</button>
-            <button class="btn bo" onclick="openEmailModal('report')">✉️ Gửi BOD</button>
-            <button class="btn bo bsm" onclick="exportReport()">📥 Xuất Excel</button>
-          </div>
-        </div>
+
+    <!-- Mode selector -->
+    <div class="card" style="margin-bottom:12px">
+      <div class="ch">
+        <span class="ct">Cấu hình báo cáo</span>
+        <span id="rpt-id-label" style="font-size:11px;color:var(--gray)"></span>
       </div>
-      <div class="card">
-        <div class="ch"><span class="ct">Xem trước báo cáo</span>
-          <button class="btn bo bsm" id="btn-copy-rpt" style="display:none" onclick="copyText(reportText)">📋
-            Copy</button>
+      <div class="cb">
+        <div class="fr" style="margin-bottom:11px">
+          <div class="fg">
+            <label class="fl">Chế độ báo cáo</label>
+            <select class="fc" id="rpt-mode" onchange="toggleReportMode()">
+              <option value="free">Mode 1: Tự do</option>
+              <option value="plan">Mode 2: Theo kế hoạch</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label class="fl">Kỳ báo cáo *</label>
+            <input class="fc" id="rpt-month" placeholder="VD: Tháng 4/2026">
+          </div>
         </div>
-        <div class="cb">
-          <pre id="report-preview"
-            style="font-size:12px;line-height:1.8;color:var(--gray);min-height:200px;white-space:pre-wrap">← Điền thông tin và tạo báo cáo</pre>
+        <!-- Mode 2 only: plan selector -->
+        <div id="rpt-plan-row" class="fr" style="display:none;margin-bottom:11px">
+          <div class="fg">
+            <label class="fl">Chọn kế hoạch để so sánh</label>
+            <select class="fc" id="rpt-plan-ref" onchange="loadPlanTasksToReport()">
+              <option value="">-- Chọn kế hoạch --</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label class="fl">Tiêu đề báo cáo</label>
+            <input class="fc" id="rpt-title" placeholder="Báo cáo tháng 4/2026">
+          </div>
         </div>
       </div>
     </div>
+
+    <!-- Mode 1: Free form task rows -->
+    <div id="rpt-free-section">
+      <div class="card" style="margin-bottom:12px">
+        <div class="ch">
+          <span class="ct">Nội dung báo cáo (Nhóm & Đầu việc)</span>
+          <button class="btn bo bsm" onclick="addReportGroup()">+ Thêm nhóm</button>
+        </div>
+        <div class="cb" id="rpt-tasks-container">
+          <div class="empty-state" style="padding:14px">Nhấn "+ Thêm nhóm" hoặc "🤖 AI soạn BC"</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mode 2: Plan-based result table -->
+    <div id="rpt-plan-section" style="display:none">
+      <div class="card" style="margin-bottom:12px">
+        <div class="ch"><span class="ct">So sánh KPI thực tế vs kế hoạch</span></div>
+        <div class="tbl-wrap">
+          <table class="tbl" id="rpt-compare-tbl">
+            <thead><tr>
+              <th>Nhóm CV</th><th>Đầu việc</th><th>KPI KH</th><th>KPI TH</th>
+              <th>Ngân sách KH</th><th>Ngân sách TH</th><th>Mô tả kết quả</th><th>Link kết quả</th>
+            </tr></thead>
+            <tbody id="rpt-compare-body">
+              <tr><td colspan="8"><div class="empty-state" style="padding:12px">Chọn kế hoạch để tải đầu việc</div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Common result fields -->
+    <div class="card" style="margin-bottom:12px">
+      <div class="ch"><span class="ct">Nhận xét tổng hợp</span></div>
+      <div class="cb">
+        <div class="fr">
+          <div class="fg"><label class="fl">Thành tựu nổi bật</label>
+            <textarea class="fc" id="rpt-highlight" rows="3" placeholder="Nhập thành tựu..."></textarea></div>
+          <div class="fg"><label class="fl">Thách thức & kế hoạch tiếp theo</label>
+            <textarea class="fc" id="rpt-challenge" rows="3" placeholder="Nhập thách thức..."></textarea></div>
+        </div>
+        <div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:8px">
+          <button class="btn bp" onclick="saveReport()">💾 Lưu báo cáo</button>
+          <button class="btn bo" onclick="openEmailModal('report')">✉️ Gửi BOD</button>
+          <button class="btn bo bsm" onclick="exportReport()">📥 Xuất Excel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- History -->
     <div class="card">
       <div class="ch"><span class="ct">Lịch sử báo cáo</span></div>
       <div class="tbl-wrap">
         <table class="tbl">
           <thead>
-            <tr>
-              <th>Tháng</th>
-              <th>CH khai trương TT</th>
-              <th>Điểm audit TT</th>
-              <th>Ngân sách dùng</th>
-              <th>Trạng thái</th>
-              <th>Ngày tạo</th>
-              <th>Thao tác</th>
-            </tr>
+            <tr><th>Kỳ báo cáo</th><th>Chế độ</th><th>Tiêu đề</th><th>Trạng thái</th><th>Ngày tạo</th><th>Thao tác</th></tr>
           </thead>
           <tbody id="report-history-body">
-            <tr>
-              <td colspan="7">
-                <div class="empty-state" style="padding:16px">Đồng bộ để xem</div>
-              </td>
-            </tr>
+            <tr><td colspan="6"><div class="empty-state" style="padding:16px">Đồng bộ để xem</div></td></tr>
           </tbody>
         </table>
       </div>
@@ -2014,7 +2052,9 @@
         </div>
       </div>
       <div id="mytasks-list">
-        <div class="empty-state"><div class="ei">📌</div>Chọn nhân sự để xem việc cần làm</div>
+        <div class="empty-state">
+          <div class="ei">📌</div>Chọn nhân sự để xem việc cần làm
+        </div>
       </div>
     </div>
   </div>
@@ -2183,7 +2223,10 @@
         <div class="staff-av" style="width:52px;height:52px;font-size:18px" id="profile-av">DL</div>
         <div>
           <div style="font-weight:700;font-size:15px" id="profile-name">Dương Thanh Liêm</div>
-          <div style="font-size:12px;color:var(--gray)" id="profile-email"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="d9bdacb6b7beadb1b8b7b1b5b0bcb499a9b1acbaadbcb8f7bab6b4f7afb7">[email&#160;protected]</a></div>
+          <div style="font-size:12px;color:var(--gray)" id="profile-email"><a href="/cdn-cgi/l/email-protection"
+              class="__cf_email__"
+              data-cfemail="d9bdacb6b7beadb1b8b7b1b5b0bcb499a9b1acbaadbcb8f7bab6b4f7afb7">[email&#160;protected]</a>
+          </div>
           <div style="margin-top:4px"><span class="bdg bb2" id="profile-role">System</span></div>
         </div>
       </div>
@@ -2264,7 +2307,8 @@
     </div>
   </div>
 
-  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
+  <script>
     // ════════════════════════════════════════
     //  CONFIG & STATE
     // ════════════════════════════════════════
@@ -2390,17 +2434,17 @@
           D.setupStores = data.setupStores || [];
           D.timeline = data.timeline || [];
           D.lastSync = data.lastSync;
-          
+
           setSyncStatus(true, 'Đồng bộ ' + (data.lastSync || new Date().toLocaleTimeString('vi-VN')));
           renderDashboard();
           toast('✅ Đồng bộ thành công!');
-          
+
           // Nạp các phần bổ trợ một cách tuần tự và nhẹ nhàng
           await loadStaff();
           await loadEmployees();
           // Template nạp khi vào trang setup hoặc nạp ngầm không treo
-          api({ action: 'getSetupTemplate' }).then(res => { if(res.ok) D.template = res.template || []; });
-          
+          api({ action: 'getSetupTemplate' }).then(res => { if (res.ok) D.template = res.template || []; });
+
         } else {
           setSyncStatus(false, 'Lỗi kết nối');
           toast('❌ ' + (data.error || 'Server không phản hồi'), 'terr');
@@ -2419,7 +2463,7 @@
     function renderDashboard() {
       const k = D.kpi || {};
       const safeScore = (v) => { let n = parseFloat(v); return isNaN(n) ? 0 : n; };
-      
+
       const updateEl = (id, val, color) => {
         const el = $(id); if (!el) return;
         el.textContent = val; if (color) el.style.color = color;
@@ -2427,14 +2471,14 @@
 
       updateEl('kpi-stores', k.stores || 0);
       updateEl('kpi-new', `${k.newStores || 0}/${k.targetStores || 30}`);
-      
+
       const p = k.targetStores ? Math.round((k.newStores || 0) / k.targetStores * 100) : 0;
       const subNew = $('kpi-new-sub');
       if (subNew) {
         subNew.textContent = p + '% mục tiêu 2026';
         subNew.className = 'kc ' + (p >= 40 ? 'up' : 'warn');
       }
-      
+
       const avg = safeScore(k.auditAvg);
       updateEl('kpi-audit', avg || '–', scoreColor(avg));
       const subAud = $('kpi-audit-sub');
@@ -2442,7 +2486,7 @@
         subAud.textContent = avg >= 85 ? '↑ Đạt mục tiêu ≥85' : '↓ Dưới mục tiêu';
         subAud.className = 'kc ' + (avg >= 85 ? 'up' : 'dn');
       }
-      
+
       const reCount = parseInt(k.reauditCount) || 0;
       updateEl('kpi-reaudit', reCount, reCount > 0 ? 'var(--red)' : 'var(--green)');
 
@@ -2506,7 +2550,7 @@
         const tStr = $('today-str');
         if (tStr) tStr.textContent = `${days[now.getDay()]}, ${now.toLocaleDateString('vi-VN')} · Mục tiêu 2026: ${k.targetStores || 30} cửa hàng mới`;
         if ($('greeting')) $('greeting').textContent = `${getH()}, Liêm 👋`;
-      } catch(e) {}
+      } catch (e) { }
     }
 
     // ════════════════════════════════════════
@@ -2600,8 +2644,8 @@
       $('ns-province').value = s.province || ''; $('ns-region').value = s.region || 'Miền Tây';
       $('ns-coords').value = s.coords || ''; $('ns-addr').value = s.address || '';
       $('ns-note').value = s.note || '';
-      if (s.ownerDob) { let p = s.ownerDob.split('/'); $('ns-dob').value = (p.length === 3) ? `${p[2]}-${p[0].padStart(2,'0')}-${p[1].padStart(2,'0')}` : s.ownerDob; }
-      if (s.launchDate) { let p = s.launchDate.split('/'); $('ns-launch').value = (p.length === 3) ? `${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}` : s.launchDate; }
+      if (s.ownerDob) { let p = s.ownerDob.split('/'); $('ns-dob').value = (p.length === 3) ? `${p[2]}-${p[0].padStart(2, '0')}-${p[1].padStart(2, '0')}` : s.ownerDob; }
+      if (s.launchDate) { let p = s.launchDate.split('/'); $('ns-launch').value = (p.length === 3) ? `${p[2]}-${p[1].padStart(2, '0')}-${p[0].padStart(2, '0')}` : s.launchDate; }
       toggleSetupExtra(s.status);
       $('store-modal-title').textContent = '✏️ Sửa: ' + s.name;
       openModal('modal-store');
@@ -2648,7 +2692,7 @@
       if (!CFG.scriptUrl) return;
       try {
         const data = await api({ action: 'getStaff' });
-        if (data.ok) { 
+        if (data.ok) {
           // Cố gắng lấy danh sách nhân viên từ nhiều nguồn thuộc tính khác nhau cho chắc chắn
           const rawStaff = data.staff || data.staffList || data.data || [];
           D.staffList = rawStaff.filter(s => s && (s.name || s.HoTen));
@@ -2662,9 +2706,9 @@
     function staffOpt(current) {
       let h = '<option value="">-- Chọn nhân sự --</option>';
       const list = D.staffList || [];
-      list.forEach(s => { 
+      list.forEach(s => {
         if (s && s.name) {
-          h += `<option value="${s.name}" ${s.name === current ? 'selected' : ''}>${s.name}</option>`; 
+          h += `<option value="${s.name}" ${s.name === current ? 'selected' : ''}>${s.name}</option>`;
         }
       });
       if (current && !list.some(s => s && s.name === current)) h += `<option value="${current}" selected>${current} (Cũ)</option>`;
@@ -2676,7 +2720,7 @@
       let h = '<option value="">-- Chọn --</option>';
       const list = (D.employees || D.staffList || []).filter(s => s && s.name);
       list.forEach(s => {
-        const label = s.display || `${s.name} – ${s.position||'–'} – ${s.store||'–'}`;
+        const label = s.display || `${s.name} – ${s.position || '–'} – ${s.store || '–'}`;
         h += `<option value="${s.name}" ${s.name === current ? 'selected' : ''}>${label}</option>`;
       });
       if (current && !list.some(s => s && s.name === current)) {
@@ -2693,17 +2737,17 @@
         if (data.ok) {
           D.employees = data.employees || [];
           // Populate mock-user dropdowns
-          const selectors = ['mock-user-select','mytask-user-select'];
+          const selectors = ['mock-user-select', 'mytask-user-select'];
           selectors.forEach(id => {
             const sel = $(id); if (!sel) return;
             const cur = sel.value;
             sel.innerHTML = '<option value="">-- Chọn nhân sự --</option>';
             D.employees.forEach(e => {
-              sel.innerHTML += `<option value="${e.name}" ${e.name===cur?'selected':''}>${e.display||e.name}</option>`;
+              sel.innerHTML += `<option value="${e.name}" ${e.name === cur ? 'selected' : ''}>${e.display || e.name}</option>`;
             });
           });
         }
-      } catch(e) { console.error('loadEmployees error:', e); }
+      } catch (e) { console.error('loadEmployees error:', e); }
     }
 
     function filterSetupPhase() {
@@ -2725,7 +2769,7 @@
           const tData = await api({ action: 'getSetupTemplate' });
           if (tData.ok) D.template = tData.template || [];
         }
-        
+
         const phases = [...new Set(D.template.map(t => (t.phase || '').trim().toUpperCase()).filter(Boolean))];
         const phSel = $('setup-phase-filter');
         if (phSel) {
@@ -2734,9 +2778,9 @@
         }
 
         const data = await api({ action: 'getSetupStores' });
-        if (data.ok) { 
-          D.setupStores = (data.setupStores || []).filter(s => s.status !== 'Đang hoạt động'); 
-          renderSetupList(); 
+        if (data.ok) {
+          D.setupStores = (data.setupStores || []).filter(s => s.status !== 'Đang hoạt động');
+          renderSetupList();
         }
         const cnt = $('setup-cnt'); if (cnt) cnt.textContent = D.setupStores.length;
       } catch (e) {
@@ -2750,7 +2794,7 @@
     function renderSetupList() {
       const list = $('setup-stores-list'); if (!list) return;
       if (!D.setupStores.length) { list.innerHTML = '<div class="empty-state">Không có cửa hàng đang Setup.</div>'; return; }
-      
+
       list.innerHTML = D.setupStores.map((s, si) => {
         const sid = 's_' + si; const pct = s.progress || 0;
         const c = pct >= 85 ? 'var(--green)' : pct >= 50 ? 'var(--blue)' : 'var(--red)';
@@ -2806,7 +2850,7 @@
       }).join('');
 
       // Auto-load tasks for each store silently
-      D.setupStores.forEach((s, si) => { if(s.storeId) loadStoreTasks(s.storeId, 's_'+si, true); });
+      D.setupStores.forEach((s, si) => { if (s.storeId) loadStoreTasks(s.storeId, 's_' + si, true); });
     }
 
     function getTaskDates(dS, dE, openStr) {
@@ -2814,18 +2858,18 @@
       try {
         let p = String(openStr).includes('/') ? openStr.split('/').reverse() : openStr.split('-');
         if (p.length < 3) return { s: '', e: '' };
-        if (p[0].length < 4) p = [p[2], p[1], p[0]]; 
+        if (p[0].length < 4) p = [p[2], p[1], p[0]];
         const d = new Date(parseInt(p[0]), parseInt(p[1]) - 1, parseInt(p[2]));
         if (isNaN(d.getTime())) return { s: '', e: '' };
-        
+
         let s = new Date(d); s.setDate(d.getDate() + (parseInt(dS) || 0));
         let e = new Date(d); e.setDate(d.getDate() + (parseInt(dE) || 0));
-        
+
         const f = date => {
           try {
             if (!date || isNaN(date.getTime())) return '';
             return date.toISOString().split('T')[0];
-          } catch(err) { return ''; }
+          } catch (err) { return ''; }
         };
         return { s: f(s), e: f(e) };
       } catch (err) { return { s: '', e: '' }; }
@@ -2834,25 +2878,25 @@
     function addSetupTaskRow(sid, t = {}) {
       const tbody = $(`tbl_${sid}`); if (!tbody) return;
       if (tbody.querySelector('.empty-state')) tbody.innerHTML = '';
-      
+
       const filter = ($('setup-phase-filter') ? $('setup-phase-filter').value : 'all').toUpperCase();
       const phase = (t.phase || (filter !== 'ALL' ? filter : 'KHAI TRƯƠNG')).toUpperCase();
-      
-      if (filter !== 'ALL' && phase !== filter && !t.isNew) return; 
+
+      if (filter !== 'ALL' && phase !== filter && !t.isNew) return;
 
       const tr = document.createElement('tr'); tr.className = 't-row';
-      tr.dataset.phase = phase; 
-      const s = D.setupStores[parseInt(sid.replace('s_',''))] || {};
-      
+      tr.dataset.phase = phase;
+      const s = D.setupStores[parseInt(sid.replace('s_', ''))] || {};
+
       let dates = { s: '', e: '' };
       if (t.startDelta !== undefined) {
         dates = getTaskDates(t.startDelta, t.endDelta, s.openDate);
       } else {
-        const toISO = str => { 
-          if(!str) return ''; if(str.includes('-') && str.length >=10) return str; 
-          let p=str.split('/'); 
-          if(p.length < 3) return '';
-          return `${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`; 
+        const toISO = str => {
+          if (!str) return ''; if (str.includes('-') && str.length >= 10) return str;
+          let p = str.split('/');
+          if (p.length < 3) return '';
+          return `${p[2]}-${p[1].padStart(2, '0')}-${p[0].padStart(2, '0')}`;
         };
         dates = { s: toISO(t.startDate || ''), e: toISO(t.deadline || '') };
       }
@@ -2860,12 +2904,12 @@
       tr.innerHTML = `
         <td>
           <div style="font-size:11px;color:var(--brown-m);font-weight:600;margin-bottom:2px">${phase}</div>
-          <input class="fc t-task" value="${(t.task||'').replace(/"/g,'&quot;')}" style="padding:2px;font-weight:600">
+          <input class="fc t-task" value="${(t.task || '').replace(/"/g, '&quot;')}" style="padding:2px;font-weight:600">
           <input type="hidden" class="t-id" value="${t.id || ''}">
           <input type="hidden" class="t-phase" value="${phase}">
         </td>
-        <td><select class="fc t-ic" style="padding:2px">${activeStaffOpt(t.ic||t.owner)}</select></td>
-        <td><select class="fc t-support" style="padding:2px">${activeStaffOpt(t.supporter||t.support)}</select></td>
+        <td><select class="fc t-ic" style="padding:2px">${activeStaffOpt(t.ic || t.owner)}</select></td>
+        <td><select class="fc t-support" style="padding:2px">${activeStaffOpt(t.supporter || t.support)}</select></td>
         <td><input type="date" class="fc t-s" value="${dates.s}" style="padding:2px"></td>
         <td><input type="date" class="fc t-e" value="${dates.e}" style="padding:2px"></td>
         <td class="no-print"><button class="btn bo bsm t-done ${t.done ? 'bg2' : ''}" onclick="toggleSetupTaskRow(this)" style="min-width:30px">${t.done ? '✓' : ''}</button></td>
@@ -2878,13 +2922,13 @@
       if (!silent) load('Đang tải danh sách công việc...');
       try {
         let res = await api({ action: 'getStoreTasks', storeId });
-        
+
         // Nếu chưa có tasks, tự động nạp timeline mẫu
         if (res.ok && (!res.tasks || !res.tasks.length)) {
           console.log('Chưa có tasks, đang tự kích hoạt tạo Timeline cho:', storeId);
-          const s = D.setupStores.find(x => x.storeId === storeId) || 
-                   (D.allStores && D.allStores.find(x => x.storeId === storeId));
-          
+          const s = D.setupStores.find(x => x.storeId === storeId) ||
+            (D.allStores && D.allStores.find(x => x.storeId === storeId));
+
           if (s && s.storeId) {
             const createRes = await api({ action: 'createTimeline', storeId: s.storeId, storeName: s.name, launchDate: s.openDate || s.launchDate });
             if (createRes.ok) {
@@ -2894,18 +2938,18 @@
             }
           }
         }
-        
+
         if (!silent) unload();
-        
+
         if (res.ok) {
-          tbody.innerHTML = ''; 
+          tbody.innerHTML = '';
           const tasks = res.tasks || [];
           if (tasks.length) {
             tasks.forEach(t => addSetupTaskRow(sid, t));
           } else {
             tbody.innerHTML = '<tr><td colspan="6" class="empty-state">⚠️ Không có đầu việc mẫu. Vui lòng kiểm tra sheet MẪU TIMELINE SETUP.</td></tr>';
           }
-          
+
           // Cập nhật tiến độ trên card UI
           const pct = res.progress || 0;
           const pctEl = $(`pct_${sid}`);
@@ -2915,23 +2959,23 @@
             pctEl.style.color = c;
           }
         } else {
-           tbody.innerHTML = `<tr><td colspan="6" class="empty-state">❌ Lỗi tải: ${res.error || 'Dữ liệu không phản hồi'}</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="6" class="empty-state">❌ Lỗi tải: ${res.error || 'Dữ liệu không phản hồi'}</td></tr>`;
         }
-      } catch (e) { 
-        if (!silent) unload(); 
-        console.error('LoadStoreTasks Error:', e); 
+      } catch (e) {
+        if (!silent) unload();
+        console.error('LoadStoreTasks Error:', e);
         tbody.innerHTML = '<tr><td colspan="6" class="empty-state">❌ Lỗi kết nối server</td></tr>';
       }
     }
 
     async function recalcStoreTimelineDates(sid, newLaunchISO) {
       if (!newLaunchISO) return;
-      const si = parseInt(sid.replace('s_',''));
+      const si = parseInt(sid.replace('s_', ''));
       const store = D.setupStores[si];
       if (!store) return;
       const newLaunchVN = newLaunchISO.split('-').reverse().join('/');
       if (!confirm(`Cập nhật ngày khai trương thành ${newLaunchVN} và tính lại toàn bộ deadline cho ${store.name}?`)) return;
-      
+
       load('Đang tính lại ngày...');
       const res = await api({ action: 'updateOpeningDate', storeId: store.storeId, newLaunchDate: newLaunchVN });
       if (res.ok) {
@@ -2951,8 +2995,8 @@
         id: r.querySelector('.t-id').value,
         task: r.querySelector('.t-task').value,
         phase: r.querySelector('.t-phase').value,
-        ic: (r.querySelector('.t-ic') || r.querySelector('.t-owner') || {value:''}).value,
-        supporter: (r.querySelector('.t-support') || {value:''}).value,
+        ic: (r.querySelector('.t-ic') || r.querySelector('.t-owner') || { value: '' }).value,
+        supporter: (r.querySelector('.t-support') || { value: '' }).value,
         startDate: (r.querySelector('.t-s').value || '').split('-').reverse().join('/'),
         deadline: (r.querySelector('.t-e').value || '').split('-').reverse().join('/'),
         done: r.querySelector('.t-done').classList.contains('bg2')
@@ -2962,7 +3006,7 @@
       unload();
       if (res.ok) {
         toast(`✅ Đã lưu ${tasks.length} tasks! Tiến độ: ${res.progress || 0}%`);
-        recalcSetupProgressTable(sid, parseInt(sid.replace('s_','')));
+        recalcSetupProgressTable(sid, parseInt(sid.replace('s_', '')));
       } else toast('❌ ' + (res.error || 'Lỗi lưu'), 'terr');
     }
 
@@ -2979,24 +3023,33 @@
       const c = pct >= 85 ? 'var(--green)' : pct >= 50 ? 'var(--blue)' : 'var(--red)';
       const card = $(`card_${sid}`);
       if (card) {
-        const pctEl = card.querySelector('#pct_'+sid); if (pctEl) { pctEl.textContent = pct + '%'; pctEl.style.color = c; }
-        const bar = card.querySelector('#bar_'+sid); if (bar) { bar.style.width = pct + '%'; bar.style.background = c; }
-        const bdg = card.querySelector('#bdg_'+sid); if (bdg) { bdg.className = 'bdg ' + (pct>=100?'bg2':'by2'); bdg.textContent = pct>=100?'Sẵn sàng':'Đang làm'; }
+        const pctEl = card.querySelector('#pct_' + sid); if (pctEl) { pctEl.textContent = pct + '%'; pctEl.style.color = c; }
+        const bar = card.querySelector('#bar_' + sid); if (bar) { bar.style.width = pct + '%'; bar.style.background = c; }
+        const bdg = card.querySelector('#bdg_' + sid); if (bdg) { bdg.className = 'bdg ' + (pct >= 100 ? 'bg2' : 'by2'); bdg.textContent = pct >= 100 ? 'Sẵn sàng' : 'Đang làm'; }
       }
       if (D.setupStores[si]) D.setupStores[si].progress = pct;
     }
 
     async function markStoreAsLaunched(storeId, name, sid) {
-      if (!confirm(`Xác nhận ${name} đã khai trương thành công?\nCửa hàng sẽ được chuyển trạng thái sang "Đang hoạt động".`)) return;
+      if (!confirm(`Xác nhận ${name} đã khai trương thành công?\n\n✅ Cửa hàng → "Đang hoạt động"\n🗑 Timeline setup sẽ bị xóa`)) return;
       load('Đang cập nhật trạng thái...');
       const res = await api({ action: 'markStoreAsLaunched', storeId });
-      if (res.ok) {
-        toast(`🎉 Chúc mừng ${name} đã khai trương!`);
-        await syncAll(); 
-      } else {
-        toast('Lỗi cập nhật: ' + (res.error || 'Vui lòng kiểm tra lại Google Sheets'), 'terr');
-      }
       unload();
+      if (res.ok) {
+        toast(`🎉 Chúc mừng ${name} đã khai trương! Timeline đã xóa.`);
+        // Remove the store card from UI immediately
+        const card = $(`card_${sid}`);
+        if (card) card.remove();
+        // Remove from local data
+        D.setupStores = D.setupStores.filter(s => s.storeId !== storeId);
+        // Reload stores list and dashboard
+        await loadStores();
+        renderDashboard();
+        const cnt = $('setup-cnt');
+        if (cnt) cnt.textContent = D.setupStores.length;
+      } else {
+        toast('❌ Lỗi: ' + (res.error || 'Kiểm tra lại Google Sheets'), 'terr');
+      }
     }
 
     async function exportTimelineStore(storeId, name, type) {
@@ -3007,7 +3060,7 @@
 
       if (type === 'excel') {
         const rows = [['ID', 'Giai đoạn', 'Công việc', 'Bắt đầu', 'Deadline', 'IC (Phụ trách)', 'Người hỗ trợ', 'Trạng thái']];
-        res.tasks.forEach(t => rows.push([t.id, t.phase, t.task, t.startDate, t.deadline, t.ic||t.owner||'', t.supporter||'', t.done ? 'Hoàn thành' : 'Chưa xong']));
+        res.tasks.forEach(t => rows.push([t.id, t.phase, t.task, t.startDate, t.deadline, t.ic || t.owner || '', t.supporter || '', t.done ? 'Hoàn thành' : 'Chưa xong']));
         exportXLSX(rows, `Setup_${name}`);
       } else {
         const pWin = window.open('', '', 'height=800,width=1100');
@@ -3019,14 +3072,14 @@
         pWin.document.write(`<h2>TIMELINE KHAI TRƯƠNG: ${name.toUpperCase()}</h2>`);
         const s = D.setupStores.find(st => st.storeId === storeId) || {};
         pWin.document.write(`<div style="display:flex;justify-content:space-between;margin:10px 0;font-size:12px"><span>Mã CH: <b>${storeId}</b></span><span>Ngày khai trương: <b>${s.openDate || '–'}</b></span><span>Tiến độ: <b>${s.progress || 0}%</b></span></div>`);
-        
+
         // Group by phase
-        const phases = [...new Set(res.tasks.map(t=>t.phase))];
+        const phases = [...new Set(res.tasks.map(t => t.phase))];
         phases.forEach(ph => {
-          const phTasks = res.tasks.filter(t=>t.phase===ph);
+          const phTasks = res.tasks.filter(t => t.phase === ph);
           pWin.document.write(`<table><thead><tr class="phase-hd"><td colspan="7" style="background:#fdf3e3;color:#3D2B1F;font-weight:700;padding:8px">${ph}</td></tr><tr><th>Công việc</th><th>IC (Phụ trách)</th><th>Người hỗ trợ</th><th>Bắt đầu</th><th>Deadline</th><th>Trạng thái</th></tr></thead><tbody>`);
           phTasks.forEach(t => {
-            pWin.document.write(`<tr><td style="font-weight:500">${t.task}</td><td>${t.ic||t.owner||''}</td><td>${t.supporter||''}</td><td>${t.startDate}</td><td>${t.deadline}</td><td class="${t.done?'done-st':'not-done'}">${t.done?'✓ Xong':'– Chưa'}</td></tr>`);
+            pWin.document.write(`<tr><td style="font-weight:500">${t.task}</td><td>${t.ic || t.owner || ''}</td><td>${t.supporter || ''}</td><td>${t.startDate}</td><td>${t.deadline}</td><td class="${t.done ? 'done-st' : 'not-done'}">${t.done ? '✓ Xong' : '– Chưa'}</td></tr>`);
           });
           pWin.document.write('</tbody></table><br>');
         });
@@ -3458,244 +3511,441 @@ Xác nhận: ___________________________`;
     }
 
     // ════════════════════════════════════════
-    //  PLANS
+    //  KẾ HOẠCH (REBUILT)
     // ════════════════════════════════════════
+    let _planGroups = [];
+    let _currentPlanId = null;
+
+    function updatePlanPeriodLabel() {
+      const v = $('plan-period-type') ? $('plan-period-type').value : 'month';
+      const el = $('plan-period-label');
+      if (el) el.textContent = v === 'quarter' ? 'Quý' : 'Tháng';
+    }
+
+    function newPlan() {
+      _planGroups = []; _currentPlanId = null;
+      $('plan-month').value = ''; $('plan-title').value = ''; $('plan-note').value = '';
+      $('plan-id-label').textContent = '';
+      renderPlanGroups();
+    }
+
+    function addPlanGroup(groupName) {
+      _planGroups.push({ group: groupName || '', tasks: [] });
+      renderPlanGroups();
+      setTimeout(() => {
+        const inputs = document.querySelectorAll('.plan-group-name');
+        const last = inputs[inputs.length - 1];
+        if (last && !groupName) last.focus();
+      }, 50);
+    }
+
+    function addPlanTask(groupIdx) {
+      if (!_planGroups[groupIdx]) return;
+      _planGroups[groupIdx].tasks.push({ task: '', kpi: '', budget: '', ic: '', time: '', note: '' });
+      renderPlanGroups();
+    }
+
+    function removePlanGroup(groupIdx) { _planGroups.splice(groupIdx, 1); renderPlanGroups(); }
+    function removePlanTask(groupIdx, taskIdx) { _planGroups[groupIdx].tasks.splice(taskIdx, 1); renderPlanGroups(); }
+
+    function collectPlanGroups() {
+      _planGroups = [];
+      document.querySelectorAll('.plan-group-block').forEach(block => {
+        const groupName = block.querySelector('.plan-group-name').value.trim();
+        const tasks = [];
+        block.querySelectorAll('.plan-task-row').forEach(row => {
+          tasks.push({
+            task: row.querySelector('.pt-task').value,
+            kpi: row.querySelector('.pt-kpi').value,
+            budget: row.querySelector('.pt-budget').value,
+            ic: row.querySelector('.pt-ic').value,
+            time: row.querySelector('.pt-time').value,
+            note: row.querySelector('.pt-note').value,
+          });
+        });
+        if (groupName || tasks.length) _planGroups.push({ group: groupName, tasks });
+      });
+    }
+
+    function renderPlanGroups() {
+      const c = $('plan-tasks-container'); if (!c) return;
+      if (!_planGroups.length) {
+        c.innerHTML = '<div class="empty-state" style="padding:14px">Nhấn "+ Thêm nhóm" hoặc "🤖 AI Lập KH" để bắt đầu</div>';
+        return;
+      }
+      c.innerHTML = _planGroups.map((g, gi) => `
+        <div class="plan-group-block" style="margin-bottom:14px;border:1.5px solid var(--border);border-radius:var(--rs);overflow:hidden">
+          <div style="background:var(--gold-l);padding:9px 12px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border)">
+            <span style="font-weight:700;color:var(--brown-m);font-size:11px;white-space:nowrap">NHÓM</span>
+            <input class="fc plan-group-name" value="${(g.group||'').replace(/"/g,'&quot;')}" placeholder="Tên nhóm công việc..." style="flex:1;font-weight:700;font-size:13px;padding:4px 8px">
+            <button class="btn bd bsm" onclick="collectPlanGroups();removePlanGroup(${gi})">🗑</button>
+          </div>
+          <div style="overflow-x:auto">
+            <table class="tbl" style="font-size:12px;min-width:700px">
+              <thead><tr>
+                <th style="min-width:220px">Nội dung (NỘI DUNG)</th>
+                <th style="min-width:80px">KPI</th>
+                <th style="min-width:90px">Ngân sách</th>
+                <th style="min-width:120px">Nhân sự IC</th>
+                <th style="min-width:110px">Thời gian</th>
+                <th style="min-width:120px">Ghi chú</th>
+                <th style="width:35px"></th>
+              </tr></thead>
+              <tbody>
+                ${(g.tasks||[]).map((t, ti) => `
+                <tr class="plan-task-row">
+                  <td><input class="fc pt-task" value="${(t.task||'').replace(/"/g,'&quot;')}" placeholder="Đầu việc..." style="padding:3px 6px;font-size:12px"></td>
+                  <td><input class="fc pt-kpi" value="${(t.kpi||'').replace(/"/g,'&quot;')}" placeholder="Số/%" style="padding:3px 6px;font-size:12px"></td>
+                  <td><input class="fc pt-budget" value="${(t.budget||'').replace(/"/g,'&quot;')}" placeholder="tr đồng" style="padding:3px 6px;font-size:12px"></td>
+                  <td><select class="fc pt-ic" style="padding:3px 6px;font-size:12px">${activeStaffOpt(t.ic)}</select></td>
+                  <td><input class="fc pt-time" value="${(t.time||'').replace(/"/g,'&quot;')}" placeholder="T5/2026" style="padding:3px 6px;font-size:12px"></td>
+                  <td><input class="fc pt-note" value="${(t.note||'').replace(/"/g,'&quot;')}" placeholder="Ghi chú" style="padding:3px 6px;font-size:12px"></td>
+                  <td><button class="btn bd bsm" onclick="collectPlanGroups();removePlanTask(${gi},${ti})" style="padding:2px 6px">✕</button></td>
+                </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
+          <div style="padding:8px 12px">
+            <button class="btn bo bsm" onclick="collectPlanGroups();addPlanTask(${gi})">+ Thêm đầu việc</button>
+          </div>
+        </div>`).join('');
+    }
+
     async function loadPlans() {
       if (!CFG.scriptUrl) return;
       const data = await api({ action: 'getPlans' });
       if (!data.ok) return;
       D.plans = data.plans || [];
-      const sel = $('plan-history-sel'), ref = $('rpt-plan-ref');
-      sel.innerHTML = '<option value="">-- Xem kế hoạch cũ --</option>';
-      ref.innerHTML = '<option value="">-- Không so sánh --</option>';
-      D.plans.forEach(p => {
-        sel.innerHTML += `<option value="${p.id}">${p.month || p.id} – CH:${p.targetStores} Audit:${p.targetAudit}</option>`;
-        ref.innerHTML += `<option value="${p.id}">${p.month || p.id}</option>`;
-      });
-      // History table
-      $('plan-history-body').innerHTML = D.plans.length ? D.plans.map(p => `<tr>
-    <td>${p.month || '–'}</td>
-    <td>${p.targetStores || 0}</td>
-    <td>${p.targetAudit || 85}</td>
-    <td>${p.budget || 0}tr</td>
-    <td><span class="bdg bg2">${p.status || '–'}</span></td>
-    <td style="font-size:11px">${p.timestamp || '–'}</td>
-    <td><button class="btn bo bsm" onclick="loadPlanById('${p.id}')">Xem</button></td>
-  </tr>`).join('') : '<tr><td colspan="7"><div class="empty-state" style="padding:12px">Chưa có kế hoạch</div></td></tr>';
+      const sel = $('plan-history-sel');
+      if (sel) {
+        sel.innerHTML = '<option value="">-- Xem kế hoạch cũ --</option>';
+        D.plans.forEach(p => sel.innerHTML += `<option value="${p.id}">${p.month || p.id} – ${p.title || ''}</option>`);
+      }
+      const rptSel = $('rpt-plan-ref');
+      if (rptSel) {
+        rptSel.innerHTML = '<option value="">-- Chọn kế hoạch --</option>';
+        D.plans.forEach(p => rptSel.innerHTML += `<option value="${p.id}">${p.month||p.id} – ${p.title||''}</option>`);
+      }
+      const hb = $('plan-history-body');
+      if (hb) hb.innerHTML = D.plans.length ? D.plans.map(p => {
+        const groups = Array.isArray(p.content) ? p.content : [];
+        return `<tr>
+          <td>${p.month || '–'}</td>
+          <td>${p.title || '–'}</td>
+          <td><span class="bdg bb2">${groups.length} nhóm</span></td>
+          <td><span class="bdg bg2">${p.status || 'Đã lưu'}</span></td>
+          <td style="font-size:11px">${p.timestamp || '–'}</td>
+          <td><button class="btn bo bsm" onclick="loadPlanById('${p.id}')">Xem</button></td>
+        </tr>`;
+      }).join('') : '<tr><td colspan="6"><div class="empty-state" style="padding:12px">Chưa có kế hoạch</div></td></tr>';
     }
 
     function loadPlanById(id) {
+      if (!id) return;
       const plan = D.plans.find(p => p.id === id); if (!plan) return;
+      _currentPlanId = plan.id;
       $('plan-month').value = plan.month || '';
       $('plan-title').value = plan.title || '';
-      $('plan-target-stores').value = plan.targetStores || 0;
-      $('plan-target-audit').value = plan.targetAudit || 85;
-      $('plan-budget').value = plan.budget || 0;
       $('plan-note').value = plan.note || '';
-      const content = typeof plan.content === 'object' ? JSON.stringify(plan.content, null, 2) : String(plan.content || '');
-      $('plan-content').value = content;
-      genPlanPreview(plan);
       $('plan-id-label').textContent = 'ID: ' + plan.id;
+      _planGroups = Array.isArray(plan.content) ? JSON.parse(JSON.stringify(plan.content)) : [];
+      renderPlanGroups();
       goPage('kehoach', document.querySelectorAll('.ntab')[5]);
-    }
-
-    function genPlanPreview(p) {
-      const month = p.month || $('plan-month').value;
-      const content = $('plan-content').value || '';
-      planText = `[Operations – Dương Thanh Liêm] – Kế hoạch Tháng ${month} & Báo cáo kết quả Tháng ${month}
-
-Kính gửi Anh Tài, Anh Vũ, Chị Yến và Bộ phận HR,
-
-Em xin gửi kế hoạch công việc ${month} của bộ phận Operations để xem xét và phê duyệt.
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🎯 MỤC TIÊU THÁNG
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-• Khai trương mới: ${$('plan-target-stores').value || 0} cửa hàng
-• Điểm audit mục tiêu: ≥${$('plan-target-audit').value || 85}/100
-• Ngân sách dự kiến: ${$('plan-budget').value || 0} triệu đồng
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📋 NỘI DUNG KẾ HOẠCH
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-${content}
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Ghi chú: ${$('plan-note').value || '–'}
-
-Trân trọng,
-Dương Thanh Liêm · Operations Leader
-📞 0357 636 539 · operations@phuctea.com.vn
-${new Date().toLocaleDateString('vi-VN')}`;
-      $('plan-preview').textContent = planText;
-      $('plan-preview').style.color = 'var(--brown)';
     }
 
     async function savePlan() {
       const month = $('plan-month').value.trim();
-      if (!month) { toast('⚠️ Nhập tháng kế hoạch', 'twarn'); return; }
-      genPlanPreview({});
+      if (!month) { toast('⚠️ Nhập tháng/quý kế hoạch', 'twarn'); return; }
+      collectPlanGroups();
       load('Đang lưu kế hoạch...');
       const res = await api({
         action: 'savePlan', data: {
+          id: _currentPlanId || undefined,
           month, title: $('plan-title').value,
-          targetStores: Number($('plan-target-stores').value) || 0,
-          targetAudit: Number($('plan-target-audit').value) || 85,
-          budget: Number($('plan-budget').value) || 0,
-          content: $('plan-content').value,
+          content: _planGroups,
           note: $('plan-note').value, status: 'Đã lưu'
         }
       });
       unload();
-      if (res.ok) { toast('✅ Đã lưu kế hoạch!'); await loadPlans(); }
-      else toast('❌ ' + (res.error || 'Lỗi'), 'terr');
+      if (res.ok) {
+        _currentPlanId = res.planId;
+        $('plan-id-label').textContent = 'ID: ' + res.planId;
+        toast('✅ Đã lưu kế hoạch!');
+        await loadPlans();
+      } else toast('❌ ' + (res.error || 'Lỗi'), 'terr');
     }
 
     async function aiGenPlan() {
       load('AI đang phân tích & lập kế hoạch...');
-      const ctx = D.plans.length ? `Kế hoạch tháng trước:\n` + JSON.stringify(D.plans[0].content) : 'Chưa có kế hoạch trước.';
+      const ctx = D.plans.length ? `Kế hoạch kỳ trước: ${JSON.stringify(D.plans[0].content).slice(0,600)}` : 'Chưa có kế hoạch trước.';
       const kpi = `Hiện tại: ${D.kpi.stores} CH hoạt động, audit TB ${D.kpi.auditAvg}, ${D.kpi.reauditCount} cần tái audit.`;
-      const r = await callAI(`${kpi}\n${ctx}\n\nLập kế hoạch Operations tháng tới cho BOD Phúc Tea. Bao gồm: OKR, nhóm công việc chính (setup, audit, đào tạo), rủi ro & giải pháp, KPI. Chuyên nghiệp, có số liệu cụ thể.`, 'Lập kế hoạch chiến lược vận hành.');
+      const r = await callAI(`${kpi}\n${ctx}\n\nLập kế hoạch Operations tháng tới cho Phúc Tea dạng JSON array:
+[{"group":"TÊN NHÓM","tasks":[{"task":"Tên việc","kpi":"target","budget":"triệu","ic":"","time":"Tháng X","note":""}]}]
+Trả về JSON thuần, không markdown. 4 nhóm: Setup&KT, Audit, Đào tạo, Vận hành chung.`);
       unload();
-      $('plan-content').value = r;
-      genPlanPreview({});
-      toast('🤖 AI đã lập kế hoạch!');
+      try {
+        const clean = r.replace(/```json|```/g, '').trim();
+        _planGroups = JSON.parse(clean);
+        if (!Array.isArray(_planGroups)) throw new Error();
+        renderPlanGroups();
+        toast('🤖 AI đã lập kế hoạch! Kiểm tra & chỉnh sửa.');
+      } catch (e) {
+        _planGroups = [{ group: 'KẾ HOẠCH AI', tasks: [{ task: r.slice(0, 300), kpi: '', budget: '', ic: '', time: '', note: '' }] }];
+        renderPlanGroups();
+        toast('⚠️ AI nội dung thô. Chỉnh sửa thủ công.', 'twarn');
+      }
     }
 
     function exportPlan() {
-      if (!planText) { genPlanPreview({}); }
-      const rows = planText.split('\n').map(l => [l]);
-      exportXLSX(rows, `KeHoach_${$('plan-month').value.replace(/\//g, '_')}`);
+      collectPlanGroups();
+      const month = $('plan-month').value || 'KH';
+      const rows = [['Nhóm công việc', 'Nội dung', 'KPI', 'Ngân sách', 'Nhân sự IC', 'Thời gian', 'Ghi chú']];
+      _planGroups.forEach(g => (g.tasks||[]).forEach(t =>
+        rows.push([g.group, t.task, t.kpi, t.budget, t.ic, t.time, t.note])));
+      exportXLSX(rows, `KeHoach_${month.replace(/\//g, '_')}`);
     }
 
     // ════════════════════════════════════════
-    //  REPORTS
+    //  BÁO CÁO (REBUILT)
     // ════════════════════════════════════════
+    let _rptGroups = [];
+    let _currentRptId = null;
+
+    function newReport() {
+      _rptGroups = []; _currentRptId = null;
+      $('rpt-month').value = ''; $('rpt-highlight').value = ''; $('rpt-challenge').value = '';
+      if ($('rpt-title')) $('rpt-title').value = '';
+      if ($('rpt-id-label')) $('rpt-id-label').textContent = '';
+      if ($('rpt-plan-ref')) $('rpt-plan-ref').value = '';
+      if ($('rpt-mode')) { $('rpt-mode').value = 'free'; toggleReportMode(); }
+      renderReportGroups();
+    }
+
+    function toggleReportMode() {
+      const mode = $('rpt-mode') ? $('rpt-mode').value : 'free';
+      if ($('rpt-free-section')) $('rpt-free-section').style.display = mode === 'free' ? '' : 'none';
+      if ($('rpt-plan-section')) $('rpt-plan-section').style.display = mode === 'plan' ? '' : 'none';
+      if ($('rpt-plan-row')) $('rpt-plan-row').style.display = mode === 'plan' ? '' : 'none';
+    }
+
+    function addReportGroup(groupName) {
+      _rptGroups.push({ group: groupName || '', tasks: [] });
+      renderReportGroups();
+      setTimeout(() => {
+        const inputs = document.querySelectorAll('.rpt-group-name');
+        const last = inputs[inputs.length - 1];
+        if (last && !groupName) last.focus();
+      }, 50);
+    }
+
+    function addReportTask(groupIdx) {
+      if (!_rptGroups[groupIdx]) return;
+      _rptGroups[groupIdx].tasks.push({ task: '', actualResult: '', budgetUsed: '', link: '', note: '' });
+      renderReportGroups();
+    }
+
+    function removeReportGroup(groupIdx) { _rptGroups.splice(groupIdx, 1); renderReportGroups(); }
+    function removeReportTask(groupIdx, taskIdx) { _rptGroups[groupIdx].tasks.splice(taskIdx, 1); renderReportGroups(); }
+
+    function collectReportGroups() {
+      _rptGroups = [];
+      document.querySelectorAll('.rpt-group-block').forEach(block => {
+        const groupName = block.querySelector('.rpt-group-name').value.trim();
+        const tasks = [];
+        block.querySelectorAll('.rpt-task-row').forEach(row => {
+          tasks.push({
+            task: row.querySelector('.rt-task').value,
+            actualResult: row.querySelector('.rt-result').value,
+            budgetUsed: row.querySelector('.rt-budget').value,
+            link: row.querySelector('.rt-link').value,
+            note: row.querySelector('.rt-note').value,
+          });
+        });
+        if (groupName || tasks.length) _rptGroups.push({ group: groupName, tasks });
+      });
+    }
+
+    function renderReportGroups() {
+      const c = $('rpt-tasks-container'); if (!c) return;
+      if (!_rptGroups.length) {
+        c.innerHTML = '<div class="empty-state" style="padding:14px">Nhấn "+ Thêm nhóm" hoặc "🤖 AI soạn BC"</div>';
+        return;
+      }
+      c.innerHTML = _rptGroups.map((g, gi) => `
+        <div class="rpt-group-block" style="margin-bottom:14px;border:1.5px solid var(--border);border-radius:var(--rs);overflow:hidden">
+          <div style="background:var(--teal-l);padding:9px 12px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border)">
+            <span style="font-weight:700;color:var(--teal);font-size:11px;white-space:nowrap">NHÓM</span>
+            <input class="fc rpt-group-name" value="${(g.group||'').replace(/"/g,'&quot;')}" placeholder="Tên nhóm..." style="flex:1;font-weight:700;font-size:13px;padding:4px 8px">
+            <button class="btn bd bsm" onclick="collectReportGroups();removeReportGroup(${gi})">🗑</button>
+          </div>
+          <div style="overflow-x:auto">
+            <table class="tbl" style="font-size:12px;min-width:600px">
+              <thead><tr>
+                <th style="min-width:200px">Đầu việc</th>
+                <th style="min-width:150px">Kết quả thực tế</th>
+                <th style="min-width:100px">Ngân sách TH</th>
+                <th style="min-width:150px">Link kết quả</th>
+                <th style="min-width:110px">Ghi chú</th>
+                <th style="width:35px"></th>
+              </tr></thead>
+              <tbody>
+                ${(g.tasks||[]).map((t,ti) => `
+                <tr class="rpt-task-row">
+                  <td><input class="fc rt-task" value="${(t.task||'').replace(/"/g,'&quot;')}" placeholder="Tên việc..." style="padding:3px 6px;font-size:12px"></td>
+                  <td><input class="fc rt-result" value="${(t.actualResult||'').replace(/"/g,'&quot;')}" placeholder="Kết quả" style="padding:3px 6px;font-size:12px"></td>
+                  <td><input class="fc rt-budget" value="${(t.budgetUsed||'').replace(/"/g,'&quot;')}" placeholder="tr đồng" style="padding:3px 6px;font-size:12px"></td>
+                  <td><input class="fc rt-link" value="${(t.link||'').replace(/"/g,'&quot;')}" placeholder="Link..." style="padding:3px 6px;font-size:12px"></td>
+                  <td><input class="fc rt-note" value="${(t.note||'').replace(/"/g,'&quot;')}" placeholder="Ghi chú" style="padding:3px 6px;font-size:12px"></td>
+                  <td><button class="btn bd bsm" onclick="collectReportGroups();removeReportTask(${gi},${ti})" style="padding:2px 6px">✕</button></td>
+                </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
+          <div style="padding:8px 12px">
+            <button class="btn bo bsm" onclick="collectReportGroups();addReportTask(${gi})">+ Thêm đầu việc</button>
+          </div>
+        </div>`).join('');
+    }
+
+    function loadPlanTasksToReport() {
+      const planId = $('rpt-plan-ref') ? $('rpt-plan-ref').value : '';
+      const plan = D.plans.find(p => p.id === planId);
+      const tbody = $('rpt-compare-body');
+      if (!tbody) return;
+      if (!plan) { tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state" style="padding:12px">Chọn kế hoạch để tải đầu việc</div></td></tr>'; return; }
+      const groups = Array.isArray(plan.content) ? plan.content : [];
+      tbody.innerHTML = groups.map((g, gi) =>
+        (g.tasks || []).map((t, ti) => `
+          <tr>
+            <td style="color:var(--brown-m);font-size:11px;font-weight:600">${g.group}</td>
+            <td>${t.task}</td>
+            <td style="color:var(--blue)">${t.kpi || '–'}</td>
+            <td><input class="fc" placeholder="KPI TH" style="padding:3px 6px;font-size:12px" data-g="${gi}" data-t="${ti}" data-field="actualKpi"></td>
+            <td style="color:var(--blue)">${t.budget || '–'}</td>
+            <td><input class="fc" placeholder="NS TH (tr)" style="padding:3px 6px;font-size:12px" data-g="${gi}" data-t="${ti}" data-field="actualBudget"></td>
+            <td><input class="fc" placeholder="Mô tả kết quả" style="padding:3px 6px;font-size:12px" data-g="${gi}" data-t="${ti}" data-field="description"></td>
+            <td><input class="fc" placeholder="Link..." style="padding:3px 6px;font-size:12px" data-g="${gi}" data-t="${ti}" data-field="link"></td>
+          </tr>`).join('')).join('') || '<tr><td colspan="8"><div class="empty-state">Kế hoạch chưa có đầu việc</div></td></tr>';
+    }
+
     async function loadReports() {
       if (!CFG.scriptUrl) return;
       const data = await api({ action: 'getReports' });
       if (!data.ok) return;
       D.reports = data.reports || [];
       const sel = $('report-history-sel');
-      sel.innerHTML = '<option value="">-- Xem báo cáo cũ --</option>';
-      D.reports.forEach(r => sel.innerHTML += `<option value="${r.id}">${r.month || r.id} – CH:${r.actualStores} Audit:${r.actualAudit}</option>`);
-      $('report-history-body').innerHTML = D.reports.length ? D.reports.map(r => `<tr>
-    <td>${r.month || '–'}</td>
-    <td>${r.actualStores || 0}</td>
-    <td style="color:${scoreColor(r.actualAudit || 0)};font-weight:700">${r.actualAudit || 0}/100</td>
-    <td>${r.budgetUsed || 0}tr</td>
-    <td><span class="bdg bg2">${r.status || '–'}</span></td>
-    <td style="font-size:11px">${r.timestamp || '–'}</td>
-    <td><button class="btn bo bsm" onclick="loadReportById('${r.id}')">Xem</button></td>
-  </tr>`).join('') : '<tr><td colspan="7"><div class="empty-state" style="padding:12px">Chưa có báo cáo</div></td></tr>';
+      if (sel) {
+        sel.innerHTML = '<option value="">-- Xem báo cáo cũ --</option>';
+        D.reports.forEach(r => sel.innerHTML += `<option value="${r.id}">${r.month || r.id} – ${r.title || ''}</option>`);
+      }
+      const hb = $('report-history-body');
+      if (hb) hb.innerHTML = D.reports.length ? D.reports.map(r => `<tr>
+        <td>${r.month || '–'}</td>
+        <td><span class="bdg ${r.planId ? 'bb2' : 'bt2'}">${r.planId ? 'Theo KH' : 'Tự do'}</span></td>
+        <td>${r.title || '–'}</td>
+        <td><span class="bdg bg2">${r.status || '–'}</span></td>
+        <td style="font-size:11px">${r.timestamp || '–'}</td>
+        <td><button class="btn bo bsm" onclick="loadReportById('${r.id}')">Xem</button></td>
+      </tr>`).join('') : '<tr><td colspan="6"><div class="empty-state" style="padding:12px">Chưa có báo cáo</div></td></tr>';
     }
 
     function loadReportById(id) {
       const r = D.reports.find(x => x.id === id); if (!r) return;
+      _currentRptId = r.id;
       $('rpt-month').value = r.month || '';
-      $('rpt-actual-stores').value = r.actualStores || 0;
-      $('rpt-actual-audit').value = r.actualAudit || 0;
-      $('rpt-budget-used').value = r.budgetUsed || 0;
+      if ($('rpt-title')) $('rpt-title').value = r.title || '';
+      if ($('rpt-id-label')) $('rpt-id-label').textContent = 'ID: ' + r.id;
       const c = typeof r.content === 'object' ? r.content : {};
       $('rpt-highlight').value = c.highlight || '';
       $('rpt-challenge').value = c.challenge || '';
-      $('rpt-audit-cnt').value = c.auditCount || 0;
-      const planSel = $('rpt-plan-ref');
-      if (r.planId) { for (let i = 0; i < planSel.options.length; i++) { if (planSel.options[i].value === r.planId) { planSel.selectedIndex = i; break; } } }
-      genReport();
+      const mode = r.planId ? 'plan' : 'free';
+      if ($('rpt-mode')) { $('rpt-mode').value = mode; toggleReportMode(); }
+      if (r.planId && $('rpt-plan-ref')) {
+        $('rpt-plan-ref').value = r.planId;
+        loadPlanTasksToReport();
+      } else {
+        _rptGroups = Array.isArray(c.groups) ? c.groups : [];
+        renderReportGroups();
+      }
       goPage('baocao', document.querySelectorAll('.ntab')[6]);
     }
 
-    function genReport() {
-      const month = $('rpt-month').value.trim();
-      const actualStores = Number($('rpt-actual-stores').value) || 0;
-      const actualAudit = Number($('rpt-actual-audit').value) || 0;
-      const budgetUsed = Number($('rpt-budget-used').value) || 0;
-      const highlight = $('rpt-highlight').value || '(Chưa nhập)';
-      const challenge = $('rpt-challenge').value || '(Chưa nhập)';
-      const auditCnt = Number($('rpt-audit-cnt').value) || 0;
-      // Compare with plan
-      const planId = $('rpt-plan-ref').value;
-      const plan = D.plans.find(p => p.id === planId);
-      let compareSection = '';
-      if (plan) {
-        compareSection = `\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📊 SO SÁNH VỚI KẾ HOẠCH
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-• Khai trương: TH ${actualStores} / KH ${plan.targetStores || '–'} ${actualStores >= (plan.targetStores || 0) ? '✅' : '⚠️'}
-• Điểm audit: TH ${actualAudit}/100 / KH ≥${plan.targetAudit || 85} ${actualAudit >= (plan.targetAudit || 85) ? '✅' : '⚠️'}
-• Ngân sách: Đã dùng ${budgetUsed}tr / KH ${plan.budget || 0}tr\n`;
-      }
-      reportText = `[Operations – Dương Thanh Liêm] – Báo cáo kết quả Tháng ${month}
-      
-Kính gửi Anh Lý Tấn Tài và Ban lãnh đạo Phúc Tea,
-
-Em xin gửi báo cáo kết quả thực hiện kế hoạch cửa hàng & vận hành tháng ${month}.${compareSection}
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📊 KẾT QUẢ THỰC HIỆN TOÀN HỆ THỐNG
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-• Số cửa hàng mới khai trương: ${actualStores} (Chi tiết trong Module Setup)
-• Điểm Audit trung bình hệ thống: ${actualAudit}/100
-• Tổng số lượt Audit trong tháng: ${auditCnt} lượt
-• Ngân sách đã sử dụng: ${budgetUsed} triệu VNĐ
-...
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✅ THÀNH TỰU NỔI BẬT
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-${highlight}
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⚠️ THÁCH THỨC & KẾ HOẠCH TIẾP THEO
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-${challenge}
-
-Trân trọng,
-Dương Thanh Liêm · Operations Leader
-📞 0357 636 539 · operations@phuctea.com.vn
-${new Date().toLocaleDateString('vi-VN')}`;
-      $('report-preview').textContent = reportText;
-      $('report-preview').style.color = 'var(--brown)';
-      $('btn-copy-rpt').style.display = '';
-      toast('✅ Báo cáo đã tạo!');
-    }
+    // genReport is an alias kept for compatibility
+    function genReport() { saveReport(); }
 
     async function saveReport() {
       const month = $('rpt-month').value.trim();
-      if (!month) { toast('⚠️ Nhập tháng báo cáo', 'twarn'); return; }
-      genReport();
+      if (!month) { toast('⚠️ Nhập kỳ báo cáo', 'twarn'); return; }
+      const mode = $('rpt-mode') ? $('rpt-mode').value : 'free';
+      let content = { highlight: $('rpt-highlight').value, challenge: $('rpt-challenge').value };
+      let planId = '';
+      if (mode === 'free') {
+        collectReportGroups(); content.groups = _rptGroups;
+      } else {
+        planId = $('rpt-plan-ref') ? $('rpt-plan-ref').value : '';
+        const compareData = [];
+        document.querySelectorAll('#rpt-compare-body input').forEach(inp => {
+          const g = inp.dataset.g, t = inp.dataset.t, f = inp.dataset.field;
+          if (g !== undefined && t !== undefined) {
+            if (!compareData[g]) compareData[g] = {};
+            if (!compareData[g][t]) compareData[g][t] = {};
+            compareData[g][t][f] = inp.value;
+          }
+        });
+        content.compareData = compareData;
+      }
       load('Đang lưu báo cáo...');
       const res = await api({
         action: 'saveReport', data: {
-          month, actualStores: Number($('rpt-actual-stores').value) || 0,
-          actualAudit: Number($('rpt-actual-audit').value) || 0,
-          budgetUsed: Number($('rpt-budget-used').value) || 0,
-          planId: $('rpt-plan-ref').value || '',
-          content: { highlight: $('rpt-highlight').value, challenge: $('rpt-challenge').value, auditCount: $('rpt-audit-cnt').value },
-          status: 'Đã gửi BOD'
+          id: _currentRptId || undefined,
+          month, title: ($('rpt-title') ? $('rpt-title').value : '') || `Báo cáo ${month}`,
+          content, planId, mode, status: 'Đã lưu'
         }
       });
       unload();
-      if (res.ok) { toast('✅ Đã lưu báo cáo!'); await loadReports(); }
-      else toast('❌ ' + (res.error || 'Lỗi'), 'terr');
+      if (res.ok) {
+        _currentRptId = res.reportId;
+        if ($('rpt-id-label')) $('rpt-id-label').textContent = 'ID: ' + res.reportId;
+        toast('✅ Đã lưu báo cáo!');
+        await loadReports();
+      } else toast('❌ ' + (res.error || 'Lỗi'), 'terr');
     }
 
     async function aiGenReport() {
-      load('AI đang soạn báo cáo...');
       const month = $('rpt-month').value || 'tháng này';
-      const r = await callAI(`Soạn báo cáo kết quả thực hiện kế hoạch ${month} cho BOD Phúc Tea (Anh Lý Tấn Tài). Kết quả: ${$('rpt-actual-stores').value || 0} CH khai trương, audit TB ${$('rpt-actual-audit').value || 0}/100. Chuyên nghiệp, trang trọng.`);
+      load('AI đang soạn báo cáo...');
+      const kpi = `Tháng: ${month}, CH hoạt động: ${D.kpi.stores}, audit TB: ${D.kpi.auditAvg}.`;
+      const r = await callAI(`${kpi}\nSoạn báo cáo kết quả Operations Phúc Tea dạng JSON array:
+[{"group":"TÊN NHÓM","tasks":[{"task":"Đầu việc","actualResult":"Kết quả","budgetUsed":"","link":"","note":""}]}]
+JSON thuần, 3-4 nhóm: Setup&KT, Audit, Đào tạo, Vận hành.`);
       unload();
-      reportText = r;
-      $('report-preview').textContent = r; $('report-preview').style.color = 'var(--brown)';
-      $('btn-copy-rpt').style.display = '';
-      $('em-body').value = r;
-      toast('🤖 AI đã soạn báo cáo!');
+      try {
+        const clean = r.replace(/```json|```/g, '').trim();
+        _rptGroups = JSON.parse(clean);
+        if (!Array.isArray(_rptGroups)) throw new Error();
+        if ($('rpt-mode')) { $('rpt-mode').value = 'free'; toggleReportMode(); }
+        renderReportGroups();
+        toast('🤖 AI đã soạn báo cáo! Chỉnh sửa & lưu.');
+      } catch (e) {
+        _rptGroups = [{ group: 'BÁO CÁO AI', tasks: [{ task: r.slice(0, 300), actualResult: '', budgetUsed: '', link: '', note: '' }] }];
+        if ($('rpt-mode')) { $('rpt-mode').value = 'free'; toggleReportMode(); }
+        renderReportGroups();
+        toast('⚠️ Đã nạp nội dung AI dạng thô', 'twarn');
+      }
     }
 
     function exportReport() {
-      if (!reportText) { genReport(); }
-      const rows = reportText.split('\n').map(l => [l]);
-      exportXLSX(rows, `BaoCao_${$('rpt-month').value.replace(/\//g, '_')}`);
+      const month = $('rpt-month').value || 'BC';
+      const mode = $('rpt-mode') ? $('rpt-mode').value : 'free';
+      let rows = [['Nhóm CV', 'Đầu việc', 'Kết quả TH', 'Ngân sách TH', 'Link', 'Ghi chú']];
+      if (mode === 'free') {
+        collectReportGroups();
+        _rptGroups.forEach(g => (g.tasks||[]).forEach(t =>
+          rows.push([g.group, t.task, t.actualResult, t.budgetUsed, t.link, t.note])));
+      }
+      rows.push(['', 'Thành tựu', $('rpt-highlight').value]);
+      rows.push(['', 'Thách thức', $('rpt-challenge').value]);
+      exportXLSX(rows, `BaoCao_${month.replace(/\//g, '_')}`);
     }
 
     // ════════════════════════════════════════
@@ -3703,10 +3953,36 @@ ${new Date().toLocaleDateString('vi-VN')}`;
     // ════════════════════════════════════════
     function openEmailModal(mode) {
       emailMode = mode;
-      const month = mode === 'plan' ? $('plan-month').value : $('rpt-month').value;
+      const month = mode === 'plan' ? ($('plan-month') ? $('plan-month').value : '') : ($('rpt-month') ? $('rpt-month').value : '');
       $('email-modal-title').textContent = mode === 'plan' ? '✉️ Gửi Kế hoạch BOD' : '✉️ Gửi Báo cáo BOD';
-      $('em-subject').value = `[Operations – Dương Thanh Liêm] – Kế hoạch Tháng ${month} & Báo cáo kết quả Tháng ${month}`;
-      $('em-body').value = mode === 'plan' ? planText : reportText;
+      const subj = mode === 'plan'
+        ? `[Operations – Dương Thanh Liêm] – Kế hoạch ${month}`
+        : `[Operations – Dương Thanh Liêm] – Báo cáo kết quả ${month}`;
+      $('em-subject').value = subj;
+      // Build email body
+      let body = '';
+      if (mode === 'plan') {
+        collectPlanGroups();
+        const lines = [`KẾ HOẠCH OPERATIONS – ${month.toUpperCase()}`, '', 'Kính gửi Anh Tài, Anh Vũ, Chị Yến,', ''];
+        _planGroups.forEach(g => {
+          lines.push(`▌ ${g.group}`);
+          (g.tasks || []).forEach(t => {
+            lines.push(`  • ${t.task} | KPI: ${t.kpi || '–'} | NS: ${t.budget || '–'} | IC: ${t.ic || '–'} | ${t.time || ''}`);
+            if (t.note) lines.push(`    → ${t.note}`);
+          });
+          lines.push('');
+        });
+        lines.push(`Ghi chú: ${$('plan-note') ? $('plan-note').value : ''}`);
+        lines.push('\nTrân trọng,\nDương Thanh Liêm · Operations Leader\n0357 636 539');
+        body = lines.join('\n');
+      } else {
+        const lines = [`BÁO CÁO KẾT QUẢ OPERATIONS – ${month.toUpperCase()}`, ''];
+        lines.push(`Thành tựu: ${$('rpt-highlight').value || '–'}`);
+        lines.push(`Thách thức: ${$('rpt-challenge').value || '–'}`);
+        lines.push('\nTrân trọng,\nDương Thanh Liêm');
+        body = lines.join('\n');
+      }
+      $('em-body').value = body;
       $('em-thread').value = '';
       openModal('modal-email');
     }
@@ -3843,7 +4119,7 @@ ${new Date().toLocaleDateString('vi-VN')}`;
           toast('❌ ' + (res.error || 'Lỗi tải việc'), 'terr');
           unload();
         }
-      } catch(e) {
+      } catch (e) {
         unload();
         toast('❌ Lỗi kết nối', 'terr');
       }
@@ -3865,8 +4141,8 @@ ${new Date().toLocaleDateString('vi-VN')}`;
     }
 
     function filterMyTasks() {
-      const storeFilter = ($('mytask-filter-store') || {value:'all'}).value;
-      const phaseFilter = ($('mytask-filter-phase') || {value:'all'}).value;
+      const storeFilter = ($('mytask-filter-store') || { value: 'all' }).value;
+      const phaseFilter = ($('mytask-filter-phase') || { value: 'all' }).value;
       let tasks = [...D.myTasks];
       if (storeFilter !== 'all') tasks = tasks.filter(t => t.storeName === storeFilter);
       if (phaseFilter !== 'all') tasks = tasks.filter(t => t.phase === phaseFilter);
@@ -3874,15 +4150,15 @@ ${new Date().toLocaleDateString('vi-VN')}`;
     }
 
     function renderMyTasks(tasks, filtered = false) {
-      const today = new Date(); today.setHours(0,0,0,0);
+      const today = new Date(); today.setHours(0, 0, 0, 0);
 
       const parseDeadline = dl => {
         if (!dl) return null;
         try {
           const p = dl.split('/');
-          if (p.length === 3) return new Date(parseInt(p[2]), parseInt(p[1])-1, parseInt(p[0]));
+          if (p.length === 3) return new Date(parseInt(p[2]), parseInt(p[1]) - 1, parseInt(p[0]));
           return new Date(dl);
-        } catch(e) { return null; }
+        } catch (e) { return null; }
       };
 
       const overdue = tasks.filter(t => { const d = parseDeadline(t.deadline); return d && d < today; });
@@ -3890,10 +4166,10 @@ ${new Date().toLocaleDateString('vi-VN')}`;
 
       // Update KPI counts (only on full page, not widget)
       const cntEl = $('mytask-cnt');
-      const ovEl  = $('mytask-overdue');
+      const ovEl = $('mytask-overdue');
       const todEl = $('mytask-today');
       if (cntEl) cntEl.textContent = tasks.length;
-      if (ovEl)  ovEl.textContent  = overdue.length;
+      if (ovEl) ovEl.textContent = overdue.length;
       if (todEl) todEl.textContent = todayTasks.length;
 
       // Dashboard widget (compact)
@@ -3914,13 +4190,13 @@ ${new Date().toLocaleDateString('vi-VN')}`;
                 <div style="font-size:11px;margin-top:2px;display:flex;gap:8px;flex-wrap:wrap">
                   <span style="color:var(--blue)">🏪 ${t.storeName}</span>
                   <span style="color:var(--brown-m)">📂 ${t.phase}</span>
-                  <span style="color:${dlColor};font-weight:${isOD||isTD?'700':'400'}">
-                    📅 ${isOD?'⚠️ Quá hạn: ':isTD?'🔔 Hôm nay: ':''}${t.deadline||'–'}
+                  <span style="color:${dlColor};font-weight:${isOD || isTD ? '700' : '400'}">
+                    📅 ${isOD ? '⚠️ Quá hạn: ' : isTD ? '🔔 Hôm nay: ' : ''}${t.deadline || '–'}
                   </span>
                 </div>
               </div>
             </div>`;
-          }).join('') + (tasks.length > 5 ? `<div style="text-align:center;padding:8px;font-size:12px;color:var(--gray)">và ${tasks.length-5} việc khác...</div>` : '');
+          }).join('') + (tasks.length > 5 ? `<div style="text-align:center;padding:8px;font-size:12px;color:var(--gray)">và ${tasks.length - 5} việc khác...</div>` : '');
         }
       }
 
@@ -3950,8 +4226,8 @@ ${new Date().toLocaleDateString('vi-VN')}`;
           return `<tr style="${rowBg}">
             <td style="font-weight:600">${t.task}</td>
             <td><span class="bdg bb2" style="font-size:10px">${t.phase}</span></td>
-            <td style="color:${isOD?'var(--red)':isTD?'var(--gold)':'var(--gray)'};font-weight:${isOD||isTD?'700':'400'}">
-              ${isOD?'⚠️ ':'🔔 '}${t.deadline||'–'}
+            <td style="color:${isOD ? 'var(--red)' : isTD ? 'var(--gold)' : 'var(--gray)'};font-weight:${isOD || isTD ? '700' : '400'}">
+              ${isOD ? '⚠️ ' : '🔔 '}${t.deadline || '–'}
             </td>
             <td><button class="btn bp bsm" onclick="quickMarkDone('${t.storeId}','${t.taskId}',this)">✓ Xong</button></td>
           </tr>`;
@@ -4018,6 +4294,11 @@ ${new Date().toLocaleDateString('vi-VN')}`;
       if (CFG.scriptUrl) { $('cfg-alert').style.display = 'none'; syncAll(); }
       else { $('cfg-alert').style.display = 'flex'; setSyncStatus(false, 'Chưa cấu hình'); toast('👋 Chào mừng! Nhấn ⚙️ Cài đặt để kết nối Google Sheets.', 'twarn'); }
 
-      // Default audit criteria while loading
       setTimeout(() => {
-        if (!D.auditCriteria.length && $('audit-criteria-conta
+        if (!D.auditCriteria.length && $('audit-criteria-container')) renderAuditForm();
+      }, 1000);
+    })();
+  </script>
+</body>
+
+</html>
