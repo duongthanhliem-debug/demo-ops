@@ -2765,16 +2765,13 @@
       try {
         await loadStaff();
         await loadEmployees();
-        if (!D.template.length) {
-          const tData = await api({ action: 'getSetupTemplate' });
-          if (tData.ok) D.template = tData.template || [];
-        }
 
-        const phases = [...new Set(D.template.map(t => (t.phase || '').trim().toUpperCase()).filter(Boolean))];
-        const phSel = $('setup-phase-filter');
-        if (phSel) {
-          phSel.innerHTML = '<option value="all">Tất cả giai đoạn</option>' + phases.map(p => `<option value="${p}">${p}</option>`).join('');
-          phSel.onchange = () => renderSetupList();
+        // Always reload template to get fresh phase list
+        const tData = await api({ action: 'getSetupTemplate' });
+        if (tData.ok) {
+          D.template = tData.template || [];
+          // Store server-returned phases (Bug 1+6 fix)
+          D.templatePhases = tData.phases || [...new Set(D.template.map(t => (t.phase||'').trim().toUpperCase()).filter(Boolean))];
         }
 
         const data = await api({ action: 'getSetupStores' });
@@ -2880,7 +2877,7 @@
       if (tbody.querySelector('.empty-state')) tbody.innerHTML = '';
 
       const filter = ($('setup-phase-filter') ? $('setup-phase-filter').value : 'all').toUpperCase();
-      const phase = (t.phase || (filter !== 'ALL' ? filter : 'KHAI TRƯƠNG')).toUpperCase();
+      const phase = (t.phase || (filter !== 'ALL' ? filter : 'CHUNG')).toUpperCase();
 
       if (filter !== 'ALL' && phase !== filter && !t.isNew) return;
 
@@ -2901,15 +2898,47 @@
         dates = { s: toISO(t.startDate || ''), e: toISO(t.deadline || '') };
       }
 
+      // BUG 3: Parse onTimeStatus from note field (format: "note|Đúng hạn" or "note|Trễ hạn")
+      const note = t.note || '';
+      const onTimeMatch = note.match(/\|(Đúng hạn|Trễ hạn)/);
+      const onTimeStatus = onTimeMatch ? onTimeMatch[1] : '';
+      const cleanNote = note.replace(/\|?(Đúng hạn|Trễ hạn)/g, '').trim();
+
+      // BUG 3: Build status badge
+      let statusBadge = '';
+      if (t.done) {
+        if (onTimeStatus === 'Trễ hạn') {
+          statusBadge = '<span class="bdg br2" style="font-size:9px;margin-left:3px">⚠️ Trễ hạn</span>';
+        } else if (onTimeStatus === 'Đúng hạn') {
+          statusBadge = '<span class="bdg bg2" style="font-size:9px;margin-left:3px">✅ Đúng hạn</span>';
+        }
+      }
+
+      // BUG 4: Sanitize IC value — reject date strings that got into IC field
+      const sanitizeIC = (v) => {
+        if (!v) return '';
+        const s = String(v).trim();
+        if (/^\d{1,2}\/\d{1,2}\/\d{4}/.test(s)) return '';
+        if (/^(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\s+/i.test(s)) return '';
+        if (/^\d{4}-\d{2}-\d{2}/.test(s)) return '';
+        return s;
+      };
+      const cleanIC = sanitizeIC(t.ic || t.owner || '');
+      const cleanSupport = sanitizeIC(t.supporter || t.support || '');
+
       tr.innerHTML = `
         <td>
-          <div style="font-size:11px;color:var(--brown-m);font-weight:600;margin-bottom:2px">${phase}</div>
-          <input class="fc t-task" value="${(t.task || '').replace(/"/g, '&quot;')}" style="padding:2px;font-weight:600">
+          <div style="font-size:10px;color:var(--brown-m);font-weight:600;margin-bottom:2px;text-transform:uppercase">${phase}</div>
+          <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">
+            <input class="fc t-task" value="${(t.task || '').replace(/"/g, '&quot;')}" style="padding:2px;font-weight:600;flex:1;min-width:120px">
+            ${statusBadge}
+          </div>
           <input type="hidden" class="t-id" value="${t.id || ''}">
           <input type="hidden" class="t-phase" value="${phase}">
+          <input type="hidden" class="t-note" value="${cleanNote.replace(/"/g, '&quot;')}">
         </td>
-        <td><select class="fc t-ic" style="padding:2px">${activeStaffOpt(t.ic || t.owner)}</select></td>
-        <td><select class="fc t-support" style="padding:2px">${activeStaffOpt(t.supporter || t.support)}</select></td>
+        <td><select class="fc t-ic" style="padding:2px">${activeStaffOpt(cleanIC)}</select></td>
+        <td><select class="fc t-support" style="padding:2px">${activeStaffOpt(cleanSupport)}</select></td>
         <td><input type="date" class="fc t-s" value="${dates.s}" style="padding:2px"></td>
         <td><input type="date" class="fc t-e" value="${dates.e}" style="padding:2px"></td>
         <td class="no-print"><button class="btn bo bsm t-done ${t.done ? 'bg2' : ''}" onclick="toggleSetupTaskRow(this)" style="min-width:30px">${t.done ? '✓' : ''}</button></td>
@@ -2925,10 +2954,8 @@
 
         // Nếu chưa có tasks, tự động nạp timeline mẫu
         if (res.ok && (!res.tasks || !res.tasks.length)) {
-          console.log('Chưa có tasks, đang tự kích hoạt tạo Timeline cho:', storeId);
           const s = D.setupStores.find(x => x.storeId === storeId) ||
             (D.allStores && D.allStores.find(x => x.storeId === storeId));
-
           if (s && s.storeId) {
             const createRes = await api({ action: 'createTimeline', storeId: s.storeId, storeName: s.name, launchDate: s.openDate || s.launchDate });
             if (createRes.ok) {
@@ -2945,19 +2972,21 @@
           tbody.innerHTML = '';
           const tasks = res.tasks || [];
           if (tasks.length) {
+            // BUG 1+6 FIX: Collect all unique phases from ACTUAL task data
+            const taskPhases = [...new Set(tasks.map(t => (t.phase || '').trim().toUpperCase()).filter(Boolean))];
+            // Merge with template phases and update the filter dropdown
+            const allPhases = [...new Set([...(D.templatePhases || []), ...taskPhases])];
+            D.templatePhases = allPhases;
+            _rebuildPhaseFilter(allPhases);
+
             tasks.forEach(t => addSetupTaskRow(sid, t));
           } else {
             tbody.innerHTML = '<tr><td colspan="6" class="empty-state">⚠️ Không có đầu việc mẫu. Vui lòng kiểm tra sheet MẪU TIMELINE SETUP.</td></tr>';
           }
 
-          // Cập nhật tiến độ trên card UI
+          // Update progress on card UI
           const pct = res.progress || 0;
-          const pctEl = $(`pct_${sid}`);
-          if (pctEl) {
-            pctEl.textContent = pct + '%';
-            const c = pct >= 85 ? 'var(--green)' : pct >= 50 ? 'var(--blue)' : 'var(--red)';
-            pctEl.style.color = c;
-          }
+          _updateSetupCardProgress(sid, pct);
         } else {
           tbody.innerHTML = `<tr><td colspan="6" class="empty-state">❌ Lỗi tải: ${res.error || 'Dữ liệu không phản hồi'}</td></tr>`;
         }
@@ -2966,6 +2995,30 @@
         console.error('LoadStoreTasks Error:', e);
         tbody.innerHTML = '<tr><td colspan="6" class="empty-state">❌ Lỗi kết nối server</td></tr>';
       }
+    }
+
+    // Helper: rebuild phase filter dropdown from all known phases
+    function _rebuildPhaseFilter(phases) {
+      const phSel = $('setup-phase-filter');
+      if (!phSel) return;
+      const cur = phSel.value;
+      phSel.innerHTML = '<option value="all">Tất cả giai đoạn</option>' +
+        phases.map(p => `<option value="${p}" ${p === cur ? 'selected' : ''}>${p}</option>`).join('');
+      phSel.onchange = () => filterSetupPhase();
+    }
+
+    // Helper: update card progress UI elements
+    function _updateSetupCardProgress(sid, pct) {
+      const c = pct >= 85 ? 'var(--green)' : pct >= 50 ? 'var(--blue)' : 'var(--red)';
+      const pctEl = $(`pct_${sid}`);
+      if (pctEl) { pctEl.textContent = pct + '%'; pctEl.style.color = c; }
+      const bar = $(`bar_${sid}`);
+      if (bar) { bar.style.width = pct + '%'; bar.style.background = c; }
+      const bdg = $(`bdg_${sid}`);
+      if (bdg) { bdg.className = 'bdg ' + (pct >= 100 ? 'bg2' : 'by2'); bdg.textContent = pct >= 100 ? 'Sẵn sàng' : 'Chưa xong'; }
+      // Update local store data
+      const si = parseInt(sid.replace('s_', ''));
+      if (D.setupStores[si]) D.setupStores[si].progress = pct;
     }
 
     async function recalcStoreTimelineDates(sid, newLaunchISO) {
@@ -2995,39 +3048,90 @@
         id: r.querySelector('.t-id').value,
         task: r.querySelector('.t-task').value,
         phase: r.querySelector('.t-phase').value,
-        ic: (r.querySelector('.t-ic') || r.querySelector('.t-owner') || { value: '' }).value,
+        ic: (r.querySelector('.t-ic') || { value: '' }).value,
         supporter: (r.querySelector('.t-support') || { value: '' }).value,
         startDate: (r.querySelector('.t-s').value || '').split('-').reverse().join('/'),
         deadline: (r.querySelector('.t-e').value || '').split('-').reverse().join('/'),
-        done: r.querySelector('.t-done').classList.contains('bg2')
+        done: r.querySelector('.t-done').classList.contains('bg2'),
+        note: (r.querySelector('.t-note') || { value: '' }).value
       }));
       load('Đang lưu lên Sheets...');
       const res = await api({ action: 'saveStoreTasks', storeId, tasks });
       unload();
       if (res.ok) {
         toast(`✅ Đã lưu ${tasks.length} tasks! Tiến độ: ${res.progress || 0}%`);
-        recalcSetupProgressTable(sid, parseInt(sid.replace('s_', '')));
+        _updateSetupCardProgress(sid, res.progress || 0);
       } else toast('❌ ' + (res.error || 'Lỗi lưu'), 'terr');
     }
 
-    function toggleSetupTaskRow(btn) {
-      btn.classList.toggle('bg2'); btn.textContent = btn.classList.contains('bg2') ? '✓' : '';
-      const sid = btn.closest('.setup-card').id.replace('card_', '');
-      recalcSetupProgressTable(sid, parseInt(sid.replace('s_', '')));
+    async function toggleSetupTaskRow(btn) {
+      const wasDone = btn.classList.contains('bg2');
+      const nowDone = !wasDone;
+
+      btn.classList.toggle('bg2', nowDone);
+      btn.textContent = nowDone ? '✓' : '';
+
+      const card = btn.closest('.setup-card');
+      if (!card) return;
+      const sid = card.id.replace('card_', '');
+      const si = parseInt(sid.replace('s_', ''));
+      const store = D.setupStores[si];
+
+      // BUG 3+5: Call server immediately to update status + get progress back
+      const tr = btn.closest('tr');
+      if (tr && store) {
+        const taskId = tr.querySelector('.t-id') ? tr.querySelector('.t-id').value : '';
+        const deadline = tr.querySelector('.t-e') ? tr.querySelector('.t-e').value : '';
+        if (taskId && CFG.scriptUrl) {
+          const todayISO = new Date().toISOString().split('T')[0];
+          const doneDate = (todayISO.split('-').reverse().join('/'));
+          const res = await api({
+            action: 'updateTaskStatus',
+            storeId: store.storeId,
+            taskId,
+            done: nowDone,
+            doneDate: nowDone ? doneDate : ''
+          });
+          if (res.ok) {
+            // BUG 5: Update progress from server response
+            _updateSetupCardProgress(sid, res.progress || 0);
+
+            // BUG 3: Show đúng hạn / trễ hạn badge
+            if (nowDone && res.onTimeStatus) {
+              const taskCell = tr.querySelector('td:first-child');
+              if (taskCell) {
+                // Remove old badge
+                taskCell.querySelectorAll('.bdg.bg2, .bdg.br2').forEach(b => b.remove());
+                const badge = document.createElement('span');
+                badge.className = 'bdg ' + (res.onTimeStatus === 'Trễ hạn' ? 'br2' : 'bg2');
+                badge.style.fontSize = '9px';
+                badge.style.marginLeft = '3px';
+                badge.textContent = res.onTimeStatus === 'Trễ hạn' ? '⚠️ Trễ hạn' : '✅ Đúng hạn';
+                const taskInputWrapper = taskCell.querySelector('div:nth-child(2)') || taskCell;
+                taskInputWrapper.appendChild(badge);
+              }
+            } else if (!nowDone) {
+              // Remove badge when unchecking
+              const taskCell = tr.querySelector('td:first-child');
+              if (taskCell) taskCell.querySelectorAll('.bdg.bg2, .bdg.br2').forEach(b => b.remove());
+            }
+          } else {
+            toast('⚠️ Lưu trạng thái thất bại: ' + (res.error || ''), 'twarn');
+          }
+        } else {
+          // No server — just recalc locally
+          recalcSetupProgressTable(sid, si);
+        }
+      } else {
+        recalcSetupProgressTable(sid, si);
+      }
     }
 
     function recalcSetupProgressTable(sid, si) {
       const rows = $(`tbl_${sid}`).querySelectorAll('tr.t-row');
       const done = [...rows].filter(r => r.querySelector('.t-done').classList.contains('bg2')).length;
       const pct = rows.length ? Math.round(done / rows.length * 100) : 0;
-      const c = pct >= 85 ? 'var(--green)' : pct >= 50 ? 'var(--blue)' : 'var(--red)';
-      const card = $(`card_${sid}`);
-      if (card) {
-        const pctEl = card.querySelector('#pct_' + sid); if (pctEl) { pctEl.textContent = pct + '%'; pctEl.style.color = c; }
-        const bar = card.querySelector('#bar_' + sid); if (bar) { bar.style.width = pct + '%'; bar.style.background = c; }
-        const bdg = card.querySelector('#bdg_' + sid); if (bdg) { bdg.className = 'bdg ' + (pct >= 100 ? 'bg2' : 'by2'); bdg.textContent = pct >= 100 ? 'Sẵn sàng' : 'Đang làm'; }
-      }
-      if (D.setupStores[si]) D.setupStores[si].progress = pct;
+      _updateSetupCardProgress(sid, pct);
     }
 
     async function markStoreAsLaunched(storeId, name, sid) {
@@ -4089,35 +4193,45 @@ JSON thuần, 3-4 nhóm: Setup&KT, Audit, Đào tạo, Vận hành.`);
     function quickAsk(q) { $('ai-q').value = q; goPage('ai', document.querySelectorAll('.ntab')[7]); setTimeout(askAI, 80); }
 
     // ════════════════════════════════════════
-    //  VIỆC CỦA TÔI
+    //  VIỆC CỦA TÔI (BUG 2 FIX)
     // ════════════════════════════════════════
     async function loadMyTasks() {
-      // Get selected user from whichever selector is visible
       const userDash = $('mock-user-select');
       const userFull = $('mytask-user-select');
-      // Sync selections
-      const userName = (userFull && userFull.value) ? userFull.value : (userDash ? userDash.value : '');
+      // Sync selections – prefer the full page selector when on that page
+      let userName = '';
+      if (userFull && userFull.value) userName = userFull.value;
+      else if (userDash && userDash.value) userName = userDash.value;
+
+      // BUG 2 FIX: trim the userName before sending
+      userName = userName.trim();
+
+      // Keep both selectors in sync
       if (userDash && userName) userDash.value = userName;
       if (userFull && userName) userFull.value = userName;
 
-      if (!userName) {
-        renderMyTasks([]);
-        return;
-      }
+      if (!userName) { renderMyTasks([]); return; }
       if (!CFG.scriptUrl) { toast('⚠️ Chưa cấu hình Apps Script URL', 'twarn'); return; }
 
       load('Đang tải việc của ' + userName + '...');
       try {
+        // Pass trimmed userName to server
         const res = await api({ action: 'getMyTasks', userName });
         unload();
         if (res.ok) {
-          D.myTasks = res.tasks || [];
+          // BUG 2 FIX: Client-side double-check — only show tasks where IC matches and not done
+          const userNorm = userName.toLowerCase().trim();
+          D.myTasks = (res.tasks || []).filter(t => {
+            const icNorm = (t.ic || '').toLowerCase().trim();
+            return icNorm && (
+              icNorm === userNorm ||
+              icNorm.split(' ').some(p => p.length > 1 && userNorm.split(' ').some(u => u.length > 1 && u === p))
+            );
+          });
           renderMyTasks(D.myTasks);
-          // Update store/phase filters
           updateMyTaskFilters(D.myTasks);
         } else {
           toast('❌ ' + (res.error || 'Lỗi tải việc'), 'terr');
-          unload();
         }
       } catch (e) {
         unload();
