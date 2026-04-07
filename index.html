@@ -1538,11 +1538,12 @@
     </div>
 
     <!-- Tabs -->
-    <div class="ptabs">
+    <div class="ptabs" style="display:flex;align-items:center;gap:0;flex-wrap:wrap">
       <button class="ptab on"  id="atab-direct-btn"   onclick="showAuditTab('direct',this)">📋 Audit trực tiếp</button>
       <button class="ptab"     id="atab-khba-btn"     onclick="showAuditTab('khba',this)">🕵️ Khách hàng bí ẩn</button>
       <button class="ptab"     id="atab-report-btn"   onclick="showAuditTab('areport',this)">📄 Biên bản PDF</button>
       <button class="ptab"     id="atab-schedule-btn" onclick="openScheduleAudit()">📅 Lên lịch audit</button>
+      <button class="ptab" id="atab-detail-btn" onclick="reopenLastAuditDetail()" style="border:2px solid var(--gold);color:var(--gold-m)" title="Mở lại chi tiết audit gần nhất">🔍 Chi tiết audit</button>
     </div>
 
     <!-- ── TAB: AUDIT TRỰC TIẾP ── -->
@@ -1597,7 +1598,7 @@
         </div>
         <div class="tbl-wrap">
           <table class="tbl">
-            <thead><tr><th>Thời gian</th><th>Cửa hàng</th><th>Điểm %</th><th>Rating TB</th><th>Nhận xét</th><th>Trạng thái</th><th style="width:44px"></th></tr></thead>
+            <thead><tr><th>Thời gian</th><th>Cửa hàng</th><th>Điểm %</th><th>Rating TB</th><th>Nhận xét</th><th>Trạng thái</th><th style="width:110px"></th></tr></thead>
             <tbody id="k-body"><tr><td colspan="7"><div class="empty-state" style="padding:16px">Nhấn "Làm mới" để tải</div></td></tr></tbody>
           </table>
         </div>
@@ -1819,11 +1820,11 @@
   </div><!-- end pg-audit -->
 
   <!-- ── Modal: Chi tiết audit ── -->
-  <div class="modal" id="modal-audit-detail">
-    <div class="modal-box" style="max-width:820px;max-height:88vh;overflow-y:auto">
-      <div class="modal-hd">
-        <span class="modal-title" id="audit-detail-title">Chi tiết audit</span>
-        <button class="modal-close" onclick="closeModal('modal-audit-detail')">✕</button>
+  <div class="overlay" id="modal-audit-detail">
+    <div class="modal modal-xl" style="max-height:88vh;overflow-y:auto">
+      <div class="mh">
+        <span class="mt" id="audit-detail-title">Chi tiết audit</span>
+        <button class="mx" onclick="closeModal('modal-audit-detail')">×</button>
       </div>
       <div id="audit-detail-body" style="padding:4px 0">
         <div class="empty-state" style="padding:20px">Đang tải...</div>
@@ -3573,7 +3574,11 @@
           <td>${k.avgRating}/5 ⭐</td>
           <td style="max-width:180px;white-space:normal;font-size:12px">${k.comment || '–'}</td>
           <td>${k.pass ? '<span class="bdg bg2">Tốt</span>' : '<span class="bdg by2">Cần cải thiện</span>'}</td>
-          <td><button class="btn bo bsm" onclick="openAuditDetail('${k.store}','${k.timestamp || ''}','khba')">🔍</button></td>
+          <td style="white-space:nowrap">
+            <button class="btn bo bsm" onclick="openAuditDetail('${k.store}','${k.timestamp || ''}','khba')">🔍 Chi tiết</button>
+            <button class="btn bo bsm" style="margin-top:3px" onclick="openAuditReportForStore('${k.store}','${k.timestamp || ''}')">📋 BB</button>
+            <button class="btn bo bsm" style="margin-top:3px" onclick="aiKHBASingleAnalysis('${k.store}','${k.timestamp || ''}')">🤖</button>
+          </td>
         </tr>`;
       }).join('');
     }
@@ -3600,9 +3605,36 @@
       exportXLSX(rows, 'KHBA_' + new Date().toLocaleDateString('vi-VN').replace(/\//g,'-'));
     }
 
+    // AI phân tích cho từng dòng KHBA
+    async function aiKHBASingleAnalysis(store, timestamp) {
+      const rec = (_khbaData.khbaList||[]).find(k=>k.store===store&&(!timestamp||k.timestamp===timestamp));
+      if (!rec) { toast('Không có dữ liệu KHBA', 'twarn'); return; }
+      load('AI đang phân tích...');
+      const aiText = await callAI(`Phân tích KHBA cửa hàng ${store}: điểm ${rec.score}%, rating ${rec.avgRating}/5. Nhận xét: "${rec.comment||'không có'}". Viết ngắn (tối đa 100 từ): điểm cần cải thiện và đề xuất.`);
+      unload();
+      // Show in KHBA AI card
+      const card = $('k-ai-card'); if (card) card.style.display = '';
+      const body = $('k-ai-body'); if (body) body.textContent = `[${store}] ${aiText}`;
+    }
+
+    // Reopen last audit detail (for header button)
+    function reopenLastAuditDetail() {
+      if (_lastAuditDetailArgs) {
+        openAuditDetail(_lastAuditDetailArgs.store, _lastAuditDetailArgs.timestamp, _lastAuditDetailArgs.source);
+      } else {
+        toast('Chưa mở chi tiết nào. Chọn dòng trong bảng.', 'twarn');
+      }
+    }
+
     // ══ DETAIL MODAL ════════════════════════════════════════
     // Shows: summary stats + violation COUNTS only + checklist table
+    let _lastAuditDetailArgs = null;
     async function openAuditDetail(store, timestamp, source) {
+      _lastAuditDetailArgs = { store, timestamp, source };
+      // Show the header button when on audit page
+      const btnDetail = $('btn-open-audit-detail');
+      if (btnDetail) btnDetail.style.display = '';
+
       const modal = $('modal-audit-detail');
       const body  = $('audit-detail-body');
       const title = $('audit-detail-title');
@@ -3706,12 +3738,21 @@
             const isOK = ans === 'Đạt' || ans === 'OK';
             const isNA = ans.includes('N/A') || ans === '';
             const isIssue = !isOK && !isNA;
+            // Detect image/drive URLs in the answer
+            const urlMatch = ans.match(/(https?:\/\/[^\s,]+)/g) || [];
+            const imgUrls = urlMatch.filter(u => u.includes('drive.google') || u.includes('googleusercontent') || /\.(jpg|jpeg|png|gif|webp)/i.test(u));
             const typeEl = item.type === 'CCP'  ? '<span class="bdg br2" style="font-size:9px;padding:1px 4px">CCP</span>'
                          : item.type === 'RISK' ? '<span style="font-size:9px;background:#FEF3C7;color:#92400E;padding:1px 5px;border-radius:3px;font-weight:600">RISK</span>'
                          : '<span style="font-size:10px;color:var(--gray)">OK</span>';
+            const qrBlock = imgUrls.length ? imgUrls.map((u,qi) =>
+              `<img src="https://api.qrserver.com/v1/create-qr-code/?size=60x60&data=${encodeURIComponent(u)}" alt="QR ảnh ${qi+1}" title="Quét QR để xem ảnh lỗi" style="width:32px;height:32px;border-radius:3px;cursor:pointer;margin-left:4px" onclick="window.open('${u}','_blank')">`
+            ).join('') : '';
             html += `<tr style="${isIssue?'background:#FEF2F2':''}">
               <td style="color:var(--gray);font-size:10px">${idx===0?grp:''}</td>
-              <td style="${isIssue?'font-weight:600;color:var(--red)':''}">${item.item}</td>
+              <td style="${isIssue?'font-weight:600;color:var(--red)':''}">
+                ${item.item}
+                ${qrBlock}
+              </td>
               <td>${typeEl}</td>
               <td style="font-weight:600;color:${isNA?'var(--gray)':isOK?'var(--green)':'var(--red)'}">${isNA?'N/A':isOK?'✓ Đạt':'✗ Không đạt'}</td>
               <td style="text-align:right;color:${isNA?'var(--gray)':isOK?'inherit':'var(--red)'}">${isNA?'–':isOK?item.maxPts:0}/${item.maxPts}</td>
@@ -3788,10 +3829,21 @@
       // Auditor
       const audName = safeAuditorName(rec.auditor || '');
       if ($('ar-auditor')) $('ar-auditor').value = audName !== '–' ? audName : 'Dương Thanh Liêm';
-      // Note & action plan from data (only if user hasn't edited)
-      if ($('ar-note')   && !$('ar-note').dataset.userEdited)   $('ar-note').value   = rec.note       || '';
-      if ($('ar-action') && !$('ar-action').dataset.userEdited) $('ar-action').value = rec.actionPlan || '';
-      // Auto-fill email from store DB
+      // Note & action plan: always reset when session changes, blank for KHBA
+      // Clear userEdited flag so new session's data loads fresh
+      const noteEl = $('ar-note'), actionEl = $('ar-action');
+      if (noteEl)   { noteEl.removeAttribute('data-user-edited');   noteEl.dataset.userEdited = ''; delete noteEl.dataset.userEdited; }
+      if (actionEl) { actionEl.removeAttribute('data-user-edited'); actionEl.dataset.userEdited = ''; delete actionEl.dataset.userEdited; }
+      if (src === 'khba') {
+        // KHBA: leave note and action plan blank (editable)
+        if (noteEl)   noteEl.value   = '';
+        if (actionEl) actionEl.value = '';
+      } else {
+        // Direct audit: pull from rec data (mapped from col BY/BZ in GS)
+        if (noteEl)   noteEl.value   = rec.note       || '';
+        if (actionEl) actionEl.value = rec.actionPlan || '';
+      }
+      // Auto-fill email from store DB (col B in CuaHang = name, col E = email)
       const storeObj = (_allStores||[]).find(s=>s.name===store);
       if ($('ar-email') && !$('ar-email').dataset.userEdited) {
         $('ar-email').value = (storeObj && storeObj.email) ? storeObj.email : '';
@@ -3826,15 +3878,14 @@
       });
     }
 
-    // Schedule: ALL stores from DB
+    // Schedule: ALL stores from DB (CuaHang sheet, col A=storeId, col B=name)
     function populateScheduleStores() {
       const sel = $('sched-store'); if (!sel) return;
-      const allNames = (_allStores||[]).map(s=>s.name);
-      const extra = [...new Set([...(_auditDirectData.auditList||[]).map(a=>a.store), ...(_khbaData.latestPerStore||[]).map(k=>k.store)])];
-      const merged = [...new Set([...allNames, ...extra])].filter(Boolean).sort();
+      // Use only _allStores from DB (full CuaHang list), sorted by name
+      const allNames = [...new Set((_allStores||[]).map(s=>s.name).filter(Boolean))].sort();
       const cur = sel.value;
       sel.innerHTML = '<option value="">-- Chọn cửa hàng --</option>' +
-        merged.map(n=>`<option value="${n}" ${n===cur?'selected':''}>${n}</option>`).join('');
+        allNames.map(n=>`<option value="${n}" ${n===cur?'selected':''}>${n}</option>`).join('');
       // Staff dropdown
       const staffSel = $('sched-staff');
       if (staffSel) {
@@ -3918,6 +3969,10 @@ Dương Thanh Liêm – Operations Phúc Tea`;
     // ── onAuditStoreChange: populate session dropdown ─────
     function onAuditStoreChange() {
       const store = ($('ar-store')||{}).value; if (!store) return;
+      // Reset user-edited flags so new store's data auto-loads fresh
+      ['ar-note','ar-action','ar-email'].forEach(id => {
+        const el = $(id); if (el) { delete el.dataset.userEdited; el.value = ''; }
+      });
       const typeFilter = ($('ar-type-filter')||{value:'all'}).value;
       const sessions = (_auditDirectData.allResults||[])
         .filter(r => r.store === store && (typeFilter === 'all' || r.auditType === typeFilter))
@@ -4056,19 +4111,49 @@ Dương Thanh Liêm – Operations Phúc Tea`;
     // ── sendAuditReportEmail ─────────────────────────────
     async function sendAuditReportEmail() {
       if (!_auditReportText) { toast('Tạo biên bản trước','twarn'); return; }
-      const store=($('ar-store')||{}).value;
+      const store = ($('ar-store')||{}).value;
+      const sessSel = $('ar-session');
+      const ts  = sessSel ? sessSel.value : '';
+      const src = sessSel ? ((sessSel.options[sessSel.selectedIndex]||{}).dataset||{}).src || 'direct' : 'direct';
+
       let to = ($('ar-email')||{}).value || '';
       if (!to) {
-        const storeObj=(_allStores||[]).find(s=>s.name===store);
+        const storeObj = (_allStores||[]).find(s=>s.name===store);
         to = (storeObj&&storeObj.email) ? storeObj.email : '';
-        to = prompt('Email cửa hàng/chủ chi nhánh:',to) || '';
+        to = prompt('Email cửa hàng/chủ chi nhánh:', to) || '';
       }
       if (!to) return;
+
+      // Build detailed checklist body to include as "PDF đính kèm" in email
+      let detailBody = '';
+      if (src !== 'khba') {
+        const rec = (_auditDirectData.allResults||[]).find(r=>r.store===store&&(!ts||r.timestamp===ts))
+                 || (_auditDirectData.auditList||[]).find(r=>r.store===store);
+        if (rec) {
+          const issues = rec.issues||[], checklist = rec.checklist||[], answers = rec.answers||{};
+          const rows = checklist.map(item=>{
+            const ans = answers[item.id]||'';
+            const isOK = ans==='Đạt'||ans==='OK', isNA = ans.includes('N/A')||ans==='';
+            const isIssue = issues.some(i=>i.id===item.id);
+            const urlMatch = ans.match(/(https?:\/\/[^\s,]+)/g)||[];
+            const imgUrls = urlMatch.filter(u=>u.includes('drive.google')||u.includes('googleusercontent')||/\.(jpg|jpeg|png|gif|webp)/i.test(u));
+            const qrImgs = imgUrls.map((u,qi)=>`<img src="https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=${encodeURIComponent(u)}" style="width:40px;height:40px;vertical-align:middle" title="Quét QR xem ảnh lỗi ${qi+1}">`).join(' ');
+            return `<tr style="background:${isIssue?'#FEF2F2':''}"><td style="padding:4px 6px;border:1px solid #e8e0d4;font-size:11px;color:#718096">${item.group}</td><td style="padding:4px 6px;border:1px solid #e8e0d4;font-size:11px;${isIssue?'color:#dc2626;font-weight:600':''}">${item.item} ${qrImgs}</td><td style="padding:4px 6px;border:1px solid #e8e0d4;font-size:11px">${item.type}</td><td style="padding:4px 6px;border:1px solid #e8e0d4;font-size:11px;font-weight:600;color:${isNA?'#718096':isOK?'#166534':'#dc2626'}">${isNA?'N/A':isOK?'✓ Đạt':'✗ Không đạt'}</td><td style="padding:4px 6px;border:1px solid #e8e0d4;font-size:11px;text-align:right">${isNA?'–':isOK?item.maxPts:0}/${item.maxPts}</td></tr>`;
+          }).join('');
+          detailBody = `\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nCHI TIẾT CHECKLIST AUDIT\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n[Xem chi tiết đầy đủ trong bảng checklist đính kèm dưới đây]\n\nNhóm | Hạng mục | Loại | Kết quả | Điểm\n${checklist.map(item=>{const ans=answers[item.id]||'';const isOK=ans==='Đạt'||ans==='OK',isNA=ans.includes('N/A')||ans==='';return `${item.group} | ${item.item} | ${item.type} | ${isNA?'N/A':isOK?'Đạt':'Không đạt'} | ${isNA?'–':isOK?item.maxPts:0}/${item.maxPts}`;}).join('\n')}`;
+        }
+      }
+
       load('Đang gửi biên bản...');
-      const res=await api({action:'sendEmail',to,subject:`Biên bản Audit – ${store} – ${new Date().toLocaleDateString('vi-VN')}`,body:_auditReportText});
+      const res = await api({
+        action: 'sendEmail',
+        to,
+        subject: `Biên bản Audit – ${store} – ${new Date().toLocaleDateString('vi-VN')}`,
+        body: _auditReportText + detailBody
+      });
       unload();
-      if(res.ok) toast('✅ Đã gửi biên bản đến '+to);
-      else toast('❌ '+(res.error||'Lỗi gửi email'),'terr');
+      if (res.ok) toast('✅ Đã gửi biên bản đến ' + to);
+      else toast('❌ ' + (res.error||'Lỗi gửi email'), 'terr');
     }
 
     // ── printDetailPDF ───────────────────────────────────
