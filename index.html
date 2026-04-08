@@ -96,9 +96,11 @@
     }
 
     .t-task { white-space: normal !important; word-break: break-word; overflow-wrap: break-word; }
-    .t-ic, .t-support { white-space: normal !important; }
+    .t-ic, .t-support { white-space: normal !important; min-width: 90px; }
     .t-row td { vertical-align: top; word-break: break-word; overflow-wrap: break-word; }
-    .t-row td input.fc, .t-row td select.fc { white-space: normal; overflow: visible; text-overflow: unset; }
+    .t-row td input.fc, .t-row td select.fc { white-space: normal; overflow: visible; text-overflow: unset; min-width: 80px; }
+    .t-row td select.fc { height: auto !important; }
+    select.fc option { white-space: normal; word-break: break-word; }
     .load-msg {
       font-size: 13px;
       color: var(--gray);
@@ -2459,6 +2461,18 @@
       staffList: [], plans: [], reports: [], template: [], auditCriteria: [],
       timeline: [], employees: [], myTasks: []
     };
+    // Persist completed tasks and audit-done taskIds across page reloads
+    function _loadPersistedTasks() {
+      try { D._completedTasks = JSON.parse(localStorage.getItem('ops_completed_tasks') || '[]'); } catch(_) { D._completedTasks = []; }
+      try { D._auditDoneIds = new Set(JSON.parse(localStorage.getItem('ops_audit_done_ids') || '[]')); } catch(_) { D._auditDoneIds = new Set(); }
+    }
+    function _saveCompletedTasks() {
+      try { localStorage.setItem('ops_completed_tasks', JSON.stringify((D._completedTasks||[]).slice(0,100))); } catch(_) {}
+    }
+    function _saveAuditDoneIds() {
+      try { localStorage.setItem('ops_audit_done_ids', JSON.stringify([...(D._auditDoneIds||new Set())])); } catch(_) {}
+    }
+    _loadPersistedTasks();
     let reportText = '', planText = '', auditReportText = '';
     let emailMode = 'plan';
     let currentStoreEdit = null, currentStaffEdit = null;
@@ -2701,10 +2715,15 @@
         // Match plans whose month field contains current month/year
         const monthPlans = (D.plans || []).filter(p => {
           const m = (p.month || '').toLowerCase();
-          // Match "tháng 4/2026", "4/2026", "04/2026", "quý" plans for current quarter
+          // Match "tháng 4/2026", "4/2026", "04/2026", "yyyy-mm" formats
+          if (!m) return false;
+          // yyyy-mm format (from input[type=month])
+          const yyyymm = curY + '-' + String(curM).padStart(2,'0');
+          if (m === yyyymm) return true;
+          // "tháng M/YYYY" format (stored after fmtPlanMonth)
           if (m.includes(String(curY))) {
-            if (m.includes('tháng ' + curM) || m.includes(curM + '/' + curY) ||
-                m.includes((curM < 10 ? '0'+curM : curM) + '/' + curY)) return true;
+            if (m.includes('tháng ' + curM + '/') || m.includes('tháng ' + String(curM).padStart(2,'0') + '/')) return true;
+            if (m.includes(curM + '/' + curY) || m.includes(String(curM).padStart(2,'0') + '/' + curY)) return true;
           }
           return false;
         });
@@ -4478,15 +4497,23 @@ Dương Thanh Liêm – Operations Phúc Tea`;
       }
     }
 
-    // Format "yyyy-mm" → "Tháng M/YYYY" for display
+    // Format any month value → clean "Tháng M/YYYY" for display
     function fmtPlanMonth(val) {
       if (!val) return '–';
-      // Already formatted like "Tháng 4/2026"
+      // Already clean: "Tháng 4/2026" or "Quý 2/2026"
       if (val.includes('Tháng') || val.includes('Quý')) return val;
-      // yyyy-mm format
+      // yyyy-mm format from input[type=month]
       const p = val.split('-');
-      if (p.length === 2) return `Tháng ${parseInt(p[1])}/${p[0]}`;
-      return val;
+      if (p.length === 2 && p[0].length === 4) return 'Tháng ' + parseInt(p[1]) + '/' + p[0];
+      // Raw JS Date string like "Mon Jun 01 2026 00:00:00 GMT+0700 (Giờ Đông Dương)"
+      // or ISO "2026-06-01T00:00:00.000Z"
+      try {
+        const d = new Date(val);
+        if (!isNaN(d.getTime()) && d.getFullYear() > 2000) {
+          return 'Tháng ' + (d.getMonth()+1) + '/' + d.getFullYear();
+        }
+      } catch(_) {}
+      return val; // fallback: return as-is
     }
 
     function updatePlanPeriodLabel() {
@@ -4592,12 +4619,12 @@ Dương Thanh Liêm – Operations Phúc Tea`;
       const sel = $('plan-history-sel');
       if (sel) {
         sel.innerHTML = '<option value="">-- Xem kế hoạch cũ --</option>';
-        D.plans.forEach(p => sel.innerHTML += `<option value="${p.id}">${p.month || p.id} – ${p.title || ''}</option>`);
+        D.plans.forEach(p => sel.innerHTML += `<option value="${p.id}">${fmtPlanMonth(p.month)||p.title||p.id}</option>`);
       }
       const rptSel = $('rpt-plan-ref');
       if (rptSel) {
         rptSel.innerHTML = '<option value="">-- Chọn kế hoạch --</option>';
-        D.plans.forEach(p => rptSel.innerHTML += `<option value="${p.id}">${p.month||p.id} – ${p.title||''}</option>`);
+        D.plans.forEach(p => rptSel.innerHTML += `<option value="${p.id}">${fmtPlanMonth(p.month)||p.title||p.id}</option>`);
       }
       const hb = $('plan-history-body');
       if (hb) hb.innerHTML = D.plans.length ? D.plans.map(p => {
@@ -5070,7 +5097,42 @@ Trả về JSON thuần, không markdown. 4 nhóm: Setup&KT, Audit, Đào tạo,
       const body = $('em-body').value;
       if (!body) { toast('⚠️ Nhập nội dung email trước', 'twarn'); return; }
       load('AI đang viết lại...');
-      const r = await callAI(`Viết lại email sau chuyên nghiệp, súc tích, trang trọng hơn. Giữ nguyên số liệu:\n\n${body}`, 'Viết email chuyên nghiệp tiếng Việt cho lãnh đạo doanh nghiệp.');
+      // Build plan comparison context for AI if in report mode
+      let compCtx = '';
+      const rptMode = $('rpt-mode') ? $('rpt-mode').value : 'free';
+      if (rptMode === 'plan') {
+        const planId = $('rpt-plan-ref') ? $('rpt-plan-ref').value : '';
+        const plan = planId ? (D.plans||[]).find(p => p.id === planId) : null;
+        if (plan) {
+          compCtx += '\n\n[DỮ LIỆU SO SÁNH KẾ HOẠCH vs THỰC TẾ]\n';
+          compCtx += 'Kế hoạch: ' + (plan.title||fmtPlanMonth(plan.month)||'–') + '\n';
+          compCtx += 'Mục tiêu CH mới: ' + (plan.targetStores||'–') + ' | Thực tế: ' + (D.kpi.newStores||0) + '\n';
+          compCtx += 'Mục tiêu Audit: ≥' + (plan.targetAudit||85) + 'đ | Thực tế TB: ' + (D.kpi.auditAvg||0) + 'đ\n';
+          compCtx += 'Ngân sách đề xuất: ' + (plan.budget||0) + 'tr\n';
+          // Collect compare inputs
+          const compareRows = [];
+          const groups = Array.isArray(plan.content) ? plan.content : [];
+          document.querySelectorAll('#rpt-compare-body input').forEach(inp => {
+            const g = parseInt(inp.dataset.g), t = parseInt(inp.dataset.t), f = inp.dataset.field;
+            if (!isNaN(g) && !isNaN(t) && f && inp.value && groups[g] && (groups[g].tasks||[])[t]) {
+              const task = groups[g].tasks[t];
+              const existing = compareRows.find(r => r.g===g && r.t===t);
+              if (existing) { existing[f] = inp.value; }
+              else { compareRows.push({ g, t, task: task.task, kpi: task.kpi||'', budget: task.budget||'', [f]: inp.value }); }
+            }
+          });
+          compareRows.forEach(r => {
+            compCtx += `• ${r.task}: KPI đặt ra=${r.kpi||'–'} → Thực tế=${r.actualKpi||'chưa điền'} | NS=${r.budget||'–'}tr → TH=${r.actualBudget||'chưa điền'}tr\n`;
+            if (r.description) compCtx += '  Mô tả: ' + r.description + '\n';
+          });
+          compCtx += 'Thành tựu: ' + ($('rpt-highlight') ? $('rpt-highlight').value : '') + '\n';
+          compCtx += 'Thách thức: ' + ($('rpt-challenge') ? $('rpt-challenge').value : '') + '\n';
+        }
+      }
+      const r = await callAI(
+        'Viết lại email sau chuyên nghiệp, súc tích, trang trọng hơn. Giữ nguyên số liệu. Nếu có dữ liệu so sánh KH vs thực tế, phân tích và đưa ra nhận xét cụ thể:\n\n' + body + compCtx,
+        'Viết email báo cáo chuyên nghiệp tiếng Việt cho lãnh đạo doanh nghiệp Phúc Tea. Phân tích KPI thực tế so với kế hoạch nếu có dữ liệu.'
+      );
       unload(); $('em-body').value = r; toast('🤖 AI đã viết lại!');
     }
 
@@ -5202,7 +5264,7 @@ Trả về JSON thuần, không markdown. 4 nhóm: Setup&KT, Audit, Đào tạo,
     //  VIỆC CỦA TÔI (BUG 2 FIX)
     // ════════════════════════════════════════
     async function loadMyTasks() {
-      if (!D.employees || D.employees.length === 0) await loadEmployees();
+      try { if (!D.employees || D.employees.length === 0) await loadEmployees(); } catch(_) {}
       const userDash = $('mock-user-select');
       const userFull = $('mytask-user-select');
       let userName = '';
@@ -5212,7 +5274,7 @@ Trả về JSON thuần, không markdown. 4 nhóm: Setup&KT, Audit, Đào tạo,
       if (userDash && userName) userDash.value = userName;
       if (userFull && userName) userFull.value = userName;
       if (!userName) { renderMyTasks([]); return; }
-      if (!CFG.scriptUrl) { toast('⚠️ Chưa cấu hình Apps Script URL', 'twarn'); return; }
+      if (!CFG.scriptUrl) { return; } // Silent fail — don't show error, not the user's fault
 
       load('Đang tải việc của ' + userName + '...');
       try {
@@ -5239,25 +5301,72 @@ Trả về JSON thuần, không markdown. 4 nhóm: Setup&KT, Audit, Đào tạo,
           }
         } catch(_) {}
 
-        // Audit tasks: CCP/RISK stores from audit data (if loaded)
+        // Audit tasks: CCP/RISK/NOK from audit data — with proper deadlines
         let auditTasks = [];
         if (_auditDirectData && _auditDirectData.auditList) {
           (_auditDirectData.auditList || []).forEach(a => {
-            if (a.hasCCP || a.hasRISK) {
-              (a.issues || []).filter(i => i.verdict === 'CCP' || i.verdict === 'RISK').forEach(issue => {
-                auditTasks.push({
-                  taskId: `AUDIT_${a.store}_${issue.id || issue.item}`,
-                  task: `[${issue.verdict}] ${issue.item}`,
-                  phase: issue.group || 'AUDIT',
-                  deadline: a.date || '',
-                  ic: safeAuditorName(a.auditor),
-                  storeName: a.store,
-                  storeId: '',
-                  _source: 'audit',
-                  _priority: issue.verdict === 'CCP' ? 0 : 1,
-                  _auditStore: a.store,
-                  _auditTs: a.timestamp,
-                });
+            if (!a.issues || !a.issues.length) return;
+            // Parse audit date to compute deadlines
+            const parseAuditDate = (ts) => {
+              if (!ts) return new Date();
+              try {
+                // "HH:mm dd/MM/yyyy" or "dd/MM/yyyy"
+                const parts = ts.split(' ');
+                const datePart = parts.length > 1 ? parts[1] : parts[0];
+                const dp = datePart.split('/');
+                if (dp.length === 3) return new Date(+dp[2], +dp[1]-1, +dp[0]);
+              } catch(_) {}
+              return new Date();
+            };
+            const auditDate = parseAuditDate(a.timestamp || a.date);
+            const addHours = (d, h) => { const r = new Date(d); r.setHours(r.getHours()+h); return r; };
+            const addDays  = (d, n) => { const r = new Date(d); r.setDate(r.getDate()+n); return r; };
+            const fmtDl = (d) => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+
+            // CCP/RISK issues → individual tasks; NOK issues → group per store
+            const ccpRisk = a.issues.filter(i => i.verdict === 'CCP' || i.verdict === 'RISK');
+            const nok     = a.issues.filter(i => i.verdict === 'NOK');
+
+            ccpRisk.forEach(issue => {
+              const hours = issue.verdict === 'CCP' ? 48 : 24; // CCP=48h, RISK=24h
+              const dl = fmtDl(addHours(auditDate, hours));
+              const safeItemId = (issue.id || issue.item || '').replace(/[^a-zA-Z0-9]/g,'_').slice(0,20);
+              const _tid = 'AUDIT_' + a.store.replace(/[^a-zA-Z0-9]/g,'_').slice(0,15) + '_' + safeItemId;
+              if ((D._auditDoneIds||new Set()).has(_tid)) return; // already marked done
+              auditTasks.push({
+                taskId: _tid,
+                task: '[' + issue.verdict + '] ' + issue.item,
+                phase: issue.group || 'AUDIT',
+                deadline: dl,
+                ic: safeAuditorName(a.auditor),
+                storeName: a.store,
+                storeId: '',
+                _source: 'audit',
+                _priority: issue.verdict === 'CCP' ? 0 : 1,
+                _auditStore: a.store,
+                _auditTs: a.timestamp,
+                _verdict: issue.verdict,
+              });
+            });
+
+            // NOK: one grouped task per store, deadline 5 days
+            if (nok.length > 0) {
+              const dl5 = fmtDl(addDays(auditDate, 5));
+              const _nokTid = 'AUDIT_NOK_' + a.store.replace(/[^a-zA-Z0-9]/g,'_').slice(0,20);
+              if ((D._auditDoneIds||new Set()).has(_nokTid)) return; // already marked done
+              auditTasks.push({
+                taskId: _nokTid,
+                task: '[NOK] ' + nok.length + ' vi phạm cần khắc phục: ' + nok.slice(0,3).map(i=>i.item).join(', ') + (nok.length>3?' ...':''),
+                phase: 'AUDIT',
+                deadline: dl5,
+                ic: safeAuditorName(a.auditor),
+                storeName: a.store,
+                storeId: '',
+                _source: 'audit',
+                _priority: 2,
+                _auditStore: a.store,
+                _auditTs: a.timestamp,
+                _verdict: 'NOK',
               });
             }
           });
@@ -5280,14 +5389,17 @@ Trả về JSON thuần, không markdown. 4 nhóm: Setup&KT, Audit, Đào tạo,
           return da - db;
         });
 
-        D.myTasks = all;
+        // Filter out tasks already marked done (audit done IDs + completed setup/plan taskIds)
+        const doneIds = new Set([...(D._auditDoneIds||new Set()), ...(D._completedTasks||[]).map(t=>t.taskId)]);
+        D.myTasks = all.filter(t => !doneIds.has(t.taskId));
         unload();
         renderMyTasks(D.myTasks);
         updateMyTaskFilters(D.myTasks);
       } catch (e) {
         unload();
-        toast('❌ Lỗi kết nối', 'terr');
-        console.error(e);
+        console.warn('loadMyTasks error (non-fatal):', e);
+        // Don't toast error — this runs in background and shouldn't show "Lỗi mạng"
+        renderMyTasks(D.myTasks || []);
       }
     }
 
@@ -5441,35 +5553,70 @@ Trả về JSON thuần, không markdown. 4 nhóm: Setup&KT, Audit, Đào tạo,
     async function quickMarkDone(storeId, taskId, source, btn) {
       if (!taskId) return;
       btn.disabled = true; btn.textContent = '...';
+
+      // Find the task first (by taskId, since storeId may be empty for audit)
+      const doneTask = D.myTasks.find(t => t.taskId === taskId);
+
+      if (source === 'audit') {
+        // Audit tasks are client-side only — no GS call, just mark locally + persist
+        if (!D._completedTasks) D._completedTasks = [];
+        if (!D._auditDoneIds) D._auditDoneIds = new Set();
+        if (doneTask) D._completedTasks.unshift({ ...doneTask, _doneAt: new Date().toLocaleString('vi-VN') });
+        D._auditDoneIds.add(taskId); // remember this taskId is done across reloads
+        _saveCompletedTasks();
+        _saveAuditDoneIds();
+        D.myTasks = D.myTasks.filter(t => t.taskId !== taskId);
+
+        // Check if all audit tasks for this store are now done
+        const auditStore = doneTask ? (doneTask._auditStore || doneTask.storeName) : '';
+        if (auditStore) {
+          const remaining = D.myTasks.filter(t => t._source === 'audit' && (t._auditStore === auditStore || t.storeName === auditStore));
+          if (remaining.length === 0) {
+            _markAuditStoreRecovered(auditStore);
+          }
+          // Auto-dismiss CCP/RISK for this verdict if done
+          if (doneTask && _auditDirectData && _auditDirectData.auditList) {
+            const rec = (_auditDirectData.auditList || []).find(a => a.store === auditStore);
+            if (rec) {
+              const verdict = doneTask._verdict || '';
+              if (verdict === 'CCP') {
+                const ccpLeft = D.myTasks.filter(t => t._source==='audit' && t._auditStore===auditStore && t._verdict==='CCP');
+                if (ccpLeft.length === 0) rec.hasCCP = false;
+              }
+              if (verdict === 'RISK') {
+                const riskLeft = D.myTasks.filter(t => t._source==='audit' && t._auditStore===auditStore && t._verdict==='RISK');
+                if (riskLeft.length === 0) rec.hasRISK = false;
+              }
+            }
+          }
+        }
+        // Re-render audit KPI counts
+        const auditRemaining = D.myTasks.filter(t => t._source === 'audit');
+        if (_auditDirectData) {
+          const ccpStores = (_auditDirectData.auditList||[]).filter(a=>a.hasCCP).length;
+          const riskStores = (_auditDirectData.auditList||[]).filter(a=>a.hasRISK).length;
+          renderAuditDirectKPI({ avg: _auditDirectData.avg||0, reauditCount: _auditDirectData.reauditCount||0, auditList: _auditDirectData.auditList||[] });
+          renderDashboard();
+        }
+        toast('✅ Đã đánh dấu hoàn thành!');
+        renderMyTasks(D.myTasks);
+        return;
+      }
+
+      // Setup / Plan tasks — need GS call
       let res;
       if (source === 'plan') {
         res = await api({ action: 'updatePlanTaskStatus', taskId, done: true });
       } else {
-        if (!storeId && source !== 'audit') { btn.disabled = false; btn.textContent = '✓ Xong'; return; }
-        res = await api({ action: 'updateTaskStatus', storeId: storeId || '', taskId, done: true });
+        if (!storeId) { btn.disabled = false; btn.textContent = '✓ Xong'; toast('❌ Thiếu storeId', 'terr'); return; }
+        res = await api({ action: 'updateTaskStatus', storeId, taskId, done: true });
       }
       if (res && res.ok) {
         toast('✅ Đã đánh dấu hoàn thành!');
-        // Move task to completed list
-        const doneTask = D.myTasks.find(t => t.storeId === storeId && t.taskId === taskId);
         if (!D._completedTasks) D._completedTasks = [];
         if (doneTask) D._completedTasks.unshift({ ...doneTask, _doneAt: new Date().toLocaleString('vi-VN') });
-        D.myTasks = D.myTasks.filter(t => !(t.storeId === storeId && t.taskId === taskId));
-
-        // For audit tasks: check if all audit tasks for this store are done → update status + dismiss alert
-        if (source === 'audit' && storeId) {
-          const remaining = D.myTasks.filter(t => t._source === 'audit' && t._auditStore === storeId);
-          if (remaining.length === 0) {
-            // All audit tasks for this store done → mark as "Đã khắc phục" in audit history
-            _markAuditStoreRecovered(storeId);
-          }
-        }
-        // Check global CCP/RISK — if no more audit tasks remain, re-render audit KPI
-        const auditRemaining = D.myTasks.filter(t => t._source === 'audit');
-        if (auditRemaining.length === 0 && _auditDirectData && _auditDirectData.auditList) {
-          renderAuditDirectKPI({ avg: _auditDirectData.avg||0, reauditCount: _auditDirectData.reauditCount||0, auditList: _auditDirectData.auditList });
-          renderDashboard();
-        }
+        _saveCompletedTasks(); // persist to localStorage
+        D.myTasks = D.myTasks.filter(t => t.taskId !== taskId);
         renderMyTasks(D.myTasks);
       } else {
         toast('❌ ' + ((res && res.error) || 'Lỗi'), 'terr');
