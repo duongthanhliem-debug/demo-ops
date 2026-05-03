@@ -11,19 +11,19 @@
   <style>
     :root {
       /* ── Dark Charcoal Palette v2 – Sáng hơn ── */
-      --primary: #383B40;       /* Nền tổng – xám trung tính */
+      --primary: #3C3F45;       /* Nền tổng */
       --primary-d: #2B2D31;     /* Nav bar */
-      --primary-l: #404349;     /* Hover */
-      --accent: #5865F2;        /* Indigo chủ đạo */
+      --primary-l: #45484F;
+      --accent: #5865F2;
       --accent-l: rgba(88,101,242,.15);
       --accent-m: #7289DA;
-      --surface: #44474E;       /* Card bg – sáng hơn hẳn */
-      --surface-l: #4E5158;     /* Card hover / input focus bg */
-      --surface-d: #3A3D42;     /* Table header / input bg */
-      --cream: #383B40;
-      --white: #44474E;
-      --text: #E3E5E8;          /* Text chính – sáng */
-      --text-muted: #96989D;    /* Text phụ */
+      --surface: #55585F;       /* Card bg – sáng rõ */
+      --surface-l: #5E6168;     /* Card hover */
+      --surface-d: #4A4D53;     /* Table header / input bg */
+      --cream: #3C3F45;
+      --white: #55585F;
+      --text: #ECEDEF;          /* Text chính – trắng sáng */
+      --text-muted: #A8AAAE;    /* Text phụ – dễ đọc */
       --text-bright: #FFFFFF;
 
       /* Keep semantic colors */
@@ -46,7 +46,7 @@
       --purple-l: rgba(155,89,182,.15);
       --gray: #96989D;
       --gray-l: #3A3D42;
-      --border: #52555C;        /* Border rõ hơn */
+      --border: #606368;        /* Border rõ hơn */
 
       --sh: 0 2px 8px rgba(0,0,0,.2);
       --shm: 0 6px 20px rgba(0,0,0,.3);
@@ -1229,7 +1229,7 @@
       max-height: 280px;
       overflow-y: auto;
       padding: 10px;
-      background: var(--surface-d);
+      background: #2B2D31;
       border-radius: var(--rs);
       border: 1px solid var(--border);
       margin-bottom: 10px
@@ -1253,14 +1253,14 @@
     }
 
     .ai-msg-user .ai-bbl {
-      background: var(--gold);
-      color: var(--brown);
+      background: var(--accent);
+      color: #fff;
       font-weight: 500
     }
 
     .ai-msg-ai .ai-bbl {
-      background: var(--brown);
-      color: #fff
+      background: #2B2D31;
+      color: #ECEDEF
     }
 
     .ai-input-row {
@@ -1354,8 +1354,8 @@
         </span>
         <button class="nbtn" onclick="syncAll()">🔄 Đồng bộ</button>
         <button class="nbtn nbtn-gold" id="settings-btn" onclick="openSettings()">⚙️ Cài đặt</button>
-        <a href="https://phuctea-pl.vercel.app" target="_blank" class="npl" id="pl-btn">📊 P&L Hub</a>
-        <a href="https://hrm-one-delta.vercel.app" target="_blank" class="npl" style="background:var(--teal);color:#fff">🗄️ Data Core</a>
+        <a href="https://phuctea-pl.vercel.app" target="_blank" class="npl" id="pl-btn" style="background:#B8860B;color:#fff">📊 P&L Hub</a>
+        <a href="https://hrm-one-delta.vercel.app" target="_blank" class="npl" style="background:#003399;color:#fff">🗄️ Data Core</a>
         <div class="navatar" id="nav-avatar" onclick="openModal('modal-profile')" title="Thông tin cá nhân">DL</div>
       </div>
     </div>
