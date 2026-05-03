@@ -1,38 +1,55 @@
 <!DOCTYPE html>
 <html lang="vi">
-
-<head>
+<link rel="icon" type="image/png" href="logo8.png">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <title>Ops Center – Phúc Tea</title>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap"
     rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
   <style>
     :root {
-      --gold: #F5A623;
-      --gold-l: #FDF3E3;
-      --gold-m: #F7C56E;
-      --brown: #3D2B1F;
-      --brown-m: #6B4226;
-      --brown-l: #9C6B47;
-      --cream: #FAF7F2;
-      --white: #fff;
-      --red: #E53E3E;
-      --red-l: #FFF5F5;
-      --green: #2D8248;
-      --green-l: #F0FFF4;
-      --blue: #2B6CB0;
-      --blue-l: #EBF8FF;
-      --teal: #0D9488;
-      --teal-l: #F0FDFA;
-      --purple: #6B46C1;
-      --purple-l: #FAF5FF;
-      --gray: #718096;
-      --gray-l: #F7F8FA;
-      --border: #E8E0D4;
-      --sh: 0 2px 12px rgba(61, 43, 31, .08);
-      --shm: 0 4px 24px rgba(61, 43, 31, .13);
+      /* ── Dark Charcoal Palette v2 ── */
+      --primary: #2F3136;
+      --primary-d: #202225;
+      --primary-l: #36393F;
+      --accent: #5865F2;
+      --accent-l: rgba(88,101,242,.12);
+      --accent-m: #7289DA;
+      --surface: #36393F;
+      --surface-l: #40444B;
+      --surface-d: #292B2F;
+      --cream: #2F3136;
+      --white: #36393F;
+      --text: #DCDDDE;
+      --text-muted: #72767D;
+      --text-bright: #FFFFFF;
+
+      /* Keep semantic colors */
+      --gold: #5865F2;
+      --gold-l: rgba(88,101,242,.12);
+      --gold-m: #7289DA;
+      --brown: #FFFFFF;
+      --brown-m: #B9BBBE;
+      --brown-l: #72767D;
+
+      --red: #ED4245;
+      --red-l: rgba(237,66,69,.12);
+      --green: #57F287;
+      --green-l: rgba(87,242,135,.12);
+      --blue: #5865F2;
+      --blue-l: rgba(88,101,242,.12);
+      --teal: #00B0F4;
+      --teal-l: rgba(0,176,244,.12);
+      --purple: #9B59B6;
+      --purple-l: rgba(155,89,182,.12);
+      --gray: #72767D;
+      --gray-l: #292B2F;
+      --border: #40444B;
+
+      --sh: 0 2px 12px rgba(0,0,0,.25);
+      --shm: 0 4px 24px rgba(0,0,0,.4);
       --r: 12px;
       --rs: 8px;
     }
@@ -60,15 +77,15 @@
 
     body {
       font-family: 'Be Vietnam Pro', sans-serif;
-      background: var(--cream);
-      color: var(--brown)
+      background: var(--primary);
+      color: var(--text)
     }
 
     .load {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(250, 247, 242, .92);
+      background: rgba(32,34,37,.95);
       z-index: 9000;
       align-items: center;
       justify-content: center;
@@ -103,7 +120,7 @@
     select.fc option { white-space: normal; word-break: break-word; }
     .load-msg {
       font-size: 13px;
-      color: var(--gray);
+      color: var(--text-muted);
       font-weight: 500
     }
 
@@ -149,11 +166,11 @@
 
     /* NAV */
     .nav {
-      background: var(--brown);
+      background: var(--primary-d);
       position: sticky;
       top: 0;
       z-index: 200;
-      border-bottom: 3px solid var(--gold)
+      border-bottom: 2px solid var(--accent)
     }
 
     .nav-top {
@@ -174,13 +191,13 @@
     .nlogo {
       width: 28px;
       height: 28px;
-      background: var(--gold);
+      background: var(--accent);
       border-radius: 7px;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 12px;
-      color: var(--brown);
+      color: #fff;
       font-weight: 700
     }
 
@@ -191,7 +208,7 @@
     }
 
     .ntitle span {
-      color: var(--gold)
+      color: var(--accent)
     }
 
     .nright {
@@ -204,8 +221,8 @@
 
     .nbtn {
       background: transparent;
-      border: 1.5px solid rgba(255, 255, 255, .25);
-      color: rgba(255, 255, 255, .75);
+      border: 1px solid rgba(255, 255, 255, .15);
+      color: rgba(255, 255, 255, .65);
       padding: 4px 9px;
       border-radius: 6px;
       font-size: 11px;
@@ -216,18 +233,18 @@
     }
 
     .nbtn:hover {
-      border-color: var(--gold);
-      color: var(--gold)
+      border-color: var(--accent);
+      color: var(--accent)
     }
 
     .nbtn-gold {
-      border-color: rgba(245, 166, 35, .5);
-      color: var(--gold-m)
+      border-color: rgba(88, 101, 242, .5);
+      color: var(--accent)
     }
 
     .npl {
-      background: var(--gold);
-      color: var(--brown);
+      background: var(--accent);
+      color: #fff;
       border: none;
       padding: 4px 9px;
       border-radius: 6px;
@@ -244,21 +261,21 @@
     }
 
     .npl:hover {
-      background: var(--gold-m)
+      background: var(--accent-m)
     }
 
     .navatar {
       width: 30px;
       height: 30px;
       border-radius: 50%;
-      background: var(--gold);
-      border: 2px solid rgba(255, 255, 255, .25);
+      background: var(--accent);
+      border: 2px solid rgba(255,255,255,.15);
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 11px;
       font-weight: 700;
-      color: var(--brown);
+      color: #fff;
       cursor: pointer;
       flex-shrink: 0
     }
@@ -280,7 +297,7 @@
       padding: 8px 11px;
       font-size: 12px;
       font-weight: 500;
-      color: rgba(255, 255, 255, .55);
+      color: rgba(255, 255, 255, .45);
       cursor: pointer;
       border-bottom: 3px solid transparent;
       margin-bottom: -3px;
@@ -294,12 +311,12 @@
     }
 
     .ntab:hover {
-      color: rgba(255, 255, 255, .9)
+      color: rgba(255, 255, 255, .85)
     }
 
     .ntab.on {
-      color: var(--gold);
-      border-bottom-color: var(--gold)
+      color: var(--accent);
+      border-bottom-color: var(--accent)
     }
 
     .sdot {
@@ -368,12 +385,12 @@
     .pt {
       font-size: 20px;
       font-weight: 700;
-      color: var(--brown)
+      color: var(--text-bright)
     }
 
     .ps {
       font-size: 13px;
-      color: var(--gray);
+      color: var(--text-muted);
       margin-top: 2px
     }
 
@@ -400,23 +417,23 @@
     }
 
     .bp {
-      background: var(--gold);
-      color: var(--brown)
+      background: var(--accent);
+      color: #fff
     }
 
     .bp:hover {
-      background: var(--gold-m)
+      background: var(--accent-m)
     }
 
     .bo {
-      background: var(--white);
-      color: var(--brown-m);
-      border: 1.5px solid var(--border)
+      background: var(--surface-l);
+      color: var(--text);
+      border: 1px solid var(--border)
     }
 
     .bo:hover {
-      border-color: var(--gold);
-      color: var(--gold)
+      border-color: var(--accent);
+      color: var(--accent)
     }
 
     .bg {
@@ -459,17 +476,17 @@
     }
 
     .kpi {
-      background: var(--white);
+      background: var(--surface);
       border-radius: var(--r);
       padding: 14px 16px;
-      border: 1.5px solid var(--border);
+      border: 1px solid var(--border);
       box-shadow: var(--sh)
     }
 
     .kl {
       font-size: 10px;
       font-weight: 700;
-      color: var(--gray);
+      color: var(--text-muted);
       letter-spacing: .05em;
       text-transform: uppercase;
       margin-bottom: 6px
@@ -478,7 +495,7 @@
     .kv {
       font-size: 26px;
       font-weight: 700;
-      color: var(--brown);
+      color: var(--text-bright);
       line-height: 1;
       margin-bottom: 5px
     }
@@ -529,18 +546,72 @@
     }
 
     @media(max-width:860px) {
+      .g2, .g3 { grid-template-columns: 1fr }
+    }
 
-      .g2,
-      .g3 {
-        grid-template-columns: 1fr
-      }
+    /* ── MOBILE RESPONSIVE (≤640px) ── */
+    @media(max-width:640px) {
+      /* Nav: hide text, show icon only; scroll horizontally */
+      .nav-top { padding: 0 8px; gap: 4px }
+      .ntitle { font-size: 11px }
+      .nbtn { padding: 3px 6px; font-size: 11px }
+      .nright { gap: 4px }
+      .nav-tabs { overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 0 6px; }
+      .ntab { padding: 6px 10px; font-size: 11px; white-space: nowrap; flex-shrink: 0; }
+
+      /* Page padding */
+      .page { padding: 10px 10px 24px; }
+      .ph { flex-direction: column; align-items: flex-start; gap: 8px; }
+      .ph .fb { flex-wrap: wrap; gap: 6px; }
+
+      /* KPI grid: 2 per row on mobile */
+      .kgrid { grid-template-columns: repeat(2,1fr) !important; gap: 8px; }
+      .kpi { padding: 10px 12px; }
+      .kv { font-size: 24px; }
+
+      /* Cards full width, good padding */
+      .card { border-radius: 10px; margin-bottom: 10px; }
+      .ch { padding: 9px 12px; flex-wrap: wrap; gap: 6px; }
+      .cb { padding: 10px 12px; }
+
+      /* Tables: horizontal scroll */
+      .tbl-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+      .tbl { font-size: 11px; min-width: 500px; }
+      .tbl th, .tbl td { padding: 5px 7px; }
+
+      /* Forms: stack all */
+      .fr { grid-template-columns: 1fr !important; }
+      .fg { margin-bottom: 10px; }
+      .fc { font-size: 13px; padding: 7px 10px; }
+
+      /* AI box */
+      .ai-box { padding: 16px; border-radius: 12px; }
+      .ait { font-size: 14px; }
+      .aii { font-size: 12px; }
+
+      /* Setup task table: wrap */
+      .t-row td { display: block; width: 100%; }
+      .t-row { display: block; margin-bottom: 8px; border: 1px solid var(--border); border-radius: 8px; padding: 8px; }
+
+      /* Modals: full screen */
+      .overlay { padding: 0; align-items: flex-end; }
+      .modal, .modal-lg, .modal-xl { border-radius: 16px 16px 0 0; max-height: 92vh; width: 100%; max-width: 100%; }
+
+      /* Buttons */
+      .btn { padding: 6px 12px; font-size: 12px; }
+      .bsm { padding: 4px 8px; font-size: 11px; }
+    }
+
+    @media(max-width:400px) {
+      .kgrid { grid-template-columns: 1fr !important; }
+      .ntab { padding: 5px 8px; font-size: 10px; }
     }
 
     /* CARDS */
     .card {
-      background: var(--white);
+      background: var(--surface);
       border-radius: var(--r);
-      border: 1.5px solid var(--border);
+      border: 1px solid var(--border);
       overflow: hidden;
       margin-bottom: 14px;
       box-shadow: var(--sh)
@@ -559,7 +630,7 @@
     .ct {
       font-size: 13px;
       font-weight: 700;
-      color: var(--brown)
+      color: var(--text-bright)
     }
 
     .cb {
@@ -578,10 +649,10 @@
       text-align: left;
       font-size: 10px;
       font-weight: 700;
-      color: var(--gray);
+      color: var(--text-muted);
       letter-spacing: .05em;
       text-transform: uppercase;
-      background: var(--gray-l);
+      background: var(--surface-d);
       border-bottom: 1px solid var(--border);
       white-space: nowrap
     }
@@ -589,7 +660,7 @@
     .tbl td {
       padding: 9px 10px;
       border-bottom: 1px solid var(--border);
-      color: var(--brown);
+      color: var(--text);
       vertical-align: middle
     }
 
@@ -598,7 +669,7 @@
     }
 
     .tbl tr:hover td {
-      background: var(--gold-l)
+      background: var(--surface-l)
     }
 
     .tbl-wrap {
@@ -691,7 +762,7 @@
       display: block;
       font-size: 11px;
       font-weight: 700;
-      color: var(--brown-m);
+      color: var(--text-muted);
       margin-bottom: 4px;
       letter-spacing: .03em;
       text-transform: uppercase
@@ -704,15 +775,15 @@
       padding: 8px 10px;
       border: 1.5px solid var(--border);
       border-radius: var(--rs);
-      background: var(--white);
-      color: var(--brown);
+      background: var(--surface-d);
+      color: var(--text);
       transition: border-color .15s;
       outline: none
     }
 
     .fc:focus {
-      border-color: var(--gold);
-      box-shadow: 0 0 0 3px rgba(245, 166, 35, .08)
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(88, 101, 242, .12)
     }
 
     .fr {
@@ -747,7 +818,7 @@
 
     .prog-bg {
       height: 5px;
-      background: var(--gray-l);
+      background: var(--surface-d);
       border-radius: 99px;
       overflow: hidden;
       border: 1px solid var(--border)
@@ -779,7 +850,7 @@
     }
 
     .chk-item:hover {
-      background: var(--gold-l);
+      background: var(--surface-l);
       margin: 0 -4px;
       padding: 8px 4px;
       border-radius: 6px
@@ -873,17 +944,17 @@
       padding: 4px;
       border: 1.5px solid var(--border);
       border-radius: var(--rs);
-      background: var(--white);
-      color: var(--brown);
+      background: var(--surface-d);
+      color: var(--text);
       outline: none
     }
 
     .audit-inp:focus {
-      border-color: var(--gold)
+      border-color: var(--accent)
     }
 
     .audit-score-box {
-      background: var(--gray-l);
+      background: var(--surface-d);
       border-radius: var(--r);
       padding: 16px;
       text-align: center;
@@ -895,7 +966,7 @@
     .overlay {
       position: fixed;
       inset: 0;
-      background: rgba(61, 43, 31, .72);
+      background: rgba(0, 0, 0, .75);
       z-index: 500;
       display: none;
       align-items: center;
@@ -908,7 +979,7 @@
     }
 
     .modal {
-      background: var(--white);
+      background: var(--surface);
       border-radius: 16px;
       padding: 22px;
       max-width: 540px;
@@ -949,20 +1020,20 @@
     .mt {
       font-size: 16px;
       font-weight: 700;
-      color: var(--brown)
+      color: var(--text-bright)
     }
 
     .mx {
       background: none;
       border: none;
       font-size: 22px;
-      color: var(--gray);
+      color: var(--text-muted);
       cursor: pointer;
       line-height: 1
     }
 
     .mx:hover {
-      color: var(--brown)
+      color: var(--text-bright)
     }
 
     /* MISC */
@@ -980,22 +1051,22 @@
       padding: 5px 11px;
       border-radius: 20px;
       cursor: pointer;
-      border: 1.5px solid var(--border);
-      background: var(--white);
-      color: var(--gray);
+      border: 1px solid var(--border);
+      background: var(--surface-l);
+      color: var(--text-muted);
       transition: all .2s
     }
 
     .ptab.on {
-      background: var(--gold);
-      color: var(--brown);
-      border-color: var(--gold)
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent)
     }
 
     .sdiv {
       font-size: 11px;
       font-weight: 700;
-      color: var(--gray);
+      color: var(--text-muted);
       text-transform: uppercase;
       letter-spacing: .05em;
       padding: 9px 0 5px;
@@ -1007,7 +1078,7 @@
     .empty-state {
       text-align: center;
       padding: 36px 20px;
-      color: var(--gray)
+      color: var(--text-muted)
     }
 
     .empty-state .ei {
@@ -1089,7 +1160,7 @@
     }
 
     .setup-card {
-      background: var(--white);
+      background: var(--surface);
       border-radius: var(--r);
       border: 1.5px solid var(--border);
       padding: 16px;
@@ -1118,7 +1189,7 @@
     }
 
     .ai-box {
-      background: linear-gradient(135deg, var(--brown), var(--brown-m));
+      background: linear-gradient(135deg, var(--primary-d), #3a3d42);
       border-radius: var(--r);
       padding: 16px;
       color: #fff;
@@ -1157,9 +1228,9 @@
       max-height: 280px;
       overflow-y: auto;
       padding: 10px;
-      background: var(--gray-l);
+      background: var(--surface-d);
       border-radius: var(--rs);
-      border: 1.5px solid var(--border);
+      border: 1px solid var(--border);
       margin-bottom: 10px
     }
 
@@ -1201,19 +1272,19 @@
       font-family: inherit;
       font-size: 13px;
       padding: 7px 10px;
-      border: 1.5px solid var(--border);
+      border: 1px solid var(--border);
       border-radius: var(--rs);
-      background: var(--white);
-      color: var(--brown);
+      background: var(--surface-d);
+      color: var(--text);
       outline: none
     }
 
     .ai-input:focus {
-      border-color: var(--gold)
+      border-color: var(--accent)
     }
 
     .staff-card {
-      background: var(--white);
+      background: var(--surface);
       border-radius: var(--r);
       border: 1.5px solid var(--border);
       padding: 14px;
@@ -1226,21 +1297,21 @@
     }
 
     .staff-card:hover {
-      border-color: var(--gold)
+      border-color: var(--accent)
     }
 
     .staff-av {
       width: 44px;
       height: 44px;
       border-radius: 50%;
-      background: var(--gold-l);
+      background: var(--accent-l);
       border: 2px solid var(--border);
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 16px;
       font-weight: 700;
-      color: var(--brown);
+      color: var(--accent);
       flex-shrink: 0;
       overflow: hidden
     }
@@ -1252,10 +1323,10 @@
     }
 
     code {
-      background: var(--gold-l);
+      background: var(--surface-d);
       padding: 1px 5px;
       border-radius: 3px;
-      color: var(--brown-m);
+      color: var(--accent);
       font-size: 11px
     }
   </style>
@@ -1270,7 +1341,7 @@
   <div class="toast" id="toastEl"></div>
 
   <!-- ═══ NAV ═══ -->
-  <nav class="nav">
+  <nav class="nav" style="display:none">
     <div class="nav-top">
       <div class="nbrand">
         <div class="nlogo">⚡</div>
@@ -1281,27 +1352,27 @@
           <span class="sdot off" id="sync-dot"></span><span id="sync-text">Chưa kết nối</span>
         </span>
         <button class="nbtn" onclick="syncAll()">🔄 Đồng bộ</button>
-        <button class="nbtn nbtn-gold" onclick="openSettings()">⚙️ Cài đặt</button>
+        <button class="nbtn nbtn-gold" id="settings-btn" onclick="openSettings()">⚙️ Cài đặt</button>
         <a href="https://phuctea-pl.vercel.app" target="_blank" class="npl" id="pl-btn">📊 P&L Hub</a>
         <a href="https://hrm-one-delta.vercel.app" target="_blank" class="npl" style="background:var(--teal);color:#fff">🗄️ Data Core</a>
         <div class="navatar" id="nav-avatar" onclick="openModal('modal-profile')" title="Thông tin cá nhân">DL</div>
       </div>
     </div>
     <div class="ntabs">
-      <button class="ntab on" onclick="goPage('dashboard',this)">📊 Dashboard</button>
-      <button class="ntab" onclick="goPage('stores',this)">🏬 Cửa hàng</button>
-      <button class="ntab" onclick="goPage('setup',this);loadSetupPage()">🏪 Setup & KT</button>
-      <button class="ntab" onclick="goPage('audit',this)">✅ Audit</button>
-      <button class="ntab" onclick="goPage('nhansu',this)">👥 Nhân sự</button>
-      <button class="ntab" onclick="goPage('kehoach',this)">🎯 Kế hoạch</button>
-      <button class="ntab" onclick="goPage('baocao',this)">📋 Báo cáo</button>
-      <button class="ntab" onclick="goPage('ai',this)">🤖 AI</button>
-      <button class="ntab" onclick="goPage('mytasks',this);loadMyTasks()">📌 Việc Cần Làm</button>
+      <button class="ntab on" onclick="goPage('dashboard',this)"><i data-lucide="bar-chart-2" style="width:14px;height:14px;vertical-align:middle;margin-right:4px"></i>Dashboard</button>
+      <button class="ntab" onclick="goPage('stores',this);if(!_storesLoaded)loadStores()"><i data-lucide="store" style="width:14px;height:14px;vertical-align:middle;margin-right:4px"></i>Cửa hàng</button>
+      <button class="ntab" onclick="goPage('setup',this);loadSetupPage()"><i data-lucide="rocket" style="width:14px;height:14px;vertical-align:middle;margin-right:4px"></i>Setup & KT</button>
+      <button class="ntab" onclick="goPage('audit',this)"><i data-lucide="shield-check" style="width:14px;height:14px;vertical-align:middle;margin-right:4px"></i>Audit</button>
+      <button class="ntab" onclick="goPage('nhansu',this)"><i data-lucide="users" style="width:14px;height:14px;vertical-align:middle;margin-right:4px"></i>Nhân sự</button>
+      <button class="ntab" onclick="goPage('kehoach',this);loadPlans()"><i data-lucide="target" style="width:14px;height:14px;vertical-align:middle;margin-right:4px"></i>Kế hoạch</button>
+      <button class="ntab" onclick="goPage('baocao',this)"><i data-lucide="file-text" style="width:14px;height:14px;vertical-align:middle;margin-right:4px"></i>Báo cáo</button>
+      <button class="ntab" onclick="goPage('ai',this)"><i data-lucide="bot" style="width:14px;height:14px;vertical-align:middle;margin-right:4px"></i>AI</button>
+      <button class="ntab" onclick="goPage('mytasks',this);loadMyTasks()"><i data-lucide="pin" style="width:14px;height:14px;vertical-align:middle;margin-right:4px"></i>Việc Cần Làm</button>
     </div>
   </nav>
 
   <!-- ═══ DASHBOARD ═══ -->
-  <div class="page on" id="pg-dashboard">
+  <div class="page" id="pg-dashboard">
     <div class="ph">
       <div>
         <div class="pt" id="greeting">Xin chào 👋</div>
@@ -1370,40 +1441,33 @@
           </div>
         </div>
       </div>
-      <div class="card">
-        <div class="ch"><span class="ct">OKR tháng – Ngân sách</span></div>
-        <div class="cb" id="okr-container">
-          <div id="okr-loading" style="color:var(--gray);font-size:13px">Đồng bộ để xem kế hoạch tháng...</div>
+      <!-- Việc Cần Làm widget (moved from below, replaces OKR) -->
+      <div class="card" id="my-tasks-widget">
+        <div class="ch">
+          <span class="ct"><i data-lucide="pin" style="width:14px;height:14px;vertical-align:middle;margin-right:4px"></i>Việc Cần Làm</span>
+          <div style="display:flex;gap:6px;align-items:center">
+            <select class="fc bsm" id="mock-user-select" style="min-width:160px" onchange="loadMyTasks()">
+              <option value="">-- Chọn nhân sự --</option>
+            </select>
+            <button class="btn bo bsm" onclick="loadMyTasks()">🔄</button>
+            <button class="btn bo bsm" onclick="goPage('mytasks',document.querySelectorAll('.ntab')[8]);loadMyTasks()">Xem tất cả →</button>
+          </div>
+        </div>
+        <div class="cb" id="my-tasks-dash">
+          <div class="empty-state" style="padding:16px">
+            <div class="ei">📌</div>Chọn tên nhân sự để xem việc cần làm
+          </div>
         </div>
       </div>
     </div>
+    <!-- OKR container kept hidden for JS compatibility but not displayed -->
+    <div style="display:none"><div id="okr-container"></div></div>
     <div class="ai-box" id="ai-dash-box">
       <span class="aitag">✨ AI PHÂN TÍCH</span>
       <div class="ait">Đang chờ dữ liệu...</div>
-      <div class="aii" style="color:rgba(255,255,255,.5)">Nhấn "Đồng bộ" để tải dữ liệu, sau đó AI phân tích tình hình
-        vận hành.</div>
+      <div class="aii" style="color:rgba(255,255,255,.5)">Nhấn "Đồng bộ" để tải dữ liệu, sau đó AI phân tích tình hình vận hành.</div>
       <button class="btn bsm" style="background:var(--gold);color:var(--brown);margin-top:10px"
         onclick="aiDashInsight()">🤖 Phân tích ngay</button>
-    </div>
-
-    <!-- VIỆC CỦA TÔI - Dashboard widget -->
-    <div class="card" id="my-tasks-widget" style="margin-top:0">
-      <div class="ch">
-        <span class="ct">📌 Việc Cần Làm</span>
-        <div style="display:flex;gap:6px;align-items:center">
-          <select class="fc bsm" id="mock-user-select" style="min-width:160px" onchange="loadMyTasks()">
-            <option value="">-- Chọn nhân sự --</option>
-          </select>
-          <button class="btn bo bsm" onclick="loadMyTasks()">🔄</button>
-          <button class="btn bo bsm" onclick="goPage('mytasks',document.querySelectorAll('.ntab')[8]);loadMyTasks()">Xem
-            tất cả →</button>
-        </div>
-      </div>
-      <div class="cb" id="my-tasks-dash">
-        <div class="empty-state" style="padding:16px">
-          <div class="ei">📌</div>Chọn tên nhân sự để xem việc cần làm
-        </div>
-      </div>
     </div>
   </div>
 
@@ -1711,7 +1775,9 @@
             <span class="ct">Xem trước biên bản</span>
             <button class="btn bo bsm" id="ar-copy-btn" style="display:none" onclick="copyText(_auditReportText)">📋 Copy</button>
           </div>
-          <div class="cb" id="ar-preview" style="font-size:12px;line-height:1.75;color:var(--brown);white-space:pre-wrap;max-height:560px;overflow-y:auto;background:var(--gray-l);border-radius:var(--rs);padding:12px">← Chọn cửa hàng và lần audit, nhấn "Tạo biên bản"</div>
+          <div class="cb" style="padding:0">
+            <textarea id="ar-preview" style="font-size:12px;line-height:1.75;color:var(--brown);white-space:pre-wrap;height:560px;width:100%;border:none;background:var(--gray-l);border-radius:var(--rs);padding:12px;resize:vertical;font-family:inherit;box-sizing:border-box;outline:none" oninput="_auditReportText=this.value">← Chọn cửa hàng và lần audit, nhấn "Tạo biên bản"</textarea>
+          </div>
         </div>
       </div>
 
@@ -1866,7 +1932,8 @@
       <select class="fc" id="fns-status" onchange="filterStaff()" style="min-width:140px">
         <option value="Đang cộng tác">Đang cộng tác</option>
         <option value="Tạm ngưng">Tạm ngưng</option>
-        <option value="Đã ngưng cộng tác">Đã ngưng</option>
+        <option value="Đã ngưng cộng tác">Đã ngưng cộng tác</option>
+        <option value="Chờ xác nhận">Chờ duyệt</option>
         <option value="all">Tất cả</option>
       </select>
       <input class="fc" id="fns-search" placeholder="🔍 Tìm kiếm..." style="min-width:150px" oninput="filterStaff()">
@@ -2122,7 +2189,7 @@
   <div class="page" id="pg-mytasks">
     <div class="ph">
       <div>
-        <div class="pt">📌 Việc Cần Làm</div>
+        <div class="pt"><i data-lucide="pin" style="width:14px;height:14px;vertical-align:middle;margin-right:4px"></i>Việc Cần Làm</div>
         <div class="ps">Tổng hợp công việc chưa hoàn thành theo IC – Setup · Kế hoạch · Audit</div>
       </div>
       <div class="fb">
@@ -2161,7 +2228,7 @@
       <button class="ptab on" id="mtab-all-btn"   onclick="filterMyTasksSource('all',this)">📋 Tất cả</button>
       <button class="ptab"    id="mtab-setup-btn"  onclick="filterMyTasksSource('setup',this)">🏪 Setup</button>
       <button class="ptab"    id="mtab-plan-btn"   onclick="filterMyTasksSource('plan',this)">📅 Kế hoạch</button>
-      <button class="ptab"    id="mtab-audit-btn"  onclick="filterMyTasksSource('audit',this)">✅ Audit</button>
+      <button class="ptab"    id="mtab-audit-btn"  onclick="filterMyTasksSource('audit',this)"><i data-lucide="shield-check" style="width:14px;height:14px;vertical-align:middle;margin-right:4px"></i>Audit</button>
     </div>
 
     <!-- Task list -->
@@ -2444,17 +2511,213 @@
     </div>
   </div>
 
+
+  <!-- ═══ LOGIN SCREEN ═══ -->
+  <div id="login-screen" style="display:none;position:fixed;inset:0;background:var(--primary-d);z-index:9999;align-items:center;justify-content:center;flex-direction:column">
+    <div style="width:100%;max-width:420px;padding:24px 16px">
+      <div style="text-align:center;margin-bottom:28px">
+        <img src="logo4.png" id="login-logo" style="height:60px;margin-bottom:14px" onerror="this.style.display='none'">
+        <div style="font-size:22px;font-weight:800;color:var(--text-bright)">Phúc Tea · Ops Center</div>
+        <div style="font-size:13px;color:var(--text-muted);margin-top:4px">Hệ thống quản lý vận hành nội bộ</div>
+      </div>
+      <div style="background:var(--surface);border-radius:16px;padding:28px;border:1px solid var(--border);box-shadow:var(--shm)">
+        <div id="login-err" style="display:none;background:var(--red-l);border:1px solid var(--red);border-radius:var(--rs);padding:10px 13px;margin-bottom:14px;font-size:13px;color:var(--red)"></div>
+        <div style="margin-bottom:14px">
+          <label style="display:block;font-size:11px;font-weight:700;color:var(--text-muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em">Email</label>
+          <input id="login-email" type="email" placeholder="your@phuctea.com.vn"
+            style="width:100%;padding:10px 12px;border-radius:var(--rs);border:1.5px solid var(--border);background:var(--surface-d);color:var(--text);font-family:inherit;font-size:14px;outline:none;box-sizing:border-box;transition:border-color .15s"
+            onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+        </div>
+        <div style="margin-bottom:20px">
+          <label style="display:block;font-size:11px;font-weight:700;color:var(--text-muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em">Mật khẩu</label>
+          <div style="position:relative">
+            <input id="login-pass" type="password" placeholder="Nhập mật khẩu"
+              style="width:100%;padding:10px 40px 10px 12px;border-radius:var(--rs);border:1.5px solid var(--border);background:var(--surface-d);color:var(--text);font-family:inherit;font-size:14px;outline:none;box-sizing:border-box;transition:border-color .15s"
+              onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+            <button id="login-eye" type="button" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:16px;padding:4px">👁</button>
+          </div>
+        </div>
+        <button id="login-btn" style="width:100%;padding:11px;background:var(--accent);color:#fff;border:none;border-radius:var(--rs);font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;transition:background .2s">
+          Đăng nhập
+        </button>
+        <div style="text-align:center;margin-top:14px;font-size:12px;color:var(--text-muted)">
+          Quên mật khẩu hoặc chưa có tài khoản?<br>
+          <a href="https://zalo.me/0357636539" target="_blank" style="color:var(--accent);font-weight:600;text-decoration:none">Liên hệ Zalo: 0357 636 539 (Thanh Liêm – Operations Manager)</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
   <script>
     // ════════════════════════════════════════
-    //  CONFIG & STATE
+    //  CONFIG & STATE — v2 (bootstrapConfig)
     // ════════════════════════════════════════
     const DEFAULT_SHEET_ID = '1tImeHSb1BacVVhJPzQxh2LHffOhqjnX7OVuTrygPJKo';
+    let OPS_API_URL = localStorage.getItem('ops_script_url') || '';
     let CFG = {
-      scriptUrl: localStorage.getItem('ops_script_url') || '',
+      get scriptUrl() { return OPS_API_URL; },
+      set scriptUrl(v) { OPS_API_URL = v; localStorage.setItem('ops_script_url', v); },
       apiKey: localStorage.getItem('ops_api_key') || '',
       sheetId: localStorage.getItem('ops_sheet_id') || DEFAULT_SHEET_ID,
     };
+
+    // ── bootstrap: đọc Config sheet qua CSV public ──────────────
+    async function bootstrapConfig() {
+      const cached = localStorage.getItem('ops_config_cache');
+      const cachedAt = parseInt(localStorage.getItem('ops_config_cache_at') || '0');
+      const CACHE_TTL = 10 * 60 * 1000; // 10 phút
+      if (cached && (Date.now() - cachedAt < CACHE_TTL)) {
+        try {
+          const cfg = JSON.parse(cached);
+          _applyCfg(cfg);
+          return;
+        } catch(_) {}
+      }
+      try {
+        const url = `https://docs.google.com/spreadsheets/d/${DEFAULT_SHEET_ID}/gviz/tq?tqx=out:csv&sheet=Config`;
+        const resp = await fetch(url, { cache: 'no-store' });
+        const text = await resp.text();
+        const cfg = {};
+        text.split('\n').forEach(line => {
+          // Parse CSV line: "Key","Value"
+          const m = line.match(/^"?([^",]+)"?,?"?([^"]*)"?/);
+          if (m && m[1] && m[1].trim()) cfg[m[1].trim()] = (m[2]||'').trim();
+        });
+        _applyCfg(cfg);
+        localStorage.setItem('ops_config_cache', JSON.stringify(cfg));
+        localStorage.setItem('ops_config_cache_at', String(Date.now()));
+      } catch(e) {
+        console.warn('bootstrapConfig failed:', e);
+      }
+    }
+
+    function _applyCfg(cfg) {
+      if (cfg['Apps Script URL'] && cfg['Apps Script URL'] !== '') {
+        OPS_API_URL = cfg['Apps Script URL'];
+        localStorage.setItem('ops_script_url', OPS_API_URL);
+      }
+      if (cfg['Google Sheet ID'] && cfg['Google Sheet ID'] !== '') {
+        CFG.sheetId = cfg['Google Sheet ID'];
+        localStorage.setItem('ops_sheet_id', CFG.sheetId);
+      }
+      if (cfg['Anthropic API Key'] && cfg['Anthropic API Key'] !== '') {
+        CFG.apiKey = cfg['Anthropic API Key'];
+        localStorage.setItem('ops_api_key', CFG.apiKey);
+      }
+    }
+
+    // ── Client-side login via NhanSu CSV ────────────────────────
+    async function doLoginCSV(email, password) {
+      const url = `https://docs.google.com/spreadsheets/d/${DEFAULT_SHEET_ID}/gviz/tq?tqx=out:csv&sheet=NhanSu`;
+      const resp = await fetch(url, { cache: 'no-store' });
+      const text = await resp.text();
+      const lines = text.split('\n').filter(l => l.trim());
+      // Skip header (row 0)
+      for (let i = 1; i < lines.length; i++) {
+        const cols = parseCSVLine(lines[i]);
+        if (!cols || cols.length < 15) continue;
+        const rowEmail   = (cols[4]  || '').trim().toLowerCase();   // col E
+        const rowRole    = (cols[9]  || '').trim();                  // col J – Phân quyền
+        const rowStatus  = (cols[12] || '').trim();                  // col M – Trạng thái
+        const rowPass    = (cols[14] || '').trim();                  // col O – Mật khẩu
+        if (rowEmail !== email.toLowerCase()) continue;
+        if (rowRole !== 'System') return { ok: false, msg: 'Tài khoản không có quyền truy cập hệ thống' };
+        if (rowStatus !== 'Đang cộng tác') return { ok: false, msg: 'Tài khoản không hoạt động' };
+        if (rowPass !== password) return { ok: false, msg: 'Mật khẩu không đúng' };
+        return {
+          ok: true, user: {
+            id: cols[0] || '', name: cols[1] || '', phone: cols[2] || '',
+            email: cols[4] || '', position: cols[7] || '',
+            store: cols[8] || 'Hệ Thống', role: rowRole, status: rowStatus,
+            avatar: cols[13] || ''
+          }
+        };
+      }
+      return { ok: false, msg: 'Email không tồn tại trong hệ thống' };
+    }
+
+    function parseCSVLine(line) {
+      const result = [];
+      let cur = '', inQ = false;
+      for (let i = 0; i < line.length; i++) {
+        const c = line[i];
+        if (c === '"') {
+          if (inQ && line[i+1] === '"') { cur += '"'; i++; }
+          else inQ = !inQ;
+        } else if (c === ',' && !inQ) { result.push(cur); cur = ''; }
+        else cur += c;
+      }
+      result.push(cur);
+      return result;
+    }
+
+    // ── Session ─────────────────────────────────────────────────
+    const SESSION_KEY = 'ptuser_v2';
+    let _currentUser = null;
+
+    function _saveSession(user) {
+      _currentUser = user;
+      localStorage.setItem(SESSION_KEY, JSON.stringify(user));
+      _applyLoginUI(user);
+    }
+
+    function _loadSession() {
+      try {
+        const raw = localStorage.getItem(SESSION_KEY);
+        if (raw) {
+          const u = JSON.parse(raw);
+          if (u && u.email) { _currentUser = u; return u; }
+        }
+      } catch(_) {}
+      return null;
+    }
+
+    function _applyLoginUI(user) {
+      // Show main app, hide login screen
+      document.getElementById('login-screen').style.display = 'none';
+      document.querySelector('.nav').style.display = '';
+      document.getElementById('pg-dashboard').style.display = '';
+      // Show/hide settings button – only for owner
+      const settingsBtn = document.getElementById('settings-btn');
+      if (settingsBtn) {
+        settingsBtn.style.display = (user.email === 'duongthanhliem@phuctea.com.vn') ? '' : 'none';
+      }
+      // Update greeting & avatar
+      const greetEl = document.getElementById('greeting');
+      if (greetEl) {
+        const firstName = (user.name || '').split(' ').pop();
+        greetEl.textContent = getH() + ', ' + firstName + ' 👋';
+      }
+      const av = document.getElementById('nav-avatar');
+      if (av) av.textContent = (user.name||'?').split(' ').slice(-1)[0].charAt(0).toUpperCase() + (user.name||'?').split(' ').slice(-2,-1)[0].charAt(0).toUpperCase();
+      // Show logout button & name in nav
+      const nright = document.querySelector('.nright');
+      if (nright && !document.getElementById('nav-user-label')) {
+        const span = document.createElement('span');
+        span.id = 'nav-user-label';
+        span.style.cssText = 'font-size:11px;color:rgba(255,255,255,.55);white-space:nowrap;max-width:120px;overflow:hidden;text-overflow:ellipsis';
+        span.textContent = user.name || user.email;
+        const logoutBtn = document.createElement('button');
+        logoutBtn.className = 'nbtn';
+        logoutBtn.textContent = '🚪 Đăng xuất';
+        logoutBtn.addEventListener('click', doLogout);
+        nright.appendChild(span);
+        nright.appendChild(logoutBtn);
+      }
+    }
+
+    function doLogout() {
+      localStorage.removeItem(SESSION_KEY);
+      _currentUser = null;
+      showLoginScreen();
+    }
+
+    function showLoginScreen() {
+      document.getElementById('login-screen').style.display = 'flex';
+      document.querySelector('.nav').style.display = 'none';
+      document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
+    }
     let D = {
       kpi: { stores: 0, setupCount: 0, newStores: 0, targetStores: 30, auditAvg: 0, reauditCount: 0 },
       auditList: [], secretList: [], setupStores: [], allStores: [],
@@ -2492,6 +2755,8 @@
     function openModal(id) { $(id).classList.add('on'); }
     function closeModal(id) { $(id).classList.remove('on'); }
     document.querySelectorAll('.overlay').forEach(o => o.addEventListener('click', e => { if (e.target === o) o.classList.remove('on'); }));
+    // Init Lucide icons
+    if (typeof lucide !== 'undefined') lucide.createIcons();
 
     function goPage(id, el) {
       document.querySelectorAll('.page').forEach(p => p.classList.remove('on'));
@@ -2549,6 +2814,10 @@
     //  SETTINGS
     // ════════════════════════════════════════
     function openSettings() {
+      if (!_currentUser || _currentUser.email !== 'duongthanhliem@phuctea.com.vn') {
+        toast('⚠️ Chỉ Operations Leader mới có quyền truy cập Cài đặt', 'twarn');
+        return;
+      }
       $('cfg-url').value = CFG.scriptUrl || '';
       $('cfg-sheet').value = CFG.sheetId || DEFAULT_SHEET_ID;
       $('cfg-key').value = CFG.apiKey || '';
@@ -2558,6 +2827,9 @@
       const url = $('cfg-url').value.trim();
       if (!url) { toast('⚠️ Nhập Apps Script URL', 'twarn'); return; }
       CFG.scriptUrl = url; localStorage.setItem('ops_script_url', url);
+      // Invalidate config cache so next reload re-fetches from sheet
+      localStorage.removeItem('ops_config_cache');
+      localStorage.removeItem('ops_config_cache_at');
       const sid = $('cfg-sheet').value.trim();
       if (sid) { CFG.sheetId = sid; localStorage.setItem('ops_sheet_id', sid); $('sheet-link').href = `https://docs.google.com/spreadsheets/d/${sid}`; }
       const key = $('cfg-key').value.trim();
@@ -2598,6 +2870,9 @@
           // Load audit data in background for latest stats
           loadAuditDirect().then(() => populateAuditReportStores());
           api({ action: 'getSetupTemplate' }).then(res => { if (res.ok) D.template = res.template || []; });
+          // Load plans & reports so history is always up to date after sync
+          loadPlans();
+          loadReports();
 
         } else {
           setSyncStatus(false, 'Lỗi kết nối');
@@ -2759,8 +3034,10 @@
     //  STORES
     // ════════════════════════════════════════
     let _allStores = [];
+    let _storesLoaded = false;
     async function loadStores() {
       if (!CFG.scriptUrl) return;
+      _storesLoaded = true;
       const data = await api({ action: 'getStores' });
       if (data.ok) {
         _allStores = data.stores || [];
@@ -3591,7 +3868,7 @@
 
     function renderAuditDirectKPI(res) {
       const avg       = res.avg || 0;
-      const reaudit   = res.reauditCount || 0;
+      const reaudit   = (res.auditList || []).filter(function(a){ return !a.pass && !a._reauditDone && !a._recovered; }).length || res.reauditCount || 0;
       const ccpStores = (res.auditList || []).filter(a => a.hasCCP).length;
       const riskStores= (res.auditList || []).filter(a => a.hasRISK).length;
 
@@ -3645,9 +3922,9 @@
           <td style="font-weight:600">${a.store}</td>
           <td style="font-size:12px">${fmtViDate(a.date) !== '–' ? fmtViDate(a.date) : fmtViDate(a.timestamp)}</td>
           <td style="color:${pctColor};font-weight:700;font-size:15px">${a.pct}%</td>
-          <td style="font-size:12px;color:var(--gray)">${a.achieved}/${a.effectiveMax}${a.naTotal > 0 ? ` <span title="NA loại ra" style="color:var(--gray)">(-${a.naTotal}đ NA)</span>` : ''}</td>
-          <td>${Number(ccpNum) > 0 ? `<span class="bdg br2" style="font-size:10px">${ccpNum} CCP</span>` : '<span style="color:var(--gray);font-size:12px">–</span>'}</td>
-          <td>${Number(riskNum) > 0 ? `<span class="bdg br2" style="font-size:10px">${riskNum} RISK</span>` : '<span style="color:var(--gray);font-size:12px">–</span>'}</td>
+          <td style="font-size:12px;color:var(--gray)">${a.achieved}/${a.effectiveMax}${a.naTotal > 0 ? '(-' + a.naTotal + 'đ NA)' : ''}</td>
+          <td>${Number(ccpNum) > 0 ? '<b style="color:#DC2626">' + ccpNum + ' CCP</b>' : '–'}</td>
+          <td>${Number(riskNum) > 0 ? '<b style="color:#DC2626">' + riskNum + ' RISK</b>' : '–'}</td>
           <td>${badge}</td>
           <td style="font-size:12px">${safeAuditorName(a.auditor)}</td>
           <td style="white-space:nowrap">
@@ -3814,7 +4091,7 @@
           <div style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--gray);letter-spacing:.5px;margin-bottom:6px">Nhận xét của khách</div>
           <div style="font-size:13px;line-height:1.6;color:var(--brown)">${rec.comment || '(Không có nhận xét)'}</div>
         </div>
-        ${(rec.ratings||[]).length ? `<div style="display:flex;gap:8px;flex-wrap:wrap">${rec.ratings.map((r,i)=>`<div style="background:var(--gold-l);border-radius:6px;padding:5px 10px;font-size:12px;color:var(--brown)"><span style="color:var(--gray)">Câu ${i+1}:</span> ${r}/5 ⭐</div>`).join('')}</div>` : ''}`;
+        ${(rec.ratings||[]).length ? '<div style="display:flex;gap:8px;flex-wrap:wrap">'+rec.ratings.map(function(r,i){ return '<div style="background:var(--gold-l);border-radius:6px;padding:5px 10px;font-size:12px;color:var(--brown)"><span style="color:var(--gray)">Câu '+(i+1)+':</span> '+r+'/5 ⭐</div>'; }).join('')+'</div>' : ''}`;
     }
 
     function _buildDirectDetailHtml(rec) {
@@ -3835,7 +4112,7 @@
           <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">
             <div style="text-align:center">
               <div style="font-size:32px;font-weight:800;color:${pctColor}">${rec.pct}%</div>
-              <div style="font-size:11px;color:var(--gray)">${rec.achieved}/${rec.effectiveMax}đ${rec.naTotal>0?` (-${rec.naTotal} NA)`:''}</div>
+              <div style="font-size:11px;color:var(--gray)">${rec.achieved}/${rec.effectiveMax}đ${rec.naTotal>0?' (-'+rec.naTotal+' NA)':''}</div>
             </div>
             <div>${rec.pass ? '<span class="bdg bg2" style="font-size:13px">ĐẠT</span>' : '<span class="bdg br2" style="font-size:13px">KHÔNG ĐẠT</span>'}</div>
           </div>
@@ -3899,11 +4176,66 @@
         html += '</tbody></table></div>';
       }
 
+      // Photo evidence — build DOM correctly (one loop, no nesting)
+      var photos = rec.photos || [];
+      if (photos.length > 0) {
+        var photoWrap = document.createElement('div');
+        photoWrap.style.cssText = 'margin-top:12px;background:var(--gray-l);border-radius:var(--rs);padding:10px 12px';
+        var photoTitle = document.createElement('div');
+        photoTitle.style.cssText = 'font-size:10px;color:var(--gray);font-weight:600;margin-bottom:8px';
+        photoTitle.textContent = '📷 HÌNH ẢNH BẰNG CHỨNG (' + photos.length + ' ảnh)';
+        photoWrap.appendChild(photoTitle);
+        var photoGrid = document.createElement('div');
+        photoGrid.style.cssText = 'display:flex;flex-wrap:wrap;gap:10px';
+        photos.forEach(function(purl, pidx) {
+          var pm = purl.match(/[?&]id=([a-zA-Z0-9_-]+)/) || purl.match(/\/d\/([a-zA-Z0-9_-]+)\//);
+          var pfid = pm ? pm[1] : null;
+          var pthumb = pfid
+            ? 'https://drive.google.com/thumbnail?id=' + pfid + '&sz=w400'
+            : (purl.startsWith('http') ? purl : '');
+          var cell = document.createElement('div');
+          cell.style.cssText = 'text-align:center;flex:0 0 auto';
+          if (pthumb) {
+            var img = document.createElement('img');
+            img.src = pthumb;
+            img.style.cssText = 'width:140px;height:140px;object-fit:cover;cursor:pointer;border-radius:8px;border:1px solid var(--border);display:block';
+            img.title = 'Click để xem ảnh gốc';
+            img.addEventListener('click', (function(u){ return function(){ window.open(u,'_blank'); }; })(purl));
+            img.onerror = (function(u, c, i2){
+              return function(){
+                c.removeChild(i2);
+                var lnk = document.createElement('a');
+                lnk.href = u; lnk.target = '_blank';
+                lnk.style.cssText = 'display:flex;width:140px;height:140px;align-items:center;justify-content:center;border:2px dashed var(--border);border-radius:8px;font-size:11px;color:var(--blue);text-decoration:none;background:var(--white);flex-direction:column;gap:4px';
+                lnk.innerHTML = '<span style="font-size:24px">🖼</span><span>Xem ảnh</span>';
+                c.insertBefore(lnk, c.firstChild);
+              };
+            })(purl, cell, img);
+            cell.appendChild(img);
+          } else {
+            var lnk2 = document.createElement('a');
+            lnk2.href = purl; lnk2.target = '_blank';
+            lnk2.style.cssText = 'display:flex;width:140px;height:140px;align-items:center;justify-content:center;border:2px dashed var(--border);border-radius:8px;font-size:11px;color:var(--blue);text-decoration:none;background:var(--white);flex-direction:column;gap:4px';
+            lnk2.innerHTML = '<span style="font-size:24px">🔗</span><span>Ảnh ' + (pidx+1) + '</span>';
+            cell.appendChild(lnk2);
+          }
+          var lbl = document.createElement('div');
+          lbl.style.cssText = 'font-size:10px;color:var(--gray);margin-top:4px';
+          lbl.textContent = 'Ảnh ' + (pidx+1);
+          cell.appendChild(lbl);
+          photoGrid.appendChild(cell);
+        });
+        photoWrap.appendChild(photoGrid);
+        // Convert DOM to HTML string for injection
+        var tmpDiv = document.createElement('div');
+        tmpDiv.appendChild(photoWrap);
+        html += tmpDiv.innerHTML;
+      }
       if (rec.note || rec.actionPlan) {
-        html += `<div style="margin-top:12px;display:flex;flex-direction:column;gap:8px">`;
-        if (rec.note)       html += `<div style="background:var(--gray-l);border-radius:var(--rs);padding:10px 12px"><div style="font-size:10px;color:var(--gray);font-weight:600;margin-bottom:3px">NHẬN XÉT</div><div style="font-size:12px">${rec.note}</div></div>`;
-        if (rec.actionPlan) html += `<div style="background:var(--blue-l);border-radius:var(--rs);padding:10px 12px"><div style="font-size:10px;color:var(--blue);font-weight:600;margin-bottom:3px">ACTION PLAN</div><div style="font-size:12px">${rec.actionPlan}</div></div>`;
-        html += `</div>`;
+        html += '<div style="margin-top:12px;display:flex;flex-direction:column;gap:8px">';
+        if (rec.note)       html += '<div style="background:var(--gray-l);border-radius:var(--rs);padding:10px 12px"><div style="font-size:10px;color:var(--gray);font-weight:600;margin-bottom:3px">NHẬN XÉT</div><div style="font-size:12px">' + rec.note + '</div></div>';
+        if (rec.actionPlan) html += '<div style="background:var(--blue-l);border-radius:var(--rs);padding:10px 12px"><div style="font-size:10px;color:var(--blue);font-weight:600;margin-bottom:3px">ACTION PLAN</div><div style="font-size:12px">' + rec.actionPlan + '</div></div>';
+        html += '</div>';
       }
 
       html += `<div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap">
@@ -3924,9 +4256,9 @@
       let aiText = '';
       if (CFG.scriptUrl) {
         const res = await api({ action:'aiAuditAnalysis', data:{ store, pct:rec.pct, issues:rec.issues||[], note:rec.note||'' } });
-        aiText = res.ok ? res.analysis : await callAI(`Audit ${store}: ${rec.pct}%. Vi phạm: ${(rec.issues||[]).map(i=>`[${i.verdict}] ${i.item}`).join(', ')||'Không có'}. Phân tích ngắn.`);
+        aiText = res.ok ? res.analysis : await callAI(`Audit ${store}: ${rec.pct}%. Vi phạm: ${(rec.issues||[]).map(function(i){return "["+i.verdict+"] "+i.item;}).join(', ')||'Không có'}. Phân tích ngắn.`);
       } else {
-        aiText = await callAI(`Audit ${store}: ${rec.pct}%. Vi phạm: ${(rec.issues||[]).map(i=>`[${i.verdict}] ${i.item}`).join(', ')||'Không có'}. Phân tích ngắn.`);
+        aiText = await callAI(`Audit ${store}: ${rec.pct}%. Vi phạm: ${(rec.issues||[]).map(function(i){return "["+i.verdict+"] "+i.item;}).join(', ')||'Không có'}. Phân tích ngắn.`);
       }
       unload();
       // Append AI result inside modal detail body
@@ -4118,6 +4450,12 @@ Dương Thanh Liêm – Operations Phúc Tea`;
           sessions.map(s => `<option value="${s.timestamp||''}" data-src="${s._src||'direct'}">${fmtViDate(s.timestamp)} – ${s.auditType||'Audit'} – ${s.pct}%</option>`).join('');
         if (sessions.length) { sessSel.selectedIndex = 1; onAuditSessionChange(); }
       }
+      // Auto-fill email immediately when store is selected
+      const emailEl = $('ar-email');
+      if (emailEl && !emailEl.dataset.userEdited) {
+        const storeObj = (_allStores||[]).find(function(s){ return s.name === store; });
+        emailEl.value = (storeObj && storeObj.email) ? storeObj.email : '';
+      }
     }
 
     // ── openAuditReportForStore ───────────────────────────
@@ -4188,7 +4526,7 @@ Dương Thanh Liêm – Operations Phúc Tea`;
       }
       const txt = buildAuditReportText(reportData);
       _auditReportText = txt;
-      const pre=$('ar-preview'); if(pre) pre.textContent=txt;
+      const pre=$('ar-preview'); if(pre) { pre.value=txt; pre.style.height='auto'; pre.style.height=Math.min(pre.scrollHeight,560)+'px'; }
       const cb=$('ar-copy-btn'); if(cb) cb.style.display='';
       toast('✅ Đã tạo biên bản cho '+store);
     }
@@ -4246,13 +4584,35 @@ Dương Thanh Liêm – Operations Phúc Tea`;
       const store=($('ar-store')||{}).value;
       let to = ($('ar-email')||{}).value || '';
       if (!to) {
-        const storeObj=(_allStores||[]).find(s=>s.name===store);
+        const storeObj=(_allStores||[]).find(function(s){ return s.name===store; });
         to = (storeObj&&storeObj.email) ? storeObj.email : '';
         to = prompt('Email cửa hàng/chủ chi nhánh:',to) || '';
       }
       if (!to) return;
       load('Đang gửi biên bản...');
-      const res=await api({action:'sendEmail',to,subject:`Biên bản Audit – ${store} – ${new Date().toLocaleDateString('vi-VN')}`,body:_auditReportText});
+      // Read attached files as base64
+      var attachments = [];
+      var attachInp = $('ar-attach-file');
+      if (attachInp && attachInp.files && attachInp.files.length) {
+        var fileReadPromises = Array.from(attachInp.files).map(function(file) {
+          return new Promise(function(resolve) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+              var b64 = e.target.result.split(',')[1];
+              resolve({ name: file.name, mimeType: file.type, data: b64 });
+            };
+            reader.readAsDataURL(file);
+          });
+        });
+        try { attachments = await Promise.all(fileReadPromises); } catch(_) {}
+      }
+      const res=await api({
+        action:'sendEmail',
+        to,
+        subject:'Biên bản Audit – '+store+' – '+new Date().toLocaleDateString('vi-VN'),
+        body:_auditReportText,
+        attachments: attachments
+      });
       unload();
       if(res.ok) toast('✅ Đã gửi biên bản đến '+to);
       else toast('❌ '+(res.error||'Lỗi gửi email'),'terr');
@@ -4283,14 +4643,31 @@ Dương Thanh Liêm – Operations Phúc Tea`;
           <div class="kpi-b"><div style="font-size:10px;color:#888">NA</div><div class="kv" style="color:#888">${rec.naTotal}đ</div></div>
           <div class="kpi-b"><div style="font-size:10px;color:#888">TRẠNG THÁI</div><div class="kv ${rec.pass?'pass':'fail'}">${rec.status||'–'}</div></div>
         </div>
-        ${issues.length?`<div style="background:#FEF2F2;border:1px solid #FCA5A5;padding:8px 12px;border-radius:6px;margin:10px 0;font-size:12px">⚠️ <strong>${issues.length} vi phạm</strong> | CCP: ${issues.filter(i=>i.verdict==='CCP').length} | RISK: ${issues.filter(i=>i.verdict==='RISK').length} | NOK: ${issues.filter(i=>i.verdict==='NOK').length}</div>`:''}
+        ${issues.length ? '<div style="background:#FEF2F2;border:1px solid #FCA5A5;padding:8px 12px;border-radius:6px;margin:10px 0;font-size:12px">⚠️ <strong>' + issues.length + ' vi phạm</strong> | CCP: ' + issues.filter(function(x){return x.verdict==='CCP';}).length + ' | RISK: ' + issues.filter(function(x){return x.verdict==='RISK';}).length + ' | NOK: ' + issues.filter(function(x){return x.verdict==='NOK';}).length + '</div>' : ''}
         <table><thead><tr><th>Nhóm</th><th>Hạng mục</th><th>Loại</th><th>Kết quả</th><th>Điểm</th></tr></thead><tbody>${rows}</tbody></table>
-        ${rec.note?`<div style="margin-top:10px;font-size:12px"><strong>Nhận xét:</strong> ${rec.note}</div>`:''}
-        ${rec.actionPlan?`<div style="margin-top:6px;font-size:12px"><strong>Action plan:</strong> ${rec.actionPlan}</div>`:''}
-        <div style="margin-top:28px;display:flex;justify-content:space-between">
-          <div style="width:200px;border-top:1px solid #333;padding-top:8px;text-align:center;font-size:12px">Người audit</div>
-          <div style="width:200px;border-top:1px solid #333;padding-top:8px;text-align:center;font-size:12px">Đại diện cửa hàng</div>
-        </div></body></html>`);
+        ${rec.note ? '<div style="margin-top:10px;font-size:12px"><strong>Nhận xét:</strong> ' + rec.note + '</div>' : ''}
+        ${rec.actionPlan ? '<div style="margin-top:6px;font-size:12px"><strong>Action plan:</strong> ' + rec.actionPlan + '</div>' : ''}
+        `);
+      // Photo evidence section
+      var pdfPhotos = rec.photos || [];
+      if (pdfPhotos.length > 0) {
+        pWin.document.write('<div style="margin-top:14px;padding-top:10px;border-top:1px solid #E8E0D4">');
+        pWin.document.write('<div style="font-size:12px;font-weight:700;margin-bottom:8px">HINH ANH BANG CHUNG (' + pdfPhotos.length + ' anh):</div>');
+        pWin.document.write('<div style="display:flex;flex-wrap:wrap;gap:8px">');
+        pdfPhotos.forEach(function(purl) {
+          var pm = purl.match(/[?&]id=([a-zA-Z0-9_-]+)/) || purl.match(/[/]d[/]([a-zA-Z0-9_-]+)[/]/);
+          var pfid = pm ? pm[1] : null;
+          var src = pfid ? 'https://drive.google.com/thumbnail?id=' + pfid + '&sz=w300' : (purl.startsWith('http') ? purl : '');
+          if (src) {
+            pWin.document.write('<img src="' + src + '" style="width:120px;height:120px;object-fit:cover;border-radius:6px;border:1px solid #E8E0D4">');
+          }
+        });
+        pWin.document.write('</div></div>');
+      }
+      pWin.document.write('<div style="margin-top:28px;display:flex;justify-content:space-between">');
+      pWin.document.write('<div style="width:200px;border-top:1px solid #333;padding-top:8px;text-align:center;font-size:12px">Nguoi audit</div>');
+      pWin.document.write('<div style="width:200px;border-top:1px solid #333;padding-top:8px;text-align:center;font-size:12px">Dai dien cua hang</div>');
+      pWin.document.write('</div></body></html>');
       pWin.document.close();
       setTimeout(()=>pWin.print(),500);
     }
@@ -4368,27 +4745,25 @@ Dương Thanh Liêm – Operations Phúc Tea`;
     function renderStaffGrid(list) {
       const grid = $('staff-grid');
       if (!list.length) { grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="ei">👥</div>Không có nhân viên phù hợp</div>'; return; }
-      grid.innerHTML = list.map(s => {
-        const initials = (s.name || '').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) || '?';
-        return `<div class="staff-card" onclick="editStaff('${s.id}')">
-      <div class="staff-av">${s.avatar ? `<img src="${s.avatar}" alt="">` : `<span>${initials}</span>`}</div>
-      <div style="flex:1;min-width:0">
-        <div style="font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${s.name}</div>
-        <div style="font-size:11px;color:var(--gray);margin-top:2px">${s.position || '–'} · <code style="font-size:10px">${s.id || '–'}</code></div>
-        <div style="margin-top:5px;display:flex;gap:4px;flex-wrap:wrap">${roleBadge(s.role)} <span class="bdg ${s.status === 'Đang cộng tác' ? 'bg2' : s.status === 'Tạm ngưng' ? 'by2' : 'br2'}">${s.status || '–'}</span></div>
-      </div>
-    </div>`;
-      }).join('');
+      // Build staff cards using DOM to avoid quote-in-attribute syntax errors
+      grid.innerHTML = '';
+      list.forEach(function(s) {
+        const initials = (s.name || '').split(' ').map(function(w){ return w[0]; }).join('').toUpperCase().slice(0, 2) || '?';
+        const avatarHtml = s.avatar ? '<img src="' + s.avatar + '" alt="">' : '<span>' + initials + '</span>';
+        const statusCls = s.status === 'Đang cộng tác' ? 'bg2' : s.status === 'Tạm ngưng' ? 'by2' : 'br2';
+        const card = document.createElement('div');
+        card.className = 'staff-card';
+        card.innerHTML = '<div class="staff-av">' + avatarHtml + '</div>'
+          + '<div style="flex:1;min-width:0">'
+          + '<div style="font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + (s.name||'') + '</div>'
+          + '<div style="font-size:11px;color:var(--gray);margin-top:2px">' + (s.position||'–') + ' · <code style="font-size:10px">' + (s.id||'–') + '</code></div>'
+          + '<div style="margin-top:5px;display:flex;gap:4px;flex-wrap:wrap">' + roleBadge(s.role) + ' <span class="bdg ' + statusCls + '">' + (s.status||'–') + '</span></div>'
+          + '</div>';
+        card.addEventListener('click', (function(sid){ return function(){ editStaff(sid); }; })(s.id));
+        grid.appendChild(card);
+      });
 
-      // Training section from latest plan
-      if (D.plans.length > 0) {
-        const plan = D.plans[0];
-        const content = (plan.content && typeof plan.content === 'object') ? JSON.stringify(plan.content) : String(plan.content || '');
-        // training-month-label removed
-        $('training-section').innerHTML = `
-      <div class="alert ab" style="margin-bottom:10px">📚 <span>Đào tạo từ kế hoạch <strong>${plan.month || '–'}</strong>. Ngân sách: ${plan.budget || 0}tr</span></div>
-      <div style="font-size:13px;color:var(--brown);line-height:1.8;white-space:pre-wrap">${content}</div>`;
-      }
+      // Training section removed — element no longer in DOM
     }
 
     function openStaffModal(data) {
@@ -4453,23 +4828,51 @@ Dương Thanh Liêm – Operations Phúc Tea`;
     async function loadPendingStaff() {
       const data = await api({ action: 'getPendingStaff' });
       if (data.ok && data.pending && data.pending.length) {
-        $('pending-section').style.display = 'block';
+        const activePage = document.querySelector('.page.on');
+        const isAllowed = activePage && (activePage.id === 'pg-nhansu' || activePage.id === 'pg-mytasks');
+        $('pending-section').style.display = isAllowed ? 'block' : 'none';
         $('pending-list').innerHTML = data.pending.map(p => `
-      <div class="card" style="margin-bottom:8px">
-        <div class="cb" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-          <div style="flex:1"><strong>${p.name}</strong> · ${p.email} · ${p.position || '–'}</div>
-          <div><span class="bdg by2">Chờ duyệt</span> · ${p.regDate || ''}</div>
-          <button class="btn bp bsm" onclick="approveStaff('${p.email}')">✅ Duyệt</button>
+      <div class="card" style="margin-bottom:10px">
+        <div class="ch" style="background:var(--gold-l)">
+          <span style="font-weight:700;color:var(--brown)">${p.name}</span>
+          <span class="bdg by2">Chờ duyệt · ${p.regDate || ''}</span>
+        </div>
+        <div class="cb" style="font-size:13px;line-height:1.8">
+          <div class="fr" style="gap:12px">
+            <div><span style="color:var(--gray);font-size:11px">Email</span><br>${p.email}</div>
+            <div><span style="color:var(--gray);font-size:11px">SĐT</span><br>${p.phone||'–'}</div>
+          </div>
+          <div class="fr" style="gap:12px;margin-top:6px">
+            <div><span style="color:var(--gray);font-size:11px">Chức danh</span><br>${p.position||'–'}</div>
+            <div><span style="color:var(--gray);font-size:11px">Cửa hàng</span><br>${p.store||'Hệ Thống'}</div>
+          </div>
+          <div class="fr" style="gap:12px;margin-top:6px">
+            <div><span style="color:var(--gray);font-size:11px">Ngày sinh</span><br>${p.dob||'–'}</div>
+            <div><span style="color:var(--gray);font-size:11px">Giới tính</span><br>${p.gender||'–'}</div>
+          </div>
+          <div style="margin-top:10px;display:flex;gap:8px;justify-content:flex-end">
+            <button class="btn bo bsm" onclick="rejectStaff('${p.email}','${p.name}')">❌ Từ chối</button>
+            <button class="btn bp bsm" onclick="approveStaff('${p.email}','${p.name}')">✅ Duyệt &amp; Kích hoạt</button>
+          </div>
         </div>
       </div>`).join('');
       } else $('pending-section').style.display = 'none';
     }
-    async function approveStaff(email) {
+    async function approveStaff(email, name) {
+      if (!confirm('Duyệt và kích hoạt tài khoản cho ' + (name||email) + '?')) return;
       load('Đang duyệt...');
       const res = await api({ action: 'approveStaff', email });
       unload();
-      if (res.ok) { toast('✅ Đã duyệt!'); await loadStaff(); }
+      if (res.ok) { toast('✅ Đã duyệt: ' + (name||email) + '. Nhân viên có thể đăng nhập ngay.'); await loadStaff(); await loadPendingStaff(); }
       else toast('❌ ' + res.error, 'terr');
+    }
+    async function rejectStaff(email, name) {
+      if (!confirm('Từ chối đăng ký của ' + (name||email) + '?')) return;
+      load('Đang xử lý...');
+      const res = await api({ action: 'rejectStaff', email });
+      unload();
+      if (res.ok) { toast('Đã từ chối đăng ký của ' + (name||email)); await loadPendingStaff(); }
+      else toast('❌ ' + (res.error||'Lỗi'), 'terr');
     }
 
     function updateProfile() {
@@ -4497,29 +4900,66 @@ Dương Thanh Liêm – Operations Phúc Tea`;
       }
     }
 
-    // Format any month value → clean "Tháng M/YYYY" for display
+    // Format any month/quarter value → clean display label
     function fmtPlanMonth(val) {
       if (!val) return '–';
+      const s = String(val).trim();
       // Already clean: "Tháng 4/2026" or "Quý 2/2026"
-      if (val.includes('Tháng') || val.includes('Quý')) return val;
+      if (s.startsWith('Tháng') || s.startsWith('Quý')) return s;
+      // Quarter format "Q1/2026" → "Quý 1/2026"
+      if (/^Q[1-4]\/\d{4}$/.test(s)) return 'Quý ' + s[1] + '/' + s.slice(3);
       // yyyy-mm format from input[type=month]
-      const p = val.split('-');
+      const p = s.split('-');
       if (p.length === 2 && p[0].length === 4) return 'Tháng ' + parseInt(p[1]) + '/' + p[0];
-      // Raw JS Date string like "Mon Jun 01 2026 00:00:00 GMT+0700 (Giờ Đông Dương)"
-      // or ISO "2026-06-01T00:00:00.000Z"
+      // Raw JS Date string (old data stored raw Date.toString())
       try {
-        const d = new Date(val);
+        const d = new Date(s);
         if (!isNaN(d.getTime()) && d.getFullYear() > 2000) {
           return 'Tháng ' + (d.getMonth()+1) + '/' + d.getFullYear();
         }
       } catch(_) {}
-      return val; // fallback: return as-is
+      return s; // fallback: return as-is
     }
 
     function updatePlanPeriodLabel() {
       const v = $('plan-period-type') ? $('plan-period-type').value : 'month';
       const el = $('plan-period-label');
       if (el) el.textContent = v === 'quarter' ? 'Quý' : 'Tháng';
+      // Swap input: month uses type=month picker, quarter uses a select Q1-Q4
+      const inp = $('plan-month');
+      if (!inp) return;
+      if (v === 'quarter') {
+        // Replace with quarter select if not already
+        if (inp.tagName === 'INPUT') {
+          const now = new Date();
+          const yr = now.getFullYear();
+          const sel = document.createElement('select');
+          sel.className = inp.className; sel.id = inp.id; sel.onchange = inp.onchange;
+          ['Q1','Q2','Q3','Q4'].forEach((q,i) => {
+            const opt = document.createElement('option');
+            opt.value = q + '/' + yr;
+            opt.textContent = q + ' năm ' + yr;
+            sel.appendChild(opt);
+          });
+          // Also add next year options
+          ['Q1','Q2','Q3','Q4'].forEach((q) => {
+            const opt = document.createElement('option');
+            opt.value = q + '/' + (yr+1);
+            opt.textContent = q + ' năm ' + (yr+1);
+            sel.appendChild(opt);
+          });
+          inp.parentNode.replaceChild(sel, inp);
+        }
+      } else {
+        // Restore to month input if currently a select
+        if (inp && inp.tagName === 'SELECT') {
+          const monthInp = document.createElement('input');
+          monthInp.type = 'month'; monthInp.className = inp.className;
+          monthInp.id = inp.id; monthInp.placeholder = 'yyyy-mm';
+          monthInp.onchange = autoFillPlanTitle;
+          inp.parentNode.replaceChild(monthInp, inp);
+        }
+      }
     }
 
     function newPlan() {
@@ -4632,10 +5072,10 @@ Dương Thanh Liêm – Operations Phúc Tea`;
         const dispMonth = fmtPlanMonth(p.month || '');
         return `<tr>
           <td style="font-weight:600">${dispMonth}</td>
-          <td>${p.title || dispMonth}</td>
+          <td><strong>${p.title || dispMonth}</strong></td>
           <td><span class="bdg bb2">${groups.length} nhóm</span></td>
           <td><span class="bdg bg2">${p.status || 'Đã lưu'}</span></td>
-          <td style="font-size:11px">${p.timestamp || '–'}</td>
+          <td style="font-size:11px">${(function(ts){ if(!ts) return '–'; if(/^(Wed|Mon|Tue|Thu|Fri|Sat|Sun)/.test(ts)){try{const d=new Date(ts);if(!isNaN(d))return d.toLocaleString('vi-VN');}catch(_){}} return ts; })(p.timestamp)}</td>
           <td><button class="btn bo bsm" onclick="loadPlanById('${p.id}')">Xem</button></td>
         </tr>`;
       }).join('') : '<tr><td colspan="6"><div class="empty-state" style="padding:12px">Chưa có kế hoạch</div></td></tr>';
@@ -4709,9 +5149,9 @@ Dương Thanh Liêm – Operations Phúc Tea`;
       load('AI đang phân tích & lập kế hoạch...');
       const ctx = D.plans.length ? `Kế hoạch kỳ trước: ${JSON.stringify(D.plans[0].content).slice(0,600)}` : 'Chưa có kế hoạch trước.';
       const kpi = `Hiện tại: ${D.kpi.stores} CH hoạt động, audit TB ${D.kpi.auditAvg}, ${D.kpi.reauditCount} cần tái audit.`;
-      const r = await callAI(`${kpi}\n${ctx}\n\nLập kế hoạch Operations tháng tới cho Phúc Tea dạng JSON array:
+      const r = await callAI(`${kpi}\n${ctx}\n\nLập kế hoạch Operations tháng tới cho Phúc Tea dạng JSON array. Không dùng ** hay ## hay icon trong nội dung text. Chỉ text thuần:
 [{"group":"TÊN NHÓM","tasks":[{"task":"Tên việc","kpi":"target","budget":"triệu","ic":"","time":"Tháng X","note":""}]}]
-Trả về JSON thuần, không markdown. 4 nhóm: Setup&KT, Audit, Đào tạo, Vận hành chung.`);
+Trả về JSON thuần, không markdown, không backtick. 4 nhóm: Setup&KT, Audit, Đào tạo, Vận hành chung.`);
       unload();
       try {
         const clean = r.replace(/```json|```/g, '').trim();
@@ -4866,17 +5306,26 @@ Trả về JSON thuần, không markdown. 4 nhóm: Setup&KT, Audit, Đào tạo,
       const sel = $('report-history-sel');
       if (sel) {
         sel.innerHTML = '<option value="">-- Xem báo cáo cũ --</option>';
-        D.reports.forEach(r => sel.innerHTML += `<option value="${r.id}">${r.month || r.id} – ${r.title || ''}</option>`);
+        D.reports.forEach(r => sel.innerHTML += `<option value="${r.id}">${r.title || r.month || r.id}</option>`);
       }
       const hb = $('report-history-body');
-      if (hb) hb.innerHTML = D.reports.length ? D.reports.map(r => `<tr>
-        <td>${r.month || '–'}</td>
-        <td><span class="bdg ${r.planId ? 'bb2' : 'bt2'}">${r.planId ? 'Theo KH' : 'Tự do'}</span></td>
-        <td>${r.title || '–'}</td>
-        <td><span class="bdg bg2">${r.status || '–'}</span></td>
-        <td style="font-size:11px">${r.timestamp || '–'}</td>
-        <td><button class="btn bo bsm" onclick="loadReportById('${r.id}')">Xem</button></td>
-      </tr>`).join('') : '<tr><td colspan="6"><div class="empty-state" style="padding:12px">Chưa có báo cáo</div></td></tr>';
+      if (hb) hb.innerHTML = D.reports.length ? D.reports.map(r => {
+        // Format timestamp safely (GS returns "HH:mm dd/MM/yyyy")
+        let tsDisplay = r.timestamp || '–';
+        if (tsDisplay.startsWith('Wed') || tsDisplay.startsWith('Mon') || tsDisplay.startsWith('Tue') || tsDisplay.startsWith('Thu') || tsDisplay.startsWith('Fri') || tsDisplay.startsWith('Sat') || tsDisplay.startsWith('Sun')) {
+          try { const d = new Date(tsDisplay); if (!isNaN(d)) tsDisplay = d.toLocaleString('vi-VN'); } catch(_) {}
+        }
+        // Display the user-entered period name (r.month is already the text like "Tháng 4/2026")
+        const periodDisplay = r.title || r.month || '–';
+        return `<tr>
+          <td><strong>${periodDisplay}</strong></td>
+          <td><span class="bdg ${r.planId ? 'bb2' : 'bt2'}">${r.planId ? 'Theo KH' : 'Tự do'}</span></td>
+          <td style="font-size:11px;color:var(--text-muted)">${r.month || '–'}</td>
+          <td><span class="bdg bg2">${r.status || '–'}</span></td>
+          <td style="font-size:11px">${tsDisplay}</td>
+          <td><button class="btn bo bsm" onclick="loadReportById('${r.id}')">Xem</button></td>
+        </tr>`;
+      }).join('') : '<tr><td colspan="6"><div class="empty-state" style="padding:12px">Chưa có báo cáo</div></td></tr>';
     }
 
     function loadReportById(id) {
@@ -4956,7 +5405,7 @@ Trả về JSON thuần, không markdown. 4 nhóm: Setup&KT, Audit, Đào tạo,
           planCtx += `\nThành tựu: ${$('rpt-highlight').value||'–'} | Thách thức: ${$('rpt-challenge').value||'–'}`;
         }
       }
-      const r = await callAI(`${kpi}${planCtx}\nSoạn báo cáo kết quả Operations Phúc Tea${planCtx?' kèm so sánh kế hoạch':''} dạng JSON array:\n[{"group":"TÊN NHÓM","tasks":[{"task":"Đầu việc","actualResult":"Kết quả","budgetUsed":"","link":"","note":""}]}]\nJSON thuần, 3-4 nhóm: Setup&KT, Audit, Đào tạo, Vận hành.`);
+      const r = await callAI(`${kpi}${planCtx}\nSoạn báo cáo kết quả Operations Phúc Tea${planCtx?' kèm so sánh kế hoạch':''} dạng JSON array. Không dùng ** hay ## hay icon trong text thuần:\n[{"group":"TÊN NHÓM","tasks":[{"task":"Đầu việc","actualResult":"Kết quả","budgetUsed":"","link":"","note":""}]}]\nJSON thuần không backtick, 3-4 nhóm: Setup&KT, Audit, Đào tạo, Vận hành.`);
       unload();
       try {
         const clean = r.replace(/```json|```/g, '').trim();
@@ -4992,33 +5441,68 @@ Trả về JSON thuần, không markdown. 4 nhóm: Setup&KT, Audit, Đào tạo,
     // ════════════════════════════════════════
     function openEmailModal(mode) {
       emailMode = mode;
-      const month = mode === 'plan' ? ($('plan-month') ? $('plan-month').value : '') : ($('rpt-month') ? $('rpt-month').value : '');
+      // month: from plan-month (yyyy-mm) or rpt-month (free text)
+      let monthRaw = mode === 'plan'
+        ? ($('plan-month') ? $('plan-month').value : '')
+        : ($('rpt-month') ? $('rpt-month').value : '');
+      // Convert "yyyy-mm" → "Tháng M/YYYY" for display
+      const monthDisp = fmtPlanMonth ? fmtPlanMonth(monthRaw) : monthRaw;
       $('email-modal-title').textContent = mode === 'plan' ? '✉️ Gửi Kế hoạch BOD' : '✉️ Gửi Báo cáo BOD';
       const subj = mode === 'plan'
-        ? `[Operations – Dương Thanh Liêm] – Kế hoạch ${month}`
-        : `[Operations – Dương Thanh Liêm] – Báo cáo kết quả ${month}`;
+        ? `[Kế hoạch tháng ${monthDisp}] – Bộ phận Operations`
+        : `[Báo cáo kết quả ${monthDisp}] – Bộ phận Operations`;
       $('em-subject').value = subj;
-      // Build email body
       let body = '';
       if (mode === 'plan') {
         collectPlanGroups();
-        const lines = [`KẾ HOẠCH OPERATIONS – ${month.toUpperCase()}`, '', 'Kính gửi Anh Tài, Anh Vũ, Chị Yến,', ''];
+        // Build plan tasks summary (no table, no icons, no ## **)
+        let taskLines = '';
         _planGroups.forEach(g => {
-          lines.push(`▌ ${g.group}`);
+          taskLines += `${g.group}\n`;
           (g.tasks || []).forEach(t => {
-            lines.push(`  • ${t.task} | KPI: ${t.kpi || '–'} | NS: ${t.budget || '–'} | IC: ${t.ic || '–'} | ${t.time || ''}`);
-            if (t.note) lines.push(`    → ${t.note}`);
+            taskLines += `- ${t.task}`;
+            if (t.kpi) taskLines += ` | KPI: ${t.kpi}`;
+            if (t.budget) taskLines += ` | Ngân sách: ${t.budget}`;
+            if (t.ic) taskLines += ` | IC: ${t.ic}`;
+            if (t.time) taskLines += ` | ${t.time}`;
+            taskLines += '\n';
+            if (t.note) taskLines += `  ${t.note}\n`;
           });
-          lines.push('');
+          taskLines += '\n';
         });
-        lines.push(`Ghi chú: ${$('plan-note') ? $('plan-note').value : ''}`);
-        lines.push('\nTrân trọng,\nDương Thanh Liêm · Operations Leader\n0357 636 539');
-        body = lines.join('\n');
+        const planNote = $('plan-note') ? $('plan-note').value.trim() : '';
+        body = `Kính gửi Anh Tài, Anh Vũ, Chị Yến và Bộ phận HR,
+
+Em xin gửi đến Anh/Chị BOD kế hoạch công việc ${monthDisp} của bộ phận Operations để xem xét và phê duyệt.
+
+I. TÓM TẮT KẾ HOẠCH ${monthDisp.toUpperCase()}
+
+${taskLines.trim()}
+
+II. KẾT QUẢ MONG ĐỢI
+
+Hoàn thành các đầu việc theo đúng KPI và tiến độ đã cam kết, kiểm soát ngân sách trong phạm vi cho phép.
+
+III. KPI – DỰ KIẾN THỰC HIỆN
+
+Chi tiết KPI và ngân sách theo từng nhóm công việc nêu trên.
+
+IV. TỔNG KẾT & CÁC BƯỚC TIẾP THEO
+
+Tổng hợp kết quả thực hiện vào cuối ${monthDisp} và báo cáo BOD theo định kỳ.
+${planNote ? '\nGhi chú thêm: ' + planNote : ''}
+
+Rất mong nhận được phản hồi và góp ý từ Anh/Chị để bộ phận Operations hoàn thiện và triển khai kế hoạch hiệu quả.
+
+Em xin cảm ơn Anh/Chị.
+
+Dương Thanh Liêm
+Operations Leader`;
       } else {
-        const lines = [`BÁO CÁO KẾT QUẢ OPERATIONS – ${month.toUpperCase()}`, ''];
-        lines.push(`Thành tựu nổi bật:\n${$('rpt-highlight').value || '–'}`);
-        lines.push('');
-        lines.push(`Thách thức & kế hoạch tiếp theo:\n${$('rpt-challenge').value || '–'}`);
+        const monthDisplayRpt = fmtPlanMonth ? fmtPlanMonth(monthRaw) : monthRaw;
+        const highlight  = ($('rpt-highlight') ? $('rpt-highlight').value.trim() : '') || '–';
+        const challenge  = ($('rpt-challenge') ? $('rpt-challenge').value.trim() : '') || '–';
+        const lines = [`KỲ BÁO CÁO: ${monthDisplayRpt}`];
         // Mode 2: include plan comparison table
         const planId = $('rpt-plan-ref') ? $('rpt-plan-ref').value : '';
         const plan = planId ? D.plans.find(p => p.id === planId) : null;
@@ -5062,8 +5546,51 @@ Trả về JSON thuần, không markdown. 4 nhóm: Setup&KT, Audit, Đào tạo,
             });
           }
         }
-        lines.push('\nTrân trọng,\nDương Thanh Liêm · Operations Leader\n0357 636 539');
-        body = lines.join('\n');
+        // Build proper report template (no table, no icons)
+        let kqLines = '';
+        if ($('rpt-mode') && $('rpt-mode').value === 'free') {
+          collectReportGroups();
+          _rptGroups.forEach(g => {
+            kqLines += `${g.group}\n`;
+            (g.tasks||[]).forEach(t => {
+              kqLines += `- ${t.task}`;
+              if (t.actualResult) kqLines += `: ${t.actualResult}`;
+              if (t.budgetUsed) kqLines += ` | NS: ${t.budgetUsed}`;
+              kqLines += '\n';
+            });
+            kqLines += '\n';
+          });
+        }
+        body = `Kính gửi Anh Tài, Anh Vũ, Chị Yến và Bộ phận HR,
+
+Em xin gửi đến Anh/Chị BOD báo cáo kết quả thực hiện kế hoạch công việc ${monthDisplayRpt} của bộ phận Operations để Anh/Chị nắm thông tin và theo dõi.
+
+I. TÓM TẮT KẾT QUẢ THỰC HIỆN ${monthDisplayRpt.toUpperCase()}
+
+${kqLines.trim() || 'Bộ phận Operations đã triển khai các công việc theo kế hoạch đề ra.'}
+
+II. KẾT QUẢ NỔI BẬT
+
+${highlight}
+
+III. ĐÁNH GIÁ & NHẬN ĐỊNH
+
+${challenge}
+
+IV. ĐỊNH HƯỚNG & CÁC BƯỚC TIẾP THEO
+
+Tiếp tục hoàn thiện các hạng mục còn tồn đọng và đưa vào kế hoạch tháng tiếp theo.
+Chuẩn hóa lại quy trình, SOP và form biểu mẫu dựa trên thực tế triển khai.
+Đề xuất các cải tiến về vận hành, đào tạo và nhân sự cho giai đoạn tiếp theo.
+
+Rất mong nhận được ý kiến đóng góp từ Anh/Chị BOD để bộ phận Operations tiếp tục hoàn thiện và triển khai hiệu quả trong các tháng tiếp theo.
+
+Em xin cảm ơn Anh/Chị.
+
+Trân trọng,
+Dương Thanh Liêm
+Operations Leader`;
+        // Clear stale lines array since we overrode body directly
       }
       $('em-body').value = body;
       $('em-thread').value = '';
@@ -5129,9 +5656,13 @@ Trả về JSON thuần, không markdown. 4 nhóm: Setup&KT, Audit, Đào tạo,
           compCtx += 'Thách thức: ' + ($('rpt-challenge') ? $('rpt-challenge').value : '') + '\n';
         }
       }
+      const isReportMode = emailMode === 'report';
+      const aiSystem = isReportMode
+        ? 'Bạn viết email báo cáo chuyên nghiệp tiếng Việt cho lãnh đạo Phúc Tea BOD. Email không dùng bảng, không dùng icon, không dùng ** hay ## thừa. Cấu trúc: Kính gửi → Tóm tắt → I. Tóm tắt kết quả → II. Kết quả nổi bật → III. Đánh giá nhận định → IV. Định hướng tiếp theo → Lời cảm ơn → Ký tên: Dương Thanh Liêm, Operations Leader.'
+        : 'Bạn viết email kế hoạch chuyên nghiệp tiếng Việt cho lãnh đạo Phúc Tea BOD. Email không dùng bảng, không dùng icon, không dùng ** hay ## thừa. Cấu trúc: Kính gửi → I. Tóm tắt kế hoạch → II. Kết quả mong đợi → III. KPI dự kiến → IV. Tổng kết bước tiếp → Lời cảm ơn → Ký tên: Dương Thanh Liêm, Operations Leader.';
       const r = await callAI(
-        'Viết lại email sau chuyên nghiệp, súc tích, trang trọng hơn. Giữ nguyên số liệu. Nếu có dữ liệu so sánh KH vs thực tế, phân tích và đưa ra nhận xét cụ thể:\n\n' + body + compCtx,
-        'Viết email báo cáo chuyên nghiệp tiếng Việt cho lãnh đạo doanh nghiệp Phúc Tea. Phân tích KPI thực tế so với kế hoạch nếu có dữ liệu.'
+        'Viết lại email sau theo đúng phong cách báo cáo nội bộ doanh nghiệp. Giữ nguyên số liệu thực tế. Không dùng bảng, không icon, không ** hay ## thừa:\n\n' + body + compCtx,
+        aiSystem
       );
       unload(); $('em-body').value = r; toast('🤖 AI đã viết lại!');
     }
@@ -5147,7 +5678,7 @@ Trả về JSON thuần, không markdown. 4 nhóm: Setup&KT, Audit, Đào tạo,
             headers: { 'Content-Type': 'application/json', 'x-api-key': CFG.apiKey, 'anthropic-version': '2023-06-01' },
             body: JSON.stringify({
               model: 'claude-3-5-sonnet-20241022', max_tokens: 1500,
-              system: 'Bạn là Operations Leader của hệ thống Phúc Tea Việt Nam. Trả lời chuyên nghiệp, thực tế theo đúng văn hóa Phuc Tea: Thân thiện - Minh bạch - Quyết liệt. ' + (system || 'Trả lời bằng tiếng Việt.'),
+              system: 'Bạn là Ops Coach nội bộ của hệ thống Phúc Tea – mô hình take-away F&B tại Việt Nam. Chỉ trả lời khi được hỏi. KHÔNG tự đề xuất thêm ngoài câu hỏi. Ưu tiên dữ liệu nội bộ (audit, task, cửa hàng, nhân sự). Nếu thiếu mới dùng kiến thức ngành F&B. Format bắt buộc: 1) Kết luận ngắn gọn, 2) Nguyên nhân (nếu cần), 3) 2-3 hành động cụ thể. Ngắn gọn, thực tế, dễ áp dụng ngay. ' + (system || 'Trả lời tiếng Việt.'),
               messages: [{ role: 'user', content: prompt }]
             })
           });
@@ -5253,7 +5784,7 @@ Trả về JSON thuần, không markdown. 4 nhóm: Setup&KT, Audit, Đào tạo,
       // Build full DB context and prepend to question
       const dbCtx = buildAIContext();
       const fullPrompt = dbCtx ? `[DỮ LIỆU HỆ THỐNG PHÚC TEA]\n${dbCtx}\n\n[CÂU HỎI]\n${q}` : q;
-      const r = await callAI(fullPrompt, 'Bạn là trợ lý vận hành Phúc Tea. Dựa trên dữ liệu được cung cấp, trả lời chính xác câu hỏi. Nếu không tìm thấy trong data, nói rõ. Trả lời tiếng Việt, ngắn gọn và thực tế.');
+      const r = await callAI(fullPrompt, 'Bạn là Ops Coach nội bộ Phúc Tea – mô hình take-away F&B Việt Nam. Dựa vào dữ liệu nội bộ trước, nếu câu hỏi không liên quan đến dữ liệu nội bộ hoặc dữ liệu chưa đủ thì dùng kiến thức chuyên môn ngành F&B để trả lời. Format: Kết luận → Nguyên nhân → 2-3 hành động cụ thể. Ngắn gọn, thực tế.');
       const t = $('ai-typing');
       if (t) { t.querySelector('.ai-bbl').innerHTML = r.replace(/\n/g, '<br>'); t.removeAttribute('id'); }
       ms.scrollTop = ms.scrollHeight;
@@ -5297,11 +5828,25 @@ Trả về JSON thuần, không markdown. 4 nhóm: Setup&KT, Audit, Đào tạo,
         try {
           const planRes = await api({ action: 'getPlanTasks', userName });
           if (planRes.ok) {
-            planTasks = (planRes.tasks || []).map(t => ({ ...t, _source: 'plan', _priority: 3 }));
+            planTasks = (planRes.tasks || []).map(t => ({
+              ...t, _source: 'plan', _priority: 3,
+              storeName: fmtPlanMonth(t.month || t.storeName || '') || t.storeName || 'Kế hoạch',
+            }));
           }
         } catch(_) {}
 
         // Audit tasks: CCP/RISK/NOK from audit data — with proper deadlines
+        // Auto-fetch audit data if not yet loaded (so re-audit tasks always appear)
+        if ((!_auditDirectData || !_auditDirectData.auditList || !_auditDirectData.auditList.length) && CFG.scriptUrl) {
+          try {
+            const auditRes = await api({ action: 'getAuditData' });
+            if (auditRes.ok) {
+              _auditDirectData = auditRes;
+              D.kpi.auditAvg     = auditRes.avg || 0;
+              D.kpi.reauditCount = auditRes.reauditCount || 0;
+            }
+          } catch(_) {}
+        }
         let auditTasks = [];
         if (_auditDirectData && _auditDirectData.auditList) {
           (_auditDirectData.auditList || []).forEach(a => {
@@ -5368,6 +5913,36 @@ Trả về JSON thuần, không markdown. 4 nhóm: Setup&KT, Audit, Đào tạo,
                 _auditTs: a.timestamp,
                 _verdict: 'NOK',
               });
+            }
+
+            // RE-AUDIT task: auto-create based on score %
+            const pct = a.pct || 0;
+            let reauditDays = 0;
+            if      (pct >= 85) reauditDays = 0;  // no task
+            else if (pct >= 80) reauditDays = 45;
+            else if (pct >= 70) reauditDays = 30;
+            else if (pct >= 60) reauditDays = 15;
+            else                reauditDays = 7;
+
+            if (reauditDays > 0) {
+              const reauditDl = fmtDl(addDays(auditDate, reauditDays));
+              const _raTid = 'REAUDIT_' + a.store.replace(/[^a-zA-Z0-9]/g,'_').slice(0,25);
+              if (!(D._auditDoneIds||new Set()).has(_raTid)) {
+                auditTasks.push({
+                  taskId: _raTid,
+                  task: '[TÁI AUDIT] ' + a.store + ' – ' + pct + '% (deadline ' + reauditDays + ' ngày)',
+                  phase: 'TÁI AUDIT',
+                  deadline: reauditDl,
+                  ic: safeAuditorName(a.auditor),
+                  storeName: a.store,
+                  storeId: '',
+                  _source: 'audit',
+                  _priority: pct < 70 ? 0 : pct < 80 ? 1 : 2,
+                  _auditStore: a.store,
+                  _auditTs: a.timestamp,
+                  _verdict: 'REAUDIT',
+                });
+              }
             }
           });
         }
@@ -5587,6 +6162,10 @@ Trả về JSON thuần, không markdown. 4 nhóm: Setup&KT, Audit, Đào tạo,
                 const riskLeft = D.myTasks.filter(t => t._source==='audit' && t._auditStore===auditStore && t._verdict==='RISK');
                 if (riskLeft.length === 0) rec.hasRISK = false;
               }
+              if (verdict === 'REAUDIT') {
+                const reauditLeft = D.myTasks.filter(t => t._source==='audit' && t._auditStore===auditStore && t._verdict==='REAUDIT');
+                if (reauditLeft.length === 0 && rec.pct < 85) rec._reauditDone = true;
+              }
             }
           }
         }
@@ -5624,32 +6203,38 @@ Trả về JSON thuần, không markdown. 4 nhóm: Setup&KT, Audit, Đào tạo,
       }
     }
 
-    // Mark a store as "Đã khắc phục" in the audit table row
+    // Mark a store as "Đã khắc phục" in the audit table row + update auditList data
     function _markAuditStoreRecovered(storeOrStoreName) {
-      // Find rows in a-direct-body for this store and update status badge
-      const tbody = $('a-direct-body');
-      if (!tbody) return;
-      tbody.querySelectorAll('tr').forEach(tr => {
-        const cells = tr.querySelectorAll('td');
-        if (cells[0] && cells[0].textContent.includes(storeOrStoreName)) {
-          const statusCell = cells[6]; // Trạng thái column
-          if (statusCell && !statusCell.innerHTML.includes('Đã khắc phục')) {
-            statusCell.innerHTML += ' <span class="bdg bg2" style="font-size:9px;margin-left:4px">✅ Đã khắc phục</span>';
-          }
-          // Auto-dismiss CCP/RISK: remove from _auditDirectData
-          if (_auditDirectData && _auditDirectData.auditList) {
-            const rec = _auditDirectData.auditList.find(a => a.store && a.store.includes(storeOrStoreName.split(' ')[0]));
-            if (rec) { rec.hasCCP = false; rec.hasRISK = false; }
-          }
+      // Update auditList data first (exact match + partial match fallback)
+      if (_auditDirectData && _auditDirectData.auditList) {
+        const rec = _auditDirectData.auditList.find(a => a.store === storeOrStoreName)
+               || _auditDirectData.auditList.find(a => a.store && a.store.includes(storeOrStoreName.split(' – ')[0]));
+        if (rec) {
+          rec.hasCCP = false;
+          rec.hasRISK = false;
+          rec._recovered = true;
         }
-      });
-      // Also update history table
-      const hbody = $('a-history-body');
+      }
+      // Update direct results table
+      const tbody = $('a-direct-body');
+      if (tbody) {
+        tbody.querySelectorAll('tr').forEach(function(tr) {
+          var cells = tr.querySelectorAll('td');
+          if (cells[0] && cells[0].textContent.includes(storeOrStoreName.split(' – ')[0])) {
+            var statusCell = cells[6];
+            if (statusCell && !statusCell.innerHTML.includes('Đã khắc phục')) {
+              statusCell.innerHTML += ' <span class="bdg bg2" style="font-size:9px;margin-left:4px">✅ Đã khắc phục</span>';
+            }
+          }
+        });
+      }
+      // Update history table
+      var hbody = $('a-history-body');
       if (hbody) {
-        hbody.querySelectorAll('tr').forEach(tr => {
-          const cells = tr.querySelectorAll('td');
-          if (cells[1] && cells[1].textContent.includes(storeOrStoreName)) {
-            const statusCell = cells[4];
+        hbody.querySelectorAll('tr').forEach(function(tr) {
+          var cells = tr.querySelectorAll('td');
+          if (cells[1] && cells[1].textContent.includes(storeOrStoreName.split(' – ')[0])) {
+            var statusCell = cells[4];
             if (statusCell && !statusCell.innerHTML.includes('Đã khắc phục')) {
               statusCell.innerHTML += ' <span class="bdg bg2" style="font-size:9px">✅ KP</span>';
             }
@@ -5674,25 +6259,91 @@ Trả về JSON thuần, không markdown. 4 nhóm: Setup&KT, Audit, Đào tạo,
     // ════════════════════════════════════════
     //  INIT
     // ════════════════════════════════════════
-    (function init() {
+    // ── DOMContentLoaded: wire up all events & init ─────────────
+    document.addEventListener('DOMContentLoaded', async function() {
+      // Wire login events
+      const loginBtn  = document.getElementById('login-btn');
+      const loginEye  = document.getElementById('login-eye');
+      const loginPass = document.getElementById('login-pass');
+      const loginEmail= document.getElementById('login-email');
+
+      if (loginEye && loginPass) {
+        loginEye.addEventListener('click', function() {
+          loginPass.type = loginPass.type === 'password' ? 'text' : 'password';
+          loginEye.textContent = loginPass.type === 'password' ? '👁' : '🙈';
+        });
+      }
+
+      async function runLogin() {
+        const email = (loginEmail ? loginEmail.value.trim() : '');
+        const pass  = (loginPass  ? loginPass.value.trim() : '');
+        const errEl = document.getElementById('login-err');
+        if (!email || !pass) {
+          if (errEl) { errEl.textContent = 'Vui lòng nhập email và mật khẩu'; errEl.style.display = 'block'; }
+          return;
+        }
+        if (loginBtn) { loginBtn.disabled = true; loginBtn.textContent = 'Đang xác thực...'; }
+        try {
+          const res = await doLoginCSV(email, pass);
+          if (res.ok) {
+            _saveSession(res.user);
+            if (errEl) errEl.style.display = 'none';
+            initApp();
+          } else {
+            if (errEl) { errEl.textContent = res.msg || 'Đăng nhập thất bại'; errEl.style.display = 'block'; }
+          }
+        } catch(e) {
+          if (errEl) { errEl.textContent = 'Lỗi kết nối: ' + e.message; errEl.style.display = 'block'; }
+        } finally {
+          if (loginBtn) { loginBtn.disabled = false; loginBtn.textContent = 'Đăng nhập'; }
+        }
+      }
+
+      if (loginBtn)  loginBtn.addEventListener('click', runLogin);
+      if (loginPass) loginPass.addEventListener('keydown', e => { if (e.key === 'Enter') runLogin(); });
+      if (loginEmail) loginEmail.addEventListener('keydown', e => { if (e.key === 'Enter') loginPass && loginPass.focus(); });
+
+      // Bootstrap config from sheet
+      await bootstrapConfig();
+
+      // Check session
+      const saved = _loadSession();
+      if (saved) {
+        _applyLoginUI(saved);
+        initApp();
+      } else {
+        showLoginScreen();
+      }
+    });
+
+    function initApp() {
       // Greeting & date
       const days = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
       const now = new Date();
-      $('greeting').textContent = getH() + ', Liêm 👋';
-      $('today-str').textContent = `${days[now.getDay()]}, ${now.toLocaleDateString('vi-VN')} · Mục tiêu 2026: 30 cửa hàng mới`;
+      const todayEl = $('today-str');
+      if (todayEl) todayEl.textContent = `${days[now.getDay()]}, ${now.toLocaleDateString('vi-VN')} · Mục tiêu 2026: 30 cửa hàng mới`;
       const ad = $('audit-date'); if (ad) ad.value = now.toISOString().split('T')[0];
 
       // Sheet link
-      if (CFG.sheetId) $('sheet-link').href = `https://docs.google.com/spreadsheets/d/${CFG.sheetId}`;
+      if (CFG.sheetId) { const sl = $('sheet-link'); if(sl) sl.href = `https://docs.google.com/spreadsheets/d/${CFG.sheetId}`; }
+
+      // Show page
+      goPage('dashboard', document.querySelector('.ntab'));
 
       // Start sync or show config alert
-      if (CFG.scriptUrl) { $('cfg-alert').style.display = 'none'; syncAll(); }
-      else { $('cfg-alert').style.display = 'flex'; setSyncStatus(false, 'Chưa cấu hình'); toast('👋 Chào mừng! Nhấn ⚙️ Cài đặt để kết nối Google Sheets.', 'twarn'); }
+      if (CFG.scriptUrl) { const ca=$('cfg-alert'); if(ca) ca.style.display='none'; syncAll(); }
+      else {
+        const ca=$('cfg-alert'); if(ca) ca.style.display='flex';
+        setSyncStatus(false, 'Chưa cấu hình');
+        if (_currentUser && _currentUser.email === 'duongthanhliem@phuctea.com.vn') {
+          toast('⚙️ Chưa cấu hình Apps Script URL. Nhấn ⚙️ Cài đặt.', 'twarn');
+        }
+      }
 
       setTimeout(() => {
         if (!D.auditCriteria.length && $('audit-criteria-container')) renderAuditForm();
       }, 1000);
-    })();
+    }
   </script>
 </body>
 
