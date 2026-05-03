@@ -11,25 +11,25 @@
   <style>
     :root {
       /* ── Dark Charcoal Palette v2 – Sáng hơn ── */
-      --primary: #3C3F45;       /* Nền tổng */
+      --primary: #3E4147;       /* Nền tổng */
       --primary-d: #2B2D31;     /* Nav bar */
-      --primary-l: #45484F;
-      --accent: #5865F2;
-      --accent-l: rgba(88,101,242,.15);
-      --accent-m: #7289DA;
-      --surface: #55585F;       /* Card bg – sáng rõ */
-      --surface-l: #5E6168;     /* Card hover */
-      --surface-d: #4A4D53;     /* Table header / input bg */
-      --cream: #3C3F45;
-      --white: #55585F;
-      --text: #ECEDEF;          /* Text chính – trắng sáng */
-      --text-muted: #A8AAAE;    /* Text phụ – dễ đọc */
+      --primary-l: #484B52;
+      --accent: #D4A017;        /* Vàng ấm chủ đạo */
+      --accent-l: rgba(212,160,23,.15);
+      --accent-m: #E8B820;
+      --surface: #5C6070;       /* Card – xám xanh nhạt, sáng hơn */
+      --surface-l: #676B7A;     /* Card hover */
+      --surface-d: #50535C;     /* Table header / input */
+      --cream: #3E4147;
+      --white: #5C6070;
+      --text: #F2F3F5;          /* Text chính – gần trắng */
+      --text-muted: #B0B3B8;    /* Text phụ */
       --text-bright: #FFFFFF;
 
       /* Keep semantic colors */
-      --gold: #5865F2;
-      --gold-l: rgba(88,101,242,.15);
-      --gold-m: #7289DA;
+      --gold: #D4A017;
+      --gold-l: rgba(212,160,23,.15);
+      --gold-m: #E8B820;
       --brown: #E3E5E8;
       --brown-m: #96989D;
       --brown-l: #72767D;
@@ -46,7 +46,7 @@
       --purple-l: rgba(155,89,182,.15);
       --gray: #96989D;
       --gray-l: #3A3D42;
-      --border: #606368;        /* Border rõ hơn */
+      --border: #6D7180;        /* Border rõ */
 
       --sh: 0 2px 8px rgba(0,0,0,.2);
       --shm: 0 6px 20px rgba(0,0,0,.3);
@@ -731,15 +731,15 @@
     }
 
     .ar {
-      background: var(--red-l);
-      border-left: 3px solid var(--red);
-      color: var(--red)
+      background: rgba(237,66,69,.18);
+      border-left: 3px solid #ED4245;
+      color: #FF7B7E
     }
 
     .ay {
-      background: var(--gold-l);
-      border-left: 3px solid var(--gold);
-      color: var(--brown-m)
+      background: rgba(212,160,23,.18);
+      border-left: 3px solid #D4A017;
+      color: #F5C842
     }
 
     .ag {
@@ -784,7 +784,7 @@
 
     .fc:focus {
       border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(88, 101, 242, .12)
+      box-shadow: 0 0 0 3px rgba(212,160,23,.18)
     }
 
     .fr {
@@ -1259,8 +1259,9 @@
     }
 
     .ai-msg-ai .ai-bbl {
-      background: #2B2D31;
-      color: #ECEDEF
+      background: #3D4350;
+      color: #F2F3F5;
+      border: 1px solid #50535C
     }
 
     .ai-input-row {
@@ -1275,7 +1276,7 @@
       padding: 7px 10px;
       border: 1px solid var(--border);
       border-radius: var(--rs);
-      background: var(--surface-d);
+      background: #3A3D45;
       color: var(--text);
       outline: none
     }
