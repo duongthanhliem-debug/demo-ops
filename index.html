@@ -4884,11 +4884,22 @@ Dương Thanh Liêm – Operations Phúc Tea`;
       _avatarBase64 = null; _cccdFrontB64 = null; _cccdBackB64 = null;
       if ($('sf-cccd-front'))  $('sf-cccd-front').value = s.cccdFront || '';
       if ($('sf-cccd-back'))   $('sf-cccd-back').value  = s.cccdBack  || '';
-      // Show existing CCCD images
+      // Load CCCD từ localStorage (ảnh không lưu trên GS)
+      const _editEmail = s.email || '';
       ['front','back'].forEach(side => {
-        const url = side==='front' ? s.cccdFront : s.cccdBack;
+        const localSrc = _editEmail ? localStorage.getItem('ops_cccd_' + side + '_' + _editEmail) : null;
+        const sheetUrl = side==='front' ? s.cccdFront : s.cccdBack;
+        const src = localSrc || sheetUrl || null;
         const prev = $('sf-cccd-'+side+'-preview');
-        if (prev) { if (url) { prev.src = url; prev.style.display = 'block'; } else { prev.src=''; prev.style.display='none'; } }
+        if (prev) {
+          if (src) { prev.src = src; prev.style.display = 'block'; }
+          else { prev.src = ''; prev.style.display = 'none'; }
+        }
+        // Pre-fill _cccdXxxB64 so existing image is preserved if user doesn't re-upload
+        if (localSrc) {
+          if (side === 'front') _cccdFrontB64 = localSrc;
+          else _cccdBackB64 = localSrc;
+        }
       });
       // Show existing avatar
       const avPrev = $('sf-avatar-preview');
@@ -4924,21 +4935,24 @@ Dương Thanh Liêm – Operations Phúc Tea`;
         cccd:          ($('sf-cccd')||{value:''}).value,
         bankName:      ($('sf-bank-name')||{value:''}).value,
         bankAcct:      ($('sf-bank-acct')||{value:''}).value,
-        cccdFront:     _cccdFrontB64 || ($('sf-cccd-front')||{value:''}).value,
-        cccdBack:      _cccdBackB64  || ($('sf-cccd-back')||{value:''}).value,
+        cccdFront:     '',  // stored in localStorage
+        cccdBack:      '',   // stored in localStorage
       };
       const res = await api({ action: 'saveStaff', data: d });
       unload();
       if (res.ok) {
-        // Lưu avatar vào localStorage theo email (không cần gửi qua GS)
         const sfEmail = $('sf-email') ? $('sf-email').value.trim() : '';
-        if (_avatarBase64 && sfEmail) {
-          localStorage.setItem('ops_avatar_' + sfEmail, _avatarBase64);
-          // Nếu đang sửa user đang đăng nhập → cập nhật nav avatar ngay
-          if (_currentUser && _currentUser.email === sfEmail) {
-            _currentUser._avatarSrc = _avatarBase64;
-            _updateNavUser(_currentUser);
+        if (sfEmail) {
+          // Lưu avatar localStorage
+          if (_avatarBase64) {
+            localStorage.setItem('ops_avatar_' + sfEmail, _avatarBase64);
+            if (_currentUser && _currentUser.email === sfEmail) {
+              _updateNavUser(_currentUser);
+            }
           }
+          // Lưu CCCD localStorage (không qua GS để tránh timeout)
+          if (_cccdFrontB64) localStorage.setItem('ops_cccd_front_' + sfEmail, _cccdFrontB64);
+          if (_cccdBackB64)  localStorage.setItem('ops_cccd_back_'  + sfEmail, _cccdBackB64);
         }
         toast('✅ Đã lưu: ' + name);
         closeModal('modal-staff');
@@ -5008,6 +5022,10 @@ Dương Thanh Liêm – Operations Phúc Tea`;
 
     // Compress image via canvas → returns base64 JPEG string
     function compressImage(file, callback) {
+      if (!file.type.startsWith('image/')) {
+        toast('⚠️ Vui lòng chọn file ảnh (JPG, PNG, HEIC...)', 'twarn');
+        return;
+      }
       if (file.size > MAX_IMG_BYTES) {
         toast('⚠️ Ảnh quá lớn (tối đa 15MB)', 'twarn');
         return;
@@ -5042,7 +5060,7 @@ Dương Thanh Liêm – Operations Phúc Tea`;
         if (hiddenId === 'sf-cccd-front') _cccdFrontB64 = src;
         if (hiddenId === 'sf-cccd-back')  _cccdBackB64  = src;
         const kb = Math.round(src.length * 0.75 / 1024);
-        toast('✅ Ảnh đã nén: ~' + kb + 'KB');
+        toast('✅ Ảnh đã nén: ~' + kb + 'KB – nhấn Lưu để xác nhận');
       });
     }
 
