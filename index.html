@@ -10,46 +10,46 @@
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
   <style>
     :root {
-      /* ── Dark Charcoal Palette v2 ── */
-      --primary: #2F3136;
-      --primary-d: #202225;
-      --primary-l: #36393F;
-      --accent: #5865F2;
-      --accent-l: rgba(88,101,242,.12);
+      /* ── Dark Charcoal Palette v2 – Sáng hơn ── */
+      --primary: #383B40;       /* Nền tổng – xám trung tính */
+      --primary-d: #2B2D31;     /* Nav bar */
+      --primary-l: #404349;     /* Hover */
+      --accent: #5865F2;        /* Indigo chủ đạo */
+      --accent-l: rgba(88,101,242,.15);
       --accent-m: #7289DA;
-      --surface: #36393F;
-      --surface-l: #40444B;
-      --surface-d: #292B2F;
-      --cream: #2F3136;
-      --white: #36393F;
-      --text: #DCDDDE;
-      --text-muted: #72767D;
+      --surface: #44474E;       /* Card bg – sáng hơn hẳn */
+      --surface-l: #4E5158;     /* Card hover / input focus bg */
+      --surface-d: #3A3D42;     /* Table header / input bg */
+      --cream: #383B40;
+      --white: #44474E;
+      --text: #E3E5E8;          /* Text chính – sáng */
+      --text-muted: #96989D;    /* Text phụ */
       --text-bright: #FFFFFF;
 
       /* Keep semantic colors */
       --gold: #5865F2;
-      --gold-l: rgba(88,101,242,.12);
+      --gold-l: rgba(88,101,242,.15);
       --gold-m: #7289DA;
-      --brown: #FFFFFF;
-      --brown-m: #B9BBBE;
+      --brown: #E3E5E8;
+      --brown-m: #96989D;
       --brown-l: #72767D;
 
       --red: #ED4245;
-      --red-l: rgba(237,66,69,.12);
-      --green: #57F287;
-      --green-l: rgba(87,242,135,.12);
+      --red-l: rgba(237,66,69,.15);
+      --green: #3BA55D;         /* Xanh lá sâu hơn – dễ đọc trên nền sáng */
+      --green-l: rgba(59,165,93,.15);
       --blue: #5865F2;
-      --blue-l: rgba(88,101,242,.12);
+      --blue-l: rgba(88,101,242,.15);
       --teal: #00B0F4;
-      --teal-l: rgba(0,176,244,.12);
+      --teal-l: rgba(0,176,244,.15);
       --purple: #9B59B6;
-      --purple-l: rgba(155,89,182,.12);
-      --gray: #72767D;
-      --gray-l: #292B2F;
-      --border: #40444B;
+      --purple-l: rgba(155,89,182,.15);
+      --gray: #96989D;
+      --gray-l: #3A3D42;
+      --border: #52555C;        /* Border rõ hơn */
 
-      --sh: 0 2px 12px rgba(0,0,0,.25);
-      --shm: 0 4px 24px rgba(0,0,0,.4);
+      --sh: 0 2px 8px rgba(0,0,0,.2);
+      --shm: 0 6px 20px rgba(0,0,0,.3);
       --r: 12px;
       --rs: 8px;
     }
@@ -78,14 +78,15 @@
     body {
       font-family: 'Be Vietnam Pro', sans-serif;
       background: var(--primary);
-      color: var(--text)
+      color: var(--text);
+      font-size: 14px
     }
 
     .load {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(32,34,37,.95);
+      background: rgba(43,45,49,.96);
       z-index: 9000;
       align-items: center;
       justify-content: center;
@@ -2513,7 +2514,7 @@
 
 
   <!-- ═══ LOGIN SCREEN ═══ -->
-  <div id="login-screen" style="display:none;position:fixed;inset:0;background:var(--primary-d);z-index:9999;align-items:center;justify-content:center;flex-direction:column">
+  <div id="login-screen" style="display:none;position:fixed;inset:0;background:var(--primary);z-index:9999;align-items:center;justify-content:center;flex-direction:column">
     <div style="width:100%;max-width:420px;padding:24px 16px">
       <div style="text-align:center;margin-bottom:28px">
         <img src="logo4.png" id="login-logo" style="height:60px;margin-bottom:14px" onerror="this.style.display='none'">
@@ -2677,7 +2678,8 @@
       // Show main app, hide login screen
       document.getElementById('login-screen').style.display = 'none';
       document.querySelector('.nav').style.display = '';
-      document.getElementById('pg-dashboard').style.display = '';
+      // Restore all pages to CSS-controlled (remove inline display override)
+      document.querySelectorAll('.page').forEach(p => p.style.display = '');
       // Show/hide settings button – only for owner
       const settingsBtn = document.getElementById('settings-btn');
       if (settingsBtn) {
@@ -2715,8 +2717,12 @@
 
     function showLoginScreen() {
       document.getElementById('login-screen').style.display = 'flex';
-      document.querySelector('.nav').style.display = 'none';
-      document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
+      const nav = document.querySelector('.nav');
+      if (nav) nav.style.display = 'none';
+      document.querySelectorAll('.page').forEach(p => {
+        p.classList.remove('on');
+        p.style.display = 'none';
+      });
     }
     let D = {
       kpi: { stores: 0, setupCount: 0, newStores: 0, targetStores: 30, auditAvg: 0, reauditCount: 0 },
@@ -6327,8 +6333,15 @@ Operations Leader`;
       // Sheet link
       if (CFG.sheetId) { const sl = $('sheet-link'); if(sl) sl.href = `https://docs.google.com/spreadsheets/d/${CFG.sheetId}`; }
 
-      // Show page
-      goPage('dashboard', document.querySelector('.ntab'));
+      // Show dashboard page
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('on'));
+      document.querySelectorAll('.ntab').forEach(t => t.classList.remove('on'));
+      const dashPage = $('pg-dashboard');
+      if (dashPage) dashPage.classList.add('on');
+      const firstTab = document.querySelector('.ntab');
+      if (firstTab) firstTab.classList.add('on');
+      // Re-init lucide icons after nav shown
+      if (typeof lucide !== 'undefined') lucide.createIcons();
 
       // Start sync or show config alert
       if (CFG.scriptUrl) { const ca=$('cfg-alert'); if(ca) ca.style.display='none'; syncAll(); }
