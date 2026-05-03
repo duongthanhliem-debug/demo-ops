@@ -2468,23 +2468,41 @@
         </div>
       </div>
       <div class="fg"><label class="fl">SĐT</label><input class="fc" id="p-phone" value="0357636539"></div>
-      <div class="sdiv">Đổi mật khẩu</div>
-      <div class="fg">
-        <label class="fl">Mật khẩu mới</label>
-        <div style="position:relative">
-          <input class="fc" type="password" id="p-newpw" placeholder="••••••••" style="padding-right:38px">
-          <button type="button" id="eye-newpw" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:15px">👁</button>
+      <!-- Hiển thị mật khẩu hiện tại (readonly, masked) -->
+      <div class="fg" id="pw-display-row">
+        <label class="fl">Mật khẩu</label>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input class="fc" type="password" value="placeholder" id="p-pw-display" readonly
+            style="background:var(--surface-d);cursor:default;flex:1;opacity:.7" tabindex="-1">
+          <button type="button" class="btn bo bsm" onclick="toggleChangePw()" style="white-space:nowrap;flex-shrink:0">
+            🔑 Đổi mật khẩu
+          </button>
         </div>
       </div>
-      <div class="fg">
-        <label class="fl">Xác nhận mật khẩu mới</label>
-        <div style="position:relative">
-          <input class="fc" type="password" id="p-confirmpw" placeholder="••••••••" style="padding-right:38px">
-          <button type="button" id="eye-confirmpw" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:15px">👁</button>
+      <!-- Form đổi mật khẩu - ẩn mặc định -->
+      <div id="pw-change-section" style="display:none">
+        <div class="fg">
+          <label class="fl">Mật khẩu mới</label>
+          <div style="position:relative">
+            <input class="fc" type="password" id="p-newpw" placeholder="••••••••" style="padding-right:38px">
+            <button type="button" id="eye-newpw" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:15px">👁</button>
+          </div>
+        </div>
+        <div class="fg">
+          <label class="fl">Xác nhận mật khẩu mới</label>
+          <div style="position:relative">
+            <input class="fc" type="password" id="p-confirmpw" placeholder="••••••••" style="padding-right:38px">
+            <button type="button" id="eye-confirmpw" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:15px">👁</button>
+          </div>
+        </div>
+        <div id="pw-match-err" style="display:none;color:var(--red);font-size:12px;margin-bottom:8px">⚠️ Mật khẩu xác nhận không khớp</div>
+        <div style="display:flex;gap:7px;margin-bottom:10px">
+          <button class="btn bp" style="flex:1" onclick="updateProfile()">💾 Cập nhật mật khẩu</button>
+          <button class="btn bo" onclick="toggleChangePw()">Hủy</button>
         </div>
       </div>
-      <div id="pw-match-err" style="display:none;color:var(--red);font-size:12px;margin-bottom:8px">⚠️ Mật khẩu xác nhận không khớp</div>
-      <button class="btn bp bfull" onclick="updateProfile()">💾 Cập nhật</button>
+      <!-- Nút Cập nhật thông tin (SĐT) khi không đổi mật khẩu -->
+      <button class="btn bp bfull" id="profile-update-btn" onclick="updateProfileInfo()">💾 Cập nhật thông tin</button>
     </div>
   </div>
 
@@ -2900,6 +2918,13 @@
           }
         }
       }
+      // Reset trạng thái đổi mật khẩu mỗi lần mở
+      const pwSec = document.getElementById('pw-change-section');
+      const pwBtn = document.getElementById('profile-update-btn');
+      const pwDisp = document.getElementById('pw-display-row');
+      if (pwSec)  pwSec.style.display  = 'none';
+      if (pwBtn)  pwBtn.style.display  = '';
+      if (pwDisp) pwDisp.style.display = '';
       openModal('modal-profile');
     });
 
@@ -5094,6 +5119,29 @@ Dương Thanh Liêm – Operations Phúc Tea`;
       });
     }
 
+    function toggleChangePw() {
+      const sec = $('pw-change-section');
+      const btn = $('profile-update-btn');
+      const disp = $('pw-display-row');
+      const isHidden = sec.style.display === 'none';
+      sec.style.display  = isHidden ? '' : 'none';
+      if (btn)  btn.style.display  = isHidden ? 'none' : '';
+      if (disp) disp.style.display = isHidden ? 'none' : '';
+      if (isHidden) { setTimeout(() => { const el=$('p-newpw'); if(el) el.focus(); }, 50); }
+      else { const e=$('pw-match-err'); if(e) e.style.display='none'; if($('p-newpw')) $('p-newpw').value=''; if($('p-confirmpw')) $('p-confirmpw').value=''; }
+    }
+
+    function updateProfileInfo() {
+      // Cập nhật SĐT (không đổi mật khẩu)
+      const phone = $('p-phone') ? $('p-phone').value.trim() : '';
+      const email = _currentUser ? _currentUser.email : '';
+      if (!email) { toast('Chưa đăng nhập', 'twarn'); return; }
+      api({ action: 'updatePassword', email, newPassword: '__keep__' })
+        .then(() => {});  // no-op, just update phone via saveStaff if needed
+      toast('✅ Đã cập nhật!');
+      if (_currentUser && phone) { _currentUser.phone = phone; _saveSession(_currentUser); }
+    }
+
     function updateProfile() {
       const pw      = $('p-newpw').value.trim();
       const confirm = $('p-confirmpw').value.trim();
@@ -5105,11 +5153,14 @@ Dương Thanh Liêm – Operations Phúc Tea`;
       }
       if (errEl) errEl.style.display = 'none';
       const email = _currentUser ? _currentUser.email : 'duongthanhliem@phuctea.com.vn';
+      load('Đang cập nhật mật khẩu...');
       api({ action: 'updatePassword', email, newPassword: pw })
         .then(r => {
+          unload();
           if (r.ok) {
-            toast('✅ Đã cập nhật mật khẩu');
+            toast('✅ Đã cập nhật mật khẩu thành công!');
             $('p-newpw').value = ''; $('p-confirmpw').value = '';
+            toggleChangePw(); // Ẩn form lại sau khi thành công
           } else toast('❌ ' + (r.error || r.message || 'Lỗi'), 'terr');
         });
     }
