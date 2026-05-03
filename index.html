@@ -2723,27 +2723,50 @@
       if (settingsBtn) {
         settingsBtn.style.display = (user.email === 'duongthanhliem@phuctea.com.vn') ? '' : 'none';
       }
-      // Update greeting & avatar
+      // Greeting with correct name
       const greetEl = document.getElementById('greeting');
       if (greetEl) {
         const firstName = (user.name || '').split(' ').pop();
         greetEl.textContent = getH() + ', ' + firstName + ' 👋';
       }
+      // Nav avatar + user label (always reflects current user)
+      _updateNavUser(user);
+    }
+
+    function _updateNavUser(user) {
+      if (!user) return;
+      // Nav avatar initials
       const av = document.getElementById('nav-avatar');
-      if (av) av.textContent = (user.name||'?').split(' ').slice(-1)[0].charAt(0).toUpperCase() + (user.name||'?').split(' ').slice(-2,-1)[0].charAt(0).toUpperCase();
-      // Show logout button & name in nav
+      if (av) {
+        const parts = (user.name || '').split(' ').filter(Boolean);
+        const init = parts.length >= 2
+          ? (parts[parts.length-1][0] + parts[parts.length-2][0]).toUpperCase()
+          : (parts[0] ? parts[0].slice(0,2).toUpperCase() : '?');
+        // Show avatar image if exists, else initials
+        const saved = localStorage.getItem('ops_avatar_' + (user.email||''));
+        if (saved) {
+          av.innerHTML = '<img src="' + saved + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
+        } else {
+          av.textContent = init;
+          av.style.fontSize = '11px';
+        }
+      }
+      // Nav user label - create if not exists, always update text
       const nright = document.querySelector('.nright');
-      if (nright && !document.getElementById('nav-user-label')) {
-        const span = document.createElement('span');
-        span.id = 'nav-user-label';
-        span.style.cssText = 'font-size:11px;color:rgba(255,255,255,.55);white-space:nowrap;max-width:120px;overflow:hidden;text-overflow:ellipsis';
+      if (nright) {
+        let span = document.getElementById('nav-user-label');
+        if (!span) {
+          span = document.createElement('span');
+          span.id = 'nav-user-label';
+          span.style.cssText = 'font-size:11px;color:rgba(255,255,255,.55);white-space:nowrap;max-width:130px;overflow:hidden;text-overflow:ellipsis';
+          const logoutBtn = document.createElement('button');
+          logoutBtn.className = 'nbtn';
+          logoutBtn.textContent = '🚪 Đăng xuất';
+          logoutBtn.addEventListener('click', doLogout);
+          nright.appendChild(span);
+          nright.appendChild(logoutBtn);
+        }
         span.textContent = user.name || user.email;
-        const logoutBtn = document.createElement('button');
-        logoutBtn.className = 'nbtn';
-        logoutBtn.textContent = '🚪 Đăng xuất';
-        logoutBtn.addEventListener('click', doLogout);
-        nright.appendChild(span);
-        nright.appendChild(logoutBtn);
       }
     }
 
@@ -3093,7 +3116,7 @@
         const now = new Date();
         const tStr = $('today-str');
         if (tStr) tStr.textContent = `${days[now.getDay()]}, ${now.toLocaleDateString('vi-VN')} · Mục tiêu 2026: ${k.targetStores || 30} cửa hàng mới`;
-        if ($('greeting')) $('greeting').textContent = `${getH()}, Liêm 👋`;
+        if ($('greeting')) { const _fn = _currentUser ? (_currentUser.name||'').split(' ').pop() : 'bạn'; $('greeting').textContent = getH() + ', ' + _fn + ' 👋'; }
       } catch (e) { }
     }
 
@@ -4895,7 +4918,7 @@ Dương Thanh Liêm – Operations Phúc Tea`;
         store: $('sf-store').value || 'Hệ Thống', role: $('sf-role').value,
         status: $('sf-status').value, note: $('sf-note').value,
         password: $('sf-pw').value || undefined,
-        avatar: _avatarBase64 || currentStaffEdit?.avatar || '',
+        avatar: currentStaffEdit?.avatar || '',  // avatar stored in localStorage, not GS
         permanentAddr: ($('sf-permanent-addr')||{value:''}).value,
         tempAddr:      ($('sf-temp-addr')||{value:''}).value,
         cccd:          ($('sf-cccd')||{value:''}).value,
@@ -4906,7 +4929,21 @@ Dương Thanh Liêm – Operations Phúc Tea`;
       };
       const res = await api({ action: 'saveStaff', data: d });
       unload();
-      if (res.ok) { toast('✅ Đã lưu: ' + name); closeModal('modal-staff'); await loadStaff(); }
+      if (res.ok) {
+        // Lưu avatar vào localStorage theo email (không cần gửi qua GS)
+        const sfEmail = $('sf-email') ? $('sf-email').value.trim() : '';
+        if (_avatarBase64 && sfEmail) {
+          localStorage.setItem('ops_avatar_' + sfEmail, _avatarBase64);
+          // Nếu đang sửa user đang đăng nhập → cập nhật nav avatar ngay
+          if (_currentUser && _currentUser.email === sfEmail) {
+            _currentUser._avatarSrc = _avatarBase64;
+            _updateNavUser(_currentUser);
+          }
+        }
+        toast('✅ Đã lưu: ' + name);
+        closeModal('modal-staff');
+        await loadStaff();
+      }
       else toast('❌ ' + (res.error || 'Lỗi'), 'terr');
     }
 
@@ -5013,10 +5050,12 @@ Dương Thanh Liêm – Operations Phúc Tea`;
       const file = input.files[0]; if (!file) return;
       compressImage(file, function(src) {
         _avatarBase64 = src;
+        // Preview in modal
         const av = document.getElementById('sf-avatar-preview');
         if (av) av.innerHTML = '<img src="' + src + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
+        // Lưu tạm, sẽ save vào localStorage khi nhấn Lưu
         const kb = Math.round(src.length * 0.75 / 1024);
-        toast('✅ Avatar đã nén: ~' + kb + 'KB');
+        toast('✅ Avatar sẵn sàng: ~' + kb + 'KB – nhấn Lưu để xác nhận');
       });
     }
 
