@@ -1357,7 +1357,7 @@
         <button class="nbtn nbtn-gold" id="settings-btn" onclick="openSettings()">⚙️ Cài đặt</button>
         <a href="https://phuctea-pl.vercel.app" target="_blank" class="npl" id="pl-btn" style="background:#B8860B;color:#fff">📊 P&L Hub</a>
         <a href="https://hrm-one-delta.vercel.app" target="_blank" class="npl" style="background:#003399;color:#fff">🗄️ Data Core</a>
-        <div class="navatar" id="nav-avatar" onclick="openModal('modal-profile')" title="Thông tin cá nhân">DL</div>
+        <div class="navatar" id="nav-avatar" title="Thông tin cá nhân">DL</div>
       </div>
     </div>
     <div class="ntabs">
@@ -2358,8 +2358,14 @@
   <div class="overlay" id="modal-staff">
     <div class="modal modal-lg">
       <div class="mh">
-        <div class="mt" id="staff-modal-title">+ Thêm nhân viên</div><button class="mx"
-          onclick="closeModal('modal-staff')">×</button>
+        <div style="display:flex;align-items:center;gap:12px;flex:1">
+        <div style="position:relative;cursor:pointer" onclick="document.getElementById('sf-avatar-file').click()">
+          <div class="staff-av" id="sf-avatar-preview" style="width:44px;height:44px;font-size:15px;cursor:pointer" title="Nhấn để đổi ảnh">?</div>
+          <span style="position:absolute;bottom:-2px;right:-2px;font-size:10px;background:var(--accent);color:#fff;border-radius:50%;width:16px;height:16px;display:flex;align-items:center;justify-content:center">+</span>
+          <input type="file" id="sf-avatar-file" accept="image/*" style="display:none" onchange="previewAvatar(this)">
+        </div>
+        <div class="mt" id="staff-modal-title">+ Thêm nhân viên</div>
+      </div><button class="mx" onclick="closeModal('modal-staff')">×</button>
       </div>
       <div class="fr">
         <div class="fg"><label class="fl">ID nhân viên</label><input class="fc" id="sf-id"
@@ -2410,8 +2416,30 @@
         <div class="fg"><label class="fl">Ngân hàng</label><input class="fc" id="sf-bank-name" placeholder="Vietcombank / MB..."></div>
       </div>
       <div class="fg"><label class="fl">Số tài khoản ngân hàng</label><input class="fc" id="sf-bank-acct" placeholder="Số tài khoản..."></div>
-      <div class="fg"><label class="fl">Link ảnh CCCD mặt trước</label><input class="fc" id="sf-cccd-front" placeholder="URL ảnh Google Drive..."></div>
-      <div class="fg"><label class="fl">Link ảnh CCCD mặt sau</label><input class="fc" id="sf-cccd-back" placeholder="URL ảnh Google Drive..."></div>
+      <div class="fr">
+        <div class="fg">
+          <label class="fl">Ảnh CCCD mặt trước</label>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <label class="btn bo bsm" style="cursor:pointer;margin:0;justify-content:center">
+              📎 Chọn ảnh
+              <input type="file" id="sf-cccd-front-file" accept="image/*" style="display:none" onchange="previewImg(this,'sf-cccd-front-preview','sf-cccd-front')">
+            </label>
+            <img id="sf-cccd-front-preview" style="display:none;max-width:100%;max-height:100px;border-radius:6px;object-fit:cover;border:1px solid var(--border)">
+            <input type="hidden" id="sf-cccd-front">
+          </div>
+        </div>
+        <div class="fg">
+          <label class="fl">Ảnh CCCD mặt sau</label>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <label class="btn bo bsm" style="cursor:pointer;margin:0;justify-content:center">
+              📎 Chọn ảnh
+              <input type="file" id="sf-cccd-back-file" accept="image/*" style="display:none" onchange="previewImg(this,'sf-cccd-back-preview','sf-cccd-back')">
+            </label>
+            <img id="sf-cccd-back-preview" style="display:none;max-width:100%;max-height:100px;border-radius:6px;object-fit:cover;border:1px solid var(--border)">
+            <input type="hidden" id="sf-cccd-back">
+          </div>
+        </div>
+      </div>
       <div style="display:flex;gap:7px;margin-top:8px">
         <button class="btn bp" style="flex:1" onclick="saveStaffForm()">💾 Lưu lên Sheets</button>
         <button class="btn bo" onclick="closeModal('modal-staff')">Hủy</button>
@@ -2429,10 +2457,7 @@
         <div class="staff-av" style="width:52px;height:52px;font-size:18px" id="profile-av">DL</div>
         <div>
           <div style="font-weight:700;font-size:15px" id="profile-name">Dương Thanh Liêm</div>
-          <div style="font-size:12px;color:var(--gray)" id="profile-email"><a href="/cdn-cgi/l/email-protection"
-              class="__cf_email__"
-              data-cfemail="d9bdacb6b7beadb1b8b7b1b5b0bcb499a9b1acbaadbcb8f7bab6b4f7afb7">[email&#160;protected]</a>
-          </div>
+          <div style="font-size:12px;color:var(--text-muted)" id="profile-email"></div>
           <div style="margin-top:4px"><span class="bdg bb2" id="profile-role">System</span></div>
         </div>
       </div>
@@ -2444,8 +2469,21 @@
       </div>
       <div class="fg"><label class="fl">SĐT</label><input class="fc" id="p-phone" value="0357636539"></div>
       <div class="sdiv">Đổi mật khẩu</div>
-      <div class="fg"><label class="fl">Mật khẩu mới</label><input class="fc" type="password" id="p-newpw"
-          placeholder="••••••••"></div>
+      <div class="fg">
+        <label class="fl">Mật khẩu mới</label>
+        <div style="position:relative">
+          <input class="fc" type="password" id="p-newpw" placeholder="••••••••" style="padding-right:38px">
+          <button type="button" id="eye-newpw" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:15px">👁</button>
+        </div>
+      </div>
+      <div class="fg">
+        <label class="fl">Xác nhận mật khẩu mới</label>
+        <div style="position:relative">
+          <input class="fc" type="password" id="p-confirmpw" placeholder="••••••••" style="padding-right:38px">
+          <button type="button" id="eye-confirmpw" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:15px">👁</button>
+        </div>
+      </div>
+      <div id="pw-match-err" style="display:none;color:var(--red);font-size:12px;margin-bottom:8px">⚠️ Mật khẩu xác nhận không khớp</div>
       <button class="btn bp bfull" onclick="updateProfile()">💾 Cập nhật</button>
     </div>
   </div>
@@ -2550,7 +2588,6 @@
     </div>
   </div>
 
-  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
   <script>
     // ════════════════════════════════════════
     //  CONFIG & STATE — v2 (bootstrapConfig)
@@ -2820,6 +2857,29 @@
     // ════════════════════════════════════════
     //  SETTINGS
     // ════════════════════════════════════════
+    // Populate profile modal from session
+    document.getElementById('nav-avatar').addEventListener('click', function() {
+      if (_currentUser) {
+        const e = $('profile-email'); if (e) e.textContent = _currentUser.email || '';
+        const n = $('profile-name'); if (n) n.textContent = _currentUser.name || '';
+        const r = $('profile-role'); if (r) r.textContent = _currentUser.role || '';
+        const pos = $('p-position'); if (pos) pos.value = _currentUser.position || '';
+        const st = $('p-store'); if (st) st.value = _currentUser.store || '';
+        const ph = $('p-phone'); if (ph) ph.value = _currentUser.phone || '';
+        // Avatar
+        const av = $('profile-av');
+        if (av && _currentUser.name) {
+          const parts = _currentUser.name.split(' ');
+          const init = (parts.slice(-1)[0][0] || '') + (parts.length > 1 ? parts.slice(-2)[0][0] || '' : '');
+          av.textContent = init.toUpperCase();
+          if (_currentUser._avatarSrc) {
+            av.innerHTML = `<img src="${_currentUser._avatarSrc}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+          }
+        }
+      }
+      openModal('modal-profile');
+    });
+
     function openSettings() {
       if (!_currentUser || _currentUser.email !== 'duongthanhliem@phuctea.com.vn') {
         toast('⚠️ Chỉ Operations Leader mới có quyền truy cập Cài đặt', 'twarn');
@@ -4775,7 +4835,11 @@ Dương Thanh Liêm – Operations Phúc Tea`;
 
     function openStaffModal(data) {
       currentStaffEdit = null;
-      ['sf-id', 'sf-name', 'sf-phone', 'sf-email', 'sf-position', 'sf-store', 'sf-note', 'sf-permanent-addr', 'sf-temp-addr', 'sf-cccd', 'sf-bank-name', 'sf-bank-acct', 'sf-cccd-front', 'sf-cccd-back'].forEach(id => { const el = $(id); if (el) el.value = id === 'sf-store' ? 'Hệ Thống' : ''; });
+      _avatarBase64 = null; _cccdFrontB64 = null; _cccdBackB64 = null;
+      const avPrev = $('sf-avatar-preview'); if (avPrev) avPrev.innerHTML = '?';
+      ['sf-cccd-front-preview','sf-cccd-back-preview'].forEach(id=>{const el=$(id);if(el){el.src='';el.style.display='none';}});
+      ['sf-cccd-front','sf-cccd-back'].forEach(id=>{const el=$(id);if(el)el.value='';});
+      ['sf-id', 'sf-name', 'sf-phone', 'sf-email', 'sf-position', 'sf-store', 'sf-note', 'sf-permanent-addr', 'sf-temp-addr', 'sf-cccd', 'sf-bank-name', 'sf-bank-acct'].forEach(id => { const el = $(id); if (el) el.value = id === 'sf-store' ? 'Hệ Thống' : ''; });
       ['sf-dob', 'sf-start'].forEach(id => { $(id).value = ''; });
       $('sf-gender').value = 'Nam'; $('sf-role').value = 'User'; $('sf-status').value = 'Đang cộng tác'; $('sf-pw').value = '';
       $('staff-modal-title').textContent = '+ Thêm nhân viên';
@@ -4794,8 +4858,21 @@ Dương Thanh Liêm – Operations Phúc Tea`;
       if ($('sf-cccd'))           $('sf-cccd').value           = s.cccd || '';
       if ($('sf-bank-name'))      $('sf-bank-name').value      = s.bankName || '';
       if ($('sf-bank-acct'))      $('sf-bank-acct').value      = s.bankAcct || '';
-      if ($('sf-cccd-front'))     $('sf-cccd-front').value     = s.cccdFront || '';
-      if ($('sf-cccd-back'))      $('sf-cccd-back').value      = s.cccdBack  || '';
+      _avatarBase64 = null; _cccdFrontB64 = null; _cccdBackB64 = null;
+      if ($('sf-cccd-front'))  $('sf-cccd-front').value = s.cccdFront || '';
+      if ($('sf-cccd-back'))   $('sf-cccd-back').value  = s.cccdBack  || '';
+      // Show existing CCCD images
+      ['front','back'].forEach(side => {
+        const url = side==='front' ? s.cccdFront : s.cccdBack;
+        const prev = $('sf-cccd-'+side+'-preview');
+        if (prev) { if (url) { prev.src = url; prev.style.display = 'block'; } else { prev.src=''; prev.style.display='none'; } }
+      });
+      // Show existing avatar
+      const avPrev = $('sf-avatar-preview');
+      if (avPrev) {
+        if (s.avatar) { avPrev.innerHTML = `<img src="${s.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`; }
+        else { const init = (s.name||'?').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2); avPrev.innerHTML = `<span>${init}</span>`; }
+      }
       $('sf-pw').value = '';
       if (s.dob) $('sf-dob').value = s.dob.split('/').reverse().join('-');
       if (s.startDate) $('sf-start').value = s.startDate.split('/').reverse().join('-');
@@ -4817,14 +4894,15 @@ Dương Thanh Liêm – Operations Phúc Tea`;
         startDate: $('sf-start').value, position: $('sf-position').value,
         store: $('sf-store').value || 'Hệ Thống', role: $('sf-role').value,
         status: $('sf-status').value, note: $('sf-note').value,
-        password: $('sf-pw').value || undefined, avatar: currentStaffEdit?.avatar || '',
+        password: $('sf-pw').value || undefined,
+        avatar: _avatarBase64 || currentStaffEdit?.avatar || '',
         permanentAddr: ($('sf-permanent-addr')||{value:''}).value,
         tempAddr:      ($('sf-temp-addr')||{value:''}).value,
         cccd:          ($('sf-cccd')||{value:''}).value,
         bankName:      ($('sf-bank-name')||{value:''}).value,
         bankAcct:      ($('sf-bank-acct')||{value:''}).value,
-        cccdFront:     ($('sf-cccd-front')||{value:''}).value,
-        cccdBack:      ($('sf-cccd-back')||{value:''}).value,
+        cccdFront:     _cccdFrontB64 || ($('sf-cccd-front')||{value:''}).value,
+        cccdBack:      _cccdBackB64  || ($('sf-cccd-back')||{value:''}).value,
       };
       const res = await api({ action: 'saveStaff', data: d });
       unload();
@@ -4882,11 +4960,69 @@ Dương Thanh Liêm – Operations Phúc Tea`;
       else toast('❌ ' + (res.error||'Lỗi'), 'terr');
     }
 
+    // ── Image preview helpers ────────────────────────────────
+    let _avatarBase64 = null;
+    let _cccdFrontB64 = null;
+    let _cccdBackB64  = null;
+
+    function previewImg(input, previewId, hiddenId) {
+      const file = input.files[0]; if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const src = e.target.result;
+        const img = $(previewId);
+        if (img) { img.src = src; img.style.display = 'block'; }
+        const hidden = $(hiddenId);
+        if (hidden) hidden.value = src; // store base64 in hidden input
+        if (hiddenId === 'sf-cccd-front') _cccdFrontB64 = src;
+        if (hiddenId === 'sf-cccd-back')  _cccdBackB64  = src;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function previewAvatar(input) {
+      const file = input.files[0]; if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        _avatarBase64 = e.target.result;
+        const av = $('sf-avatar-preview');
+        if (av) av.innerHTML = `<img src="${_avatarBase64}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // Reset avatar/cccd state when opening staff modal
+    const _origOpenStaffModal = window.openStaffModal;
+
+    // Wire 👁 buttons for password fields (delegated — works for dynamically added elements)
+    document.addEventListener('click', function(e) {
+      const btn = e.target.closest('button[id^="eye-"]');
+      if (!btn) return;
+      const targetId = btn.id.replace('eye-', '');
+      const inp = $(targetId);
+      if (!inp) return;
+      inp.type = inp.type === 'password' ? 'text' : 'password';
+      btn.textContent = inp.type === 'password' ? '👁' : '🙈';
+    });
+
     function updateProfile() {
-      const pw = $('p-newpw').value.trim();
+      const pw      = $('p-newpw').value.trim();
+      const confirm = $('p-confirmpw').value.trim();
+      const errEl   = $('pw-match-err');
       if (!pw) { toast('Nhập mật khẩu mới', 'twarn'); return; }
-      api({ action: 'updatePassword', email: 'duongthanhliem@phuctea.com.vn', newPassword: pw })
-        .then(r => { if (r.ok) { toast('✅ Đã cập nhật mật khẩu'); $('p-newpw').value = ''; } else toast('❌ ' + r.error, 'terr'); });
+      if (pw !== confirm) {
+        if (errEl) errEl.style.display = 'block';
+        toast('⚠️ Mật khẩu xác nhận không khớp', 'twarn'); return;
+      }
+      if (errEl) errEl.style.display = 'none';
+      const email = _currentUser ? _currentUser.email : 'duongthanhliem@phuctea.com.vn';
+      api({ action: 'updatePassword', email, newPassword: pw })
+        .then(r => {
+          if (r.ok) {
+            toast('✅ Đã cập nhật mật khẩu');
+            $('p-newpw').value = ''; $('p-confirmpw').value = '';
+          } else toast('❌ ' + (r.error || r.message || 'Lỗi'), 'terr');
+        });
     }
 
     // ════════════════════════════════════════
