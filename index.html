@@ -2362,7 +2362,7 @@
         <div style="position:relative;cursor:pointer" onclick="document.getElementById('sf-avatar-file').click()">
           <div class="staff-av" id="sf-avatar-preview" style="width:44px;height:44px;font-size:15px;cursor:pointer" title="Nhấn để đổi ảnh">?</div>
           <span style="position:absolute;bottom:-2px;right:-2px;font-size:10px;background:var(--accent);color:#fff;border-radius:50%;width:16px;height:16px;display:flex;align-items:center;justify-content:center">+</span>
-          <input type="file" id="sf-avatar-file" accept="image/*" style="display:none" onchange="previewAvatar(this)">
+          <input type="file" id="sf-avatar-file" accept="image/*" style="display:none;pointer-events:none" onchange="previewAvatar(this)">
         </div>
         <div class="mt" id="staff-modal-title">+ Thêm nhân viên</div>
       </div><button class="mx" onclick="closeModal('modal-staff')">×</button>
@@ -4960,50 +4960,82 @@ Dương Thanh Liêm – Operations Phúc Tea`;
       else toast('❌ ' + (res.error||'Lỗi'), 'terr');
     }
 
-    // ── Image preview helpers ────────────────────────────────
+    // ── Image helpers ─────────────────────────────────────────
     let _avatarBase64 = null;
     let _cccdFrontB64 = null;
     let _cccdBackB64  = null;
 
-    function previewImg(input, previewId, hiddenId) {
-      const file = input.files[0]; if (!file) return;
+    const MAX_IMG_BYTES = 15 * 1024 * 1024; // 15MB input limit
+    const MAX_PX = 1200;   // max dimension after resize
+    const IMG_QUALITY = 0.75; // JPEG quality → ~100-400KB output
+
+    // Compress image via canvas → returns base64 JPEG string
+    function compressImage(file, callback) {
+      if (file.size > MAX_IMG_BYTES) {
+        toast('⚠️ Ảnh quá lớn (tối đa 15MB)', 'twarn');
+        return;
+      }
       const reader = new FileReader();
       reader.onload = function(e) {
-        const src = e.target.result;
-        const img = $(previewId);
-        if (img) { img.src = src; img.style.display = 'block'; }
-        const hidden = $(hiddenId);
-        if (hidden) hidden.value = src; // store base64 in hidden input
-        if (hiddenId === 'sf-cccd-front') _cccdFrontB64 = src;
-        if (hiddenId === 'sf-cccd-back')  _cccdBackB64  = src;
+        const img = new Image();
+        img.onload = function() {
+          let w = img.width, h = img.height;
+          if (w > MAX_PX || h > MAX_PX) {
+            if (w > h) { h = Math.round(h * MAX_PX / w); w = MAX_PX; }
+            else       { w = Math.round(w * MAX_PX / h); h = MAX_PX; }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = w; canvas.height = h;
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+          const compressed = canvas.toDataURL('image/jpeg', IMG_QUALITY);
+          callback(compressed);
+        };
+        img.src = e.target.result;
       };
       reader.readAsDataURL(file);
+    }
+
+    function previewImg(input, previewId, hiddenId) {
+      const file = input.files[0]; if (!file) return;
+      compressImage(file, function(src) {
+        const img = document.getElementById(previewId);
+        if (img) { img.src = src; img.style.display = 'block'; }
+        const hidden = document.getElementById(hiddenId);
+        if (hidden) hidden.value = src;
+        if (hiddenId === 'sf-cccd-front') _cccdFrontB64 = src;
+        if (hiddenId === 'sf-cccd-back')  _cccdBackB64  = src;
+        const kb = Math.round(src.length * 0.75 / 1024);
+        toast('✅ Ảnh đã nén: ~' + kb + 'KB');
+      });
     }
 
     function previewAvatar(input) {
       const file = input.files[0]; if (!file) return;
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        _avatarBase64 = e.target.result;
-        const av = $('sf-avatar-preview');
-        if (av) av.innerHTML = `<img src="${_avatarBase64}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
-      };
-      reader.readAsDataURL(file);
+      compressImage(file, function(src) {
+        _avatarBase64 = src;
+        const av = document.getElementById('sf-avatar-preview');
+        if (av) av.innerHTML = '<img src="' + src + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
+        const kb = Math.round(src.length * 0.75 / 1024);
+        toast('✅ Avatar đã nén: ~' + kb + 'KB');
+      });
     }
 
-    // Reset avatar/cccd state when opening staff modal
-    const _origOpenStaffModal = window.openStaffModal;
-
-    // Wire 👁 buttons for password fields (delegated — works for dynamically added elements)
-    document.addEventListener('click', function(e) {
-      const btn = e.target.closest('button[id^="eye-"]');
-      if (!btn) return;
-      const targetId = btn.id.replace('eye-', '');
-      const inp = $(targetId);
-      if (!inp) return;
-      inp.type = inp.type === 'password' ? 'text' : 'password';
-      btn.textContent = inp.type === 'password' ? '👁' : '🙈';
-    });
+    // ── Nút 👁 hiện/ẩn mật khẩu – wire trực tiếp trong DOMContentLoaded ──
+    // (delegated click không hoạt động với input[type=password] trên một số browser)
+    function wireEyeBtn(btnId, inputId) {
+      const btn = document.getElementById(btnId);
+      const inp = document.getElementById(inputId);
+      if (!btn || !inp) return;
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        // Toggle bằng setAttribute để tránh browser cache type
+        const isHidden = inp.getAttribute('type') === 'password';
+        inp.setAttribute('type', isHidden ? 'text' : 'password');
+        btn.textContent = isHidden ? '🙈' : '👁';
+        inp.focus();
+      });
+    }
 
     function updateProfile() {
       const pw      = $('p-newpw').value.trim();
@@ -6457,6 +6489,14 @@ Operations Leader`;
       } else {
         showLoginScreen();
       }
+
+      // Wire 👁 eye buttons cho profile modal (static DOM)
+      wireEyeBtn('eye-newpw',     'p-newpw');
+      wireEyeBtn('eye-confirmpw', 'p-confirmpw');
+
+      // Wire avatar file input via JS (backup cho onclick wrapper)
+      const avFile = document.getElementById('sf-avatar-file');
+      if (avFile) avFile.addEventListener('change', function() { previewAvatar(this); });
     });
 
     function initApp() {
