@@ -2610,13 +2610,8 @@
     // ════════════════════════════════════════
     //  CONFIG & STATE — v2 (bootstrapConfig)
     // ════════════════════════════════════════
-    const DEFAULT_SHEET_ID  = '1tImeHSb1BacVVhJPzQxh2LHffOhqjnX7OVuTrygPJKo';
-    // ─────────────────────────────────────────────────────────────────────
-    //  Apps Script URL: hardcode an toàn (đây là public endpoint, không phải secret)
-    //  API Key & mọi config khác: đọc qua Apps Script → getConfig (bảo mật)
-    // ─────────────────────────────────────────────────────────────────────
-    const DEFAULT_SCRIPT_URL = 'PLACEHOLDER_SCRIPT_URL';
-    let OPS_API_URL = localStorage.getItem('ops_script_url') || DEFAULT_SCRIPT_URL;
+    const DEFAULT_SHEET_ID = '1tImeHSb1BacVVhJPzQxh2LHffOhqjnX7OVuTrygPJKo';
+    let OPS_API_URL = localStorage.getItem('ops_script_url') || '';
     let CFG = {
       get scriptUrl() { return OPS_API_URL; },
       set scriptUrl(v) { OPS_API_URL = v; localStorage.setItem('ops_script_url', v); },
@@ -2624,60 +2619,107 @@
       sheetId: localStorage.getItem('ops_sheet_id') || DEFAULT_SHEET_ID,
     };
 
-    // ── bootstrapConfig: đọc API Key & config qua Apps Script getConfig ──
-    // Không dùng gviz/tq (yêu cầu sheet public) — dùng Apps Script thay thế
-    async function bootstrapConfig() {
-      // Apps Script URL đã hardcode → gọi getConfig để lấy API Key và các config khác
-      if (!OPS_API_URL || !OPS_API_URL.startsWith('https://')) return;
-      const cached = localStorage.getItem('ops_config_cache');
-      const cachedAt = parseInt(localStorage.getItem('ops_config_cache_at') || '0');
-      const CACHE_TTL = 30 * 60 * 1000; // 30 phút
-      if (cached && (Date.now() - cachedAt < CACHE_TTL)) {
-        try { _applyCfg(JSON.parse(cached)); return; } catch(_) {}
+    // Xóa cache cũ nếu không có Apps Script URL (tránh cache rỗng block fetch mới)
+    try {
+      const _oldCache = JSON.parse(localStorage.getItem('ops_config_cache') || '{}');
+      if (!_oldCache['Apps Script URL']) {
+        localStorage.removeItem('ops_config_cache');
+        localStorage.removeItem('ops_config_cache_at');
       }
+    } catch(_) { localStorage.removeItem('ops_config_cache'); }
+
+    // ── bootstrap: đọc Config sheet qua CSV public ──────────────
+    async function bootstrapConfig() {
+      // 1. Khôi phục từ localStorage cache trước (để có URL ngay lập tức)
       try {
-        const res = await fetch(OPS_API_URL + '?action=getConfig', { redirect: 'follow' });
-        const data = await res.json();
-        if (data.ok && data.config) {
-          _applyCfg(data.config);
-          localStorage.setItem('ops_config_cache', JSON.stringify(data.config));
-          localStorage.setItem('ops_config_cache_at', String(Date.now()));
-          console.log('[Config] loaded from Apps Script ✓');
+        const cached = localStorage.getItem('ops_config_cache');
+        if (cached) {
+          const cfg = JSON.parse(cached);
+          _applyCfg(cfg);
+          console.log('[Config] from cache → scriptUrl:', OPS_API_URL ? '✓' : '✗');
         }
+      } catch(_) {}
+
+      // 2. Luôn fetch mới từ sheet (không TTL block)
+      try {
+        const url = `https://docs.google.com/spreadsheets/d/${DEFAULT_SHEET_ID}/gviz/tq?tqx=out:csv&sheet=Config`;
+        const resp = await fetch(url, { cache: 'no-store' });
+        if (!resp.ok) { console.warn('[Config] HTTP', resp.status); return; }
+        const text = await resp.text();
+        console.log('[Config] raw CSV:', text.slice(0, 300));
+
+        function parseCSVLine(line) {
+          const cells = []; let cur = '', q = false;
+          for (const ch of line) {
+            if (ch === '"') { q = !q; }
+            else if (ch === ',' && !q) { cells.push(cur.trim()); cur = ''; }
+            else cur += ch;
+          }
+          cells.push(cur.trim());
+          return cells;
+        }
+
+        const cfg = {};
+        text.split('\n').slice(1).forEach(line => {
+          if (!line.trim()) return;
+          const parts = parseCSVLine(line);
+          const key = (parts[0] || '').trim();
+          const val = (parts[1] || '').trim();
+          if (key && val) cfg[key] = val;
+        });
+
+        console.log('[Config] parsed keys:', Object.keys(cfg));
+        _applyCfg(cfg);
+        localStorage.setItem('ops_config_cache', JSON.stringify(cfg));
+        console.log('[Config] done → scriptUrl:', OPS_API_URL ? OPS_API_URL.slice(0,60)+'…' : '✗ EMPTY');
       } catch(e) {
-        console.warn('[Config] bootstrapConfig failed:', e.message);
+        console.warn('[Config] fetch error:', e.message);
       }
     }
 
     function _applyCfg(cfg) {
-      // cfg từ getConfig: { 'Apps Script URL': '...', 'anthropic_api_key': '...', ... }
-      const get = (...keys) => {
-        for (const k of keys) {
-          const v = cfg[k] || cfg[k.toLowerCase()] || cfg[k.replace(/ /g,'_')] || cfg[k.replace(/_/g,' ')];
-          if (v && String(v).length > 3) return String(v);
-        }
-        return '';
-      };
-      const apiKey  = get('anthropic_api_key', 'Anthropic API Key', 'anthropic api key');
-      const sheetId = get('Google Sheet ID', 'google_sheet_id', 'google sheet id');
-      if (apiKey)  { CFG.apiKey  = apiKey;  localStorage.setItem('ops_api_key',  CFG.apiKey); }
-      if (sheetId) { CFG.sheetId = sheetId; localStorage.setItem('ops_sheet_id', CFG.sheetId); }
+      if (cfg['Apps Script URL'] && cfg['Apps Script URL'] !== '') {
+        OPS_API_URL = cfg['Apps Script URL'];
+        localStorage.setItem('ops_script_url', OPS_API_URL);
+      }
+      if (cfg['Google Sheet ID'] && cfg['Google Sheet ID'] !== '') {
+        CFG.sheetId = cfg['Google Sheet ID'];
+        localStorage.setItem('ops_sheet_id', CFG.sheetId);
+      }
+      if (cfg['Anthropic API Key'] && cfg['Anthropic API Key'] !== '') {
+        CFG.apiKey = cfg['Anthropic API Key'];
+        localStorage.setItem('ops_api_key', CFG.apiKey);
+      }
     }
 
-    // ── Login qua Apps Script (không cần sheet public) ──────────
+    // ── Client-side login via NhanSu CSV ────────────────────────
     async function doLoginCSV(email, password) {
-      try {
-        const qs = new URLSearchParams({ action: 'login', email, password }).toString();
-        const res = await fetch(OPS_API_URL + '?' + qs, { redirect: 'follow' });
-        const data = await res.json();
-        if (data.success) {
-          const u = data.user || {};
-          return { ok: true, user: u };
-        }
-        return { ok: false, msg: data.message || 'Đăng nhập thất bại' };
-      } catch(e) {
-        return { ok: false, msg: 'Lỗi kết nối: ' + e.message };
+      const url = `https://docs.google.com/spreadsheets/d/${DEFAULT_SHEET_ID}/gviz/tq?tqx=out:csv&sheet=NhanSu`;
+      const resp = await fetch(url, { cache: 'no-store' });
+      const text = await resp.text();
+      const lines = text.split('\n').filter(l => l.trim());
+      // Skip header (row 0)
+      for (let i = 1; i < lines.length; i++) {
+        const cols = parseCSVLine(lines[i]);
+        if (!cols || cols.length < 15) continue;
+        const rowEmail   = (cols[4]  || '').trim().toLowerCase();   // col E
+        const rowRole    = (cols[9]  || '').trim();                  // col J – Phân quyền
+        const rowStatus  = (cols[12] || '').trim();                  // col M – Trạng thái
+        const rowPass    = (cols[14] || '').trim();                  // col O – Mật khẩu
+        if (rowEmail !== email.toLowerCase()) continue;
+        if (rowRole !== 'System') return { ok: false, msg: 'Tài khoản không có quyền truy cập hệ thống' };
+        if (rowStatus !== 'Đang cộng tác') return { ok: false, msg: 'Tài khoản không hoạt động' };
+        if (rowPass !== password) return { ok: false, msg: 'Mật khẩu không đúng' };
+        return {
+          ok: true, user: {
+            id: cols[0] || '', name: cols[1] || '', phone: cols[2] || '',
+            email: cols[4] || '', position: cols[7] || '',
+            store: cols[8] || 'Hệ Thống', role: rowRole, status: rowStatus,
+            avatar: cols[13] || ''
+          }
+        };
       }
+      return { ok: false, msg: 'Email không tồn tại trong hệ thống' };
     }
 
     function parseCSVLine(line) {
@@ -2944,13 +2986,6 @@
     //  SYNC ALL
     // ════════════════════════════════════════
     async function syncAll() {
-      // Nếu chưa có scriptUrl → thử đọc lại từ database (bỏ cache cũ)
-      if (!CFG.scriptUrl) {
-        setSyncStatus(false, 'Đang tải cấu hình...');
-        localStorage.removeItem('ops_config_cache');
-        localStorage.removeItem('ops_config_cache_at');
-        await bootstrapConfig();
-      }
       if (!CFG.scriptUrl) { $('cfg-alert').style.display = 'flex'; setSyncStatus(false, 'Chưa cấu hình'); return; }
       $('cfg-alert').style.display = 'none';
       load('Đang đồng bộ Google Sheets...');
@@ -6564,7 +6599,7 @@ Operations Leader`;
           if (res.ok) {
             _saveSession(res.user);
             if (errEl) errEl.style.display = 'none';
-            await initApp();
+            initApp();
           } else {
             if (errEl) { errEl.textContent = res.msg || 'Đăng nhập thất bại'; errEl.style.display = 'block'; }
           }
@@ -6586,7 +6621,7 @@ Operations Leader`;
       const saved = _loadSession();
       if (saved) {
         _applyLoginUI(saved);
-        await initApp();
+        initApp();
       } else {
         showLoginScreen();
       }
@@ -6621,21 +6656,20 @@ Operations Leader`;
       // Re-init lucide icons after nav shown
       if (typeof lucide !== 'undefined') lucide.createIcons();
 
-      // Luôn đọc lại Config từ database khi scriptUrl chưa có
-      // Đảm bảo tự động kết nối trên mọi trình duyệt sau khi đăng nhập
-      if (!CFG.scriptUrl) {
-        localStorage.removeItem('ops_config_cache');
-        localStorage.removeItem('ops_config_cache_at');
-        await bootstrapConfig();
-      }
-
       // Start sync or show config alert
       if (CFG.scriptUrl) { const ca=$('cfg-alert'); if(ca) ca.style.display='none'; syncAll(); }
       else {
-        const ca=$('cfg-alert'); if(ca) ca.style.display='flex';
-        setSyncStatus(false, 'Chưa cấu hình');
-        if (_currentUser && _currentUser.email === 'duongthanhliem@phuctea.com.vn') {
-          toast('⚙️ Chưa cấu hình Apps Script URL. Nhấn ⚙️ Cài đặt.', 'twarn');
+        // Thử bootstrap lại 1 lần nữa (phòng trường hợp fetch chưa kịp xong)
+        await bootstrapConfig();
+        if (CFG.scriptUrl) {
+          const ca=$('cfg-alert'); if(ca) ca.style.display='none';
+          syncAll();
+        } else {
+          const ca=$('cfg-alert'); if(ca) ca.style.display='flex';
+          setSyncStatus(false, 'Chưa cấu hình');
+          if (_currentUser && _currentUser.email === 'duongthanhliem@phuctea.com.vn') {
+            toast('⚙️ Chưa cấu hình Apps Script URL. Nhấn ⚙️ Cài đặt.', 'twarn');
+          }
         }
       }
 
