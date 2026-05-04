@@ -3183,27 +3183,48 @@
     }
     function renderStores(list) {
       const tbody = $('stores-tbody');
-      if (!list.length) { tbody.innerHTML = '<tr><td colspan="12"><div class="empty-state">Không có dữ liệu</div></td></tr>'; return; }
-      tbody.innerHTML = list.map(s => {
-        const prog = s.setupProgress != null ? `<div class="prog-bg" style="width:80px"><div class="prog-bar" style="width:${s.setupProgress}%;background:var(--gold)"></div></div><small>${s.setupProgress}%</small>` : '–';
-        return `<tr>
-      <td><code>${s.storeId || '–'}</code></td>
-      <td style="font-weight:600">${s.name}</td>
-      <td>${s.brand || '–'}</td>
-      <td>${s.owner || '–'}<br><small style="color:var(--gray)">${s.phone || ''}</small></td>
-      <td>${s.model || '–'}</td>
-      <td>${s.type || '–'}</td>
-      <td>${statusBadge(s.status)}</td>
-      <td>${s.status === 'Đang setup' ? prog : '–'}</td>
-      <td>${s.launchDate || '–'}</td>
-      <td>${s.province || '–'}</td>
-      <td style="max-width:150px;white-space:normal;font-size:12px">${s.address || '–'}</td>
-      <td>
-        ${getPermission().canEditStore ? \`<button class="btn bo bsm" onclick="editStore('\${s.storeId}')">✏️</button>\` : ''}
-        ${getPermission().canDeleteStore ? \`<button class="btn bd bsm" onclick="deleteStoreConfirm('\${s.storeId}','\${s.name.replace(/'/g,\"\\\\'\")}')">🗑</button>\` : ''}
-      </td>
-    </tr>`;
-      }).join('');
+      tbody.innerHTML = '';
+      if (!list.length) {
+        tbody.innerHTML = '<tr><td colspan="12"><div class="empty-state">Không có dữ liệu</div></td></tr>';
+        return;
+      }
+      const perm = getPermission();
+      list.forEach(function(s) {
+        const prog = s.setupProgress != null
+          ? '<div class="prog-bg" style="width:80px"><div class="prog-bar" style="width:' + s.setupProgress + '%;background:var(--accent)"></div></div><small>' + s.setupProgress + '%</small>'
+          : '–';
+        const tr = document.createElement('tr');
+        tr.innerHTML = '<td><code>' + (s.storeId || '–') + '</code></td>'
+          + '<td style="font-weight:600">' + (s.name || '') + '</td>'
+          + '<td>' + (s.brand || '–') + '</td>'
+          + '<td>' + (s.owner || '–') + '<br><small style="color:var(--text-muted)">' + (s.phone || '') + '</small></td>'
+          + '<td>' + (s.model || '–') + '</td>'
+          + '<td>' + (s.type || '–') + '</td>'
+          + '<td>' + statusBadge(s.status) + '</td>'
+          + '<td>' + (s.status === 'Đang setup' ? prog : '–') + '</td>'
+          + '<td>' + (s.launchDate || '–') + '</td>'
+          + '<td>' + (s.province || '–') + '</td>'
+          + '<td style="max-width:150px;white-space:normal;font-size:12px">' + (s.address || '–') + '</td>'
+          + '<td></td>';
+        // Add action buttons safely
+        const actionTd = tr.lastElementChild;
+        if (perm.canEditStore) {
+          const btnEdit = document.createElement('button');
+          btnEdit.className = 'btn bo bsm';
+          btnEdit.textContent = '✏️';
+          btnEdit.addEventListener('click', (function(id){ return function(){ editStore(id); }; })(s.storeId));
+          actionTd.appendChild(btnEdit);
+        }
+        if (perm.canDeleteStore) {
+          const btnDel = document.createElement('button');
+          btnDel.className = 'btn bd bsm';
+          btnDel.textContent = '🗑';
+          btnDel.style.marginLeft = '4px';
+          btnDel.addEventListener('click', (function(id,n){ return function(){ deleteStoreConfirm(id,n); }; })(s.storeId, s.name));
+          actionTd.appendChild(btnDel);
+        }
+        tbody.appendChild(tr);
+      });
     }
     function updateAllStoreDropdowns() {
       const names = _allStores.map(s => s.name);
