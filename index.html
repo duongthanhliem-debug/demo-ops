@@ -3199,8 +3199,8 @@
       <td>${s.province || '–'}</td>
       <td style="max-width:150px;white-space:normal;font-size:12px">${s.address || '–'}</td>
       <td>
-        ${(function(){ const p=getPermission(); return p.canEditStore ? '<button class="btn bo bsm" onclick="editStore(''+s.storeId+'')">✏️</button>' : ''; })()}
-        ${(function(){ const p=getPermission(); return p.canDeleteStore ? '<button class="btn bd bsm" onclick="deleteStoreConfirm(''+s.storeId+'',''+s.name+'')">🗑</button>' : ''; })()}
+        ${getPermission().canEditStore ? \`<button class="btn bo bsm" onclick="editStore('\${s.storeId}')">✏️</button>\` : ''}
+        ${getPermission().canDeleteStore ? \`<button class="btn bd bsm" onclick="deleteStoreConfirm('\${s.storeId}','\${s.name.replace(/'/g,\"\\\\'\")}')">🗑</button>\` : ''}
       </td>
     </tr>`;
       }).join('');
@@ -4880,34 +4880,31 @@ Dương Thanh Liêm – Operations Phúc Tea`;
 
     // ── Phân quyền ─────────────────────────────────────────────
     function getPermission() {
-      const role = _currentUser ? _currentUser.role : 'User';
-      const myEmail = _currentUser ? _currentUser.email : '';
+      var role    = _currentUser ? _currentUser.role : 'User';
+      var myEmail = _currentUser ? _currentUser.email : '';
+      var isSystem = role === 'System';
+      var isAdmin  = role === 'Admin';
       return {
-        isSystem: role === 'System',
-        isAdmin:  role === 'Admin',
+        isSystem: isSystem,
+        isAdmin:  isAdmin,
         isUser:   role === 'User',
-        // Có thể sửa staff record không?
-        canEditStaff(s) {
-          if (role === 'System') return true;
-          if (role === 'Admin') {
-            // Admin chỉ sửa được User (không sửa System, Admin khác)
-            return s.role === 'User';
-          }
-          // User chỉ sửa chính mình
+        canEditStaff: function(s) {
+          if (isSystem) return true;
+          if (isAdmin)  return s.role === 'User';
           return s.email === myEmail;
         },
-        canDeleteStaff(s) {
-          if (role === 'System') return true;
-          if (role === 'Admin') return s.role === 'User';
-          return false; // User không xóa được ai
+        canDeleteStaff: function(s) {
+          if (isSystem) return true;
+          if (isAdmin)  return s.role === 'User';
+          return false;
         },
-        canAddStaff:    role === 'System' || role === 'Admin',
-        canEditStore:   role === 'System' || role === 'Admin',
-        canDeleteStore: role === 'System' || role === 'Admin',
-        canSeeCCCD(s)  {
-          if (role === 'System') return true;
-          return s.email === myEmail; // Admin và User chỉ xem CCCD của chính mình
-        },
+        canAddStaff:    isSystem || isAdmin,
+        canEditStore:   isSystem || isAdmin,
+        canDeleteStore: isSystem || isAdmin,
+        canSeeCCCD: function(s) {
+          if (isSystem) return true;
+          return s.email === myEmail;
+        }
       };
     }
 
@@ -4928,7 +4925,7 @@ Dương Thanh Liêm – Operations Phúc Tea`;
           + '<div style="font-size:11px;color:var(--gray);margin-top:2px">' + (s.position||'–') + ' · <code style="font-size:10px">' + (s.id||'–') + '</code></div>'
           + '<div style="margin-top:5px;display:flex;gap:4px;flex-wrap:wrap">' + roleBadge(s.role) + ' <span class="bdg ' + statusCls + '">' + (s.status||'–') + '</span></div>'
           + '</div>';
-        const _perm = getPermission();
+        var _perm = getPermission();
         if (_perm.canEditStaff(s)) {
           card.style.cursor = 'pointer';
           card.addEventListener('click', (function(sid){ return function(){ editStaff(sid); }; })(s.id));
