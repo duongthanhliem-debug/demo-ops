@@ -2621,31 +2621,25 @@
 
     // ── bootstrap: đọc Config sheet qua CSV public ──────────────
     async function bootstrapConfig() {
-      const cached = localStorage.getItem('ops_config_cache');
-      const cachedAt = parseInt(localStorage.getItem('ops_config_cache_at') || '0');
-      const CACHE_TTL = 10 * 60 * 1000; // 10 phút
-      if (cached && (Date.now() - cachedAt < CACHE_TTL)) {
-        try {
-          const cfg = JSON.parse(cached);
-          _applyCfg(cfg);
-          return;
-        } catch(_) {}
-      }
+      // Luôn fetch mới từ sheet Config - không dùng cache
+      // để mọi người dùng, mọi trình duyệt đều tự động kết nối
       try {
-        const url = `https://docs.google.com/spreadsheets/d/${DEFAULT_SHEET_ID}/gviz/tq?tqx=out:csv&sheet=Config`;
+        const url = 'https://docs.google.com/spreadsheets/d/' + DEFAULT_SHEET_ID + '/gviz/tq?tqx=out:csv&sheet=Config';
         const resp = await fetch(url, { cache: 'no-store' });
         const text = await resp.text();
         const cfg = {};
-        text.split('\n').forEach(line => {
-          // Parse CSV line: "Key","Value"
-          const m = line.match(/^"?([^",]+)"?,?"?([^"]*)"?/);
+        text.split('\n').forEach(function(line) {
+          // Parse CSV: "Key","Value"
+          var m = line.match(/^"?([^",]+)"?,?"?([^"]*)"?/);
           if (m && m[1] && m[1].trim()) cfg[m[1].trim()] = (m[2]||'').trim();
         });
         _applyCfg(cfg);
-        localStorage.setItem('ops_config_cache', JSON.stringify(cfg));
-        localStorage.setItem('ops_config_cache_at', String(Date.now()));
+        console.log('bootstrapConfig OK, scriptUrl:', OPS_API_URL ? 'set' : 'empty');
       } catch(e) {
-        console.warn('bootstrapConfig failed:', e);
+        // Fallback: dùng localStorage nếu có
+        console.warn('bootstrapConfig fetch failed, using localStorage fallback:', e.message);
+        var fallback = localStorage.getItem('ops_script_url');
+        if (fallback) OPS_API_URL = fallback;
       }
     }
 
@@ -6724,15 +6718,22 @@ Operations Leader`;
       // Re-init lucide icons after nav shown
       if (typeof lucide !== 'undefined') lucide.createIcons();
 
-      // Start sync or show config alert
-      if (CFG.scriptUrl) { const ca=$('cfg-alert'); if(ca) ca.style.display='none'; syncAll(); }
-      else {
-        const ca=$('cfg-alert'); if(ca) ca.style.display='flex';
-        setSyncStatus(false, 'Chưa cấu hình');
-        if (_currentUser && _currentUser.email === 'duongthanhliem@phuctea.com.vn') {
-          toast('⚙️ Chưa cấu hình Apps Script URL. Nhấn ⚙️ Cài đặt.', 'twarn');
+      // Luôn thử bootstrapConfig trước khi sync
+      // đảm bảo mọi user/browser đều tự lấy URL từ sheet Config
+      bootstrapConfig().then(function() {
+        const ca = $('cfg-alert');
+        if (CFG.scriptUrl) {
+          if (ca) ca.style.display = 'none';
+          syncAll();
+        } else {
+          if (ca) ca.style.display = 'flex';
+          setSyncStatus(false, 'Chưa cấu hình Apps Script URL trong sheet Config');
+          // Chỉ hiện hướng dẫn cho owner
+          if (_currentUser && _currentUser.email === 'duongthanhliem@phuctea.com.vn') {
+            toast('⚙️ Dán Apps Script URL vào sheet Config → cột B dòng "Apps Script URL"', 'twarn');
+          }
         }
-      }
+      });
 
       setTimeout(() => {
         if (!D.auditCriteria.length && $('audit-criteria-container')) renderAuditForm();
