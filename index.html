@@ -4946,15 +4946,9 @@ Dương Thanh Liêm – Operations Phúc Tea`;
           + '<div style="font-size:11px;color:var(--gray);margin-top:2px">' + (s.position||'–') + ' · <code style="font-size:10px">' + (s.id||'–') + '</code></div>'
           + '<div style="margin-top:5px;display:flex;gap:4px;flex-wrap:wrap">' + roleBadge(s.role) + ' <span class="bdg ' + statusCls + '">' + (s.status||'–') + '</span></div>'
           + '</div>';
-        var _perm = getPermission();
-        if (_perm.canEditStaff(s)) {
-          card.style.cursor = 'pointer';
-          card.addEventListener('click', (function(sid){ return function(){ editStaff(sid); }; })(s.id));
-        } else {
-          card.style.cursor = 'default';
-          card.style.opacity = '0.75';
-          card.title = 'Bạn không có quyền chỉnh sửa hồ sơ này';
-        }
+        // Tất cả đều có thể click xem, nhưng modal sẽ readonly nếu không có quyền sửa
+        card.style.cursor = 'pointer';
+        card.addEventListener('click', (function(sid){ return function(){ editStaff(sid); }; })(s.id));
         grid.appendChild(card);
       });
 
@@ -4975,9 +4969,7 @@ Dương Thanh Liêm – Operations Phúc Tea`;
     }
     function editStaff(id) {
       const _s = D.staff.find(x => x.id === id);
-      if (_s && !getPermission().canEditStaff(_s)) {
-        toast('⚠️ Bạn không có quyền chỉnh sửa hồ sơ này', 'twarn'); return;
-      }
+      const _canEdit = !_s || getPermission().canEditStaff(_s);
       const s = _allStaff.find(x => x.id === id); if (!s) return;
       currentStaffEdit = s;
       $('sf-id').value = s.id || ''; $('sf-name').value = s.name || '';
@@ -5025,8 +5017,28 @@ Dương Thanh Liêm – Operations Phúc Tea`;
       $('sf-pw').value = '';
       if (s.dob) $('sf-dob').value = s.dob.split('/').reverse().join('-');
       if (s.startDate) $('sf-start').value = s.startDate.split('/').reverse().join('-');
-      $('staff-modal-title').textContent = '✏️ Sửa: ' + s.name;
+      // Set tiêu đề & readonly mode theo quyền
+      if (_canEdit) {
+        $('staff-modal-title').textContent = '✏️ Sửa: ' + s.name;
+      } else {
+        $('staff-modal-title').textContent = '👁 Xem hồ sơ: ' + s.name;
+      }
       openModal('modal-staff');
+      // Apply readonly nếu không có quyền sửa
+      setTimeout(function() {
+        var isRO = !_canEdit;
+        document.querySelectorAll('#modal-staff input:not([type=file]), #modal-staff select, #modal-staff textarea').forEach(function(el) {
+          el.readOnly = isRO;
+          if (el.tagName === 'SELECT') el.disabled = isRO;
+        });
+        var saveBtn = document.querySelector('#modal-staff button.btn.bp');
+        if (saveBtn) saveBtn.style.display = isRO ? 'none' : '';
+        // Ẩn CCCD upload nếu readonly
+        ['sf-cccd-front-file','sf-cccd-back-file','sf-avatar-file'].forEach(function(id) {
+          var el = document.getElementById(id); if (el) el.disabled = isRO;
+          var lbl = el ? el.closest('label') : null; if (lbl) lbl.style.display = isRO ? 'none' : '';
+        });
+      }, 50);
     }
     async function saveStaffForm() {
       const name = $('sf-name').value.trim(), email = $('sf-email').value.trim();
