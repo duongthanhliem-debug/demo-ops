@@ -2984,6 +2984,13 @@
     //  SYNC ALL
     // ════════════════════════════════════════
     async function syncAll() {
+      // Nếu chưa có scriptUrl → thử đọc lại từ database (bỏ cache cũ)
+      if (!CFG.scriptUrl) {
+        setSyncStatus(false, 'Đang tải cấu hình...');
+        localStorage.removeItem('ops_config_cache');
+        localStorage.removeItem('ops_config_cache_at');
+        await bootstrapConfig();
+      }
       if (!CFG.scriptUrl) { $('cfg-alert').style.display = 'flex'; setSyncStatus(false, 'Chưa cấu hình'); return; }
       $('cfg-alert').style.display = 'none';
       load('Đang đồng bộ Google Sheets...');
