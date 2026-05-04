@@ -2660,20 +2660,52 @@
       if (sheetId) { CFG.sheetId = sheetId; localStorage.setItem('ops_sheet_id', CFG.sheetId); }
     }
 
-    // ── Login qua Apps Script (không cần sheet public) ──────────
+    // ── Login: thử Apps Script trước, fallback sang CSV nếu lỗi ──
     async function doLoginCSV(email, password) {
+      // Cách 1: Apps Script (hoạt động trên mọi trình duyệt kể cả Cốc Cốc)
       try {
         const qs = new URLSearchParams({ action: 'login', email, password }).toString();
-        const res = await fetch(OPS_API_URL + '?' + qs, { redirect: 'follow' });
+        const res = await fetch(OPS_API_URL + '?' + qs, { redirect: 'follow', cache: 'no-store' });
         const data = await res.json();
-        if (data.success) {
-          const u = data.user || {};
-          return { ok: true, user: u };
+        if (data.success) return { ok: true, user: data.user || {} };
+        if (data.message) return { ok: false, msg: data.message };
+      } catch(_) {}
+
+      // Cách 2: fallback đọc CSV (hoạt động khi sheet public, Chrome OK)
+      try {
+        const url = `https://docs.google.com/spreadsheets/d/${DEFAULT_SHEET_ID}/gviz/tq?tqx=out:csv&sheet=NhanSu`;
+        const resp = await fetch(url, { cache: 'no-store' });
+        const text = await resp.text();
+        // Nếu trả về HTML (lỗi) thì bỏ qua
+        if (!text.trim().startsWith('"')) throw new Error('not csv');
+        const lines = text.split('\n').filter(l => l.trim());
+        for (let i = 1; i < lines.length; i++) {
+          const cols = _parseCSVLine(lines[i]);
+          if (!cols || cols.length < 15) continue;
+          const rowEmail  = (cols[4]  || '').trim().toLowerCase();
+          const rowRole   = (cols[9]  || '').trim();
+          const rowStatus = (cols[12] || '').trim();
+          const rowPass   = (cols[14] || '').trim();
+          const rowStore  = (cols[8]  || '').trim();
+          if (rowEmail !== email.toLowerCase()) continue;
+          const allowedRoles = ['System', 'Admin', 'User'];
+          if (!allowedRoles.includes(rowRole)) return { ok: false, msg: 'Tài khoản không có quyền truy cập hệ thống' };
+          if (rowStore !== 'Hệ Thống') return { ok: false, msg: 'Tài khoản không thuộc bộ phận Hệ Thống' };
+          if (rowStatus !== 'Đang cộng tác') return { ok: false, msg: 'Tài khoản không hoạt động' };
+          if (rowPass !== password) return { ok: false, msg: 'Mật khẩu không đúng' };
+          return {
+            ok: true, user: {
+              id: cols[0]||'', name: cols[1]||'', phone: cols[2]||'',
+              email: cols[4]||'', position: cols[7]||'',
+              store: cols[8]||'Hệ Thống', role: rowRole, status: rowStatus,
+              avatar: cols[13]||''
+            }
+          };
         }
-        return { ok: false, msg: data.message || 'Đăng nhập thất bại' };
-      } catch(e) {
-        return { ok: false, msg: 'Lỗi kết nối: ' + e.message };
-      }
+        return { ok: false, msg: 'Email không tồn tại trong hệ thống' };
+      } catch(_) {}
+
+      return { ok: false, msg: 'Không thể kết nối. Vui lòng dùng Chrome hoặc kiểm tra mạng.' };
     }
 
     function parseCSVLine(line) {
