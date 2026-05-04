@@ -4336,9 +4336,11 @@
           var pviewUrl = pfid ? 'https://drive.google.com/file/d/' + pfid + '/view' : purl;
           var cell = document.createElement('div');
           cell.style.cssText = 'text-align:center;flex:0 0 auto';
-          if (pthumb) {
+          // Always show something - either image or link
+          {
             var img = document.createElement('img');
-            img.src = pthumb;
+            img.src = pthumb || pviewUrl;
+            img.crossOrigin = 'anonymous';
             img.style.cssText = 'width:140px;height:140px;object-fit:cover;cursor:pointer;border-radius:8px;border:1px solid var(--border);display:block';
             img.title = 'Click để xem ảnh gốc';
             img.addEventListener('click', (function(u){ return function(){ window.open(u,'_blank'); }; })(pviewUrl));
@@ -4354,7 +4356,7 @@
                     var lnk = document.createElement('a');
                     lnk.href = viewUrl; lnk.target = '_blank';
                     lnk.style.cssText = 'display:flex;width:140px;height:140px;align-items:center;justify-content:center;border:2px dashed var(--border);border-radius:8px;font-size:11px;color:var(--blue);text-decoration:none;background:var(--surface-l);flex-direction:column;gap:4px;text-align:center;padding:8px;box-sizing:border-box';
-                    lnk.innerHTML = '<span style="font-size:24px">🖼</span><span>Nhấn xem ảnh</span>';
+                    lnk.innerHTML = '<span style="font-size:22px">🖼</span><span style="font-size:10px;margin-top:4px">Nhấn xem ảnh</span>';
                     c.insertBefore(lnk, c.firstChild);
                   };
                   return;
@@ -4362,18 +4364,12 @@
                 if (c.contains(i2)) c.removeChild(i2);
                 var lnk = document.createElement('a');
                 lnk.href = viewUrl; lnk.target = '_blank';
-                lnk.style.cssText = 'display:flex;width:140px;height:140px;align-items:center;justify-content:center;border:2px dashed var(--border);border-radius:8px;font-size:11px;color:var(--blue);text-decoration:none;background:var(--surface-l);flex-direction:column;gap:4px;text-align:center;padding:8px;box-sizing:border-box';
-                lnk.innerHTML = '<span style="font-size:24px">🖼</span><span>Nhấn xem ảnh</span>';
+                lnk.style.cssText = 'display:flex;width:140px;height:140px;align-items:center;justify-content:center;border:2px dashed var(--accent);border-radius:8px;font-size:11px;color:var(--accent);text-decoration:none;background:var(--surface-d);flex-direction:column;gap:4px;text-align:center;padding:8px;box-sizing:border-box';
+                lnk.innerHTML = '<span style="font-size:22px">🖼</span><span style="font-size:10px;margin-top:4px">Nhấn xem ảnh</span>';
                 c.insertBefore(lnk, c.firstChild);
               };
             })(pfid, purl, pviewUrl, cell, img, false);
             cell.appendChild(img);
-          } else {
-            var lnk2 = document.createElement('a');
-            lnk2.href = purl; lnk2.target = '_blank';
-            lnk2.style.cssText = 'display:flex;width:140px;height:140px;align-items:center;justify-content:center;border:2px dashed var(--border);border-radius:8px;font-size:11px;color:var(--blue);text-decoration:none;background:var(--white);flex-direction:column;gap:4px';
-            lnk2.innerHTML = '<span style="font-size:24px">🔗</span><span>Ảnh ' + (pidx+1) + '</span>';
-            cell.appendChild(lnk2);
           }
           var lbl = document.createElement('div');
           lbl.style.cssText = 'font-size:10px;color:var(--gray);margin-top:4px';
@@ -4968,7 +4964,7 @@ Dương Thanh Liêm – Operations Phúc Tea`;
       openModal('modal-staff');
     }
     function editStaff(id) {
-      const _s = D.staff.find(x => x.id === id);
+      const _s = _allStaff.find(x => x.id === id);
       const _canEdit = !_s || getPermission().canEditStaff(_s);
       const s = _allStaff.find(x => x.id === id); if (!s) return;
       currentStaffEdit = s;
