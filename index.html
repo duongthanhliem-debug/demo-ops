@@ -2611,10 +2611,6 @@
     //  CONFIG & STATE — v2 (bootstrapConfig)
     // ════════════════════════════════════════
     const DEFAULT_SHEET_ID  = '1tImeHSb1BacVVhJPzQxh2LHffOhqjnX7OVuTrygPJKo';
-    // ─────────────────────────────────────────────────────────────────────
-    //  Apps Script URL: hardcode an toàn (đây là public endpoint, không phải secret)
-    //  API Key & mọi config khác: đọc qua Apps Script → getConfig (bảo mật)
-    // ─────────────────────────────────────────────────────────────────────
     const DEFAULT_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzEEwE3nEw8cv4nLxh7_cUz_byGCi_yAF_sqcmbwsv9p4Fg7Ee_Y3pZIXm_H5Z-rr98Qg/exec';
     let OPS_API_URL = localStorage.getItem('ops_script_url') || DEFAULT_SCRIPT_URL;
     let CFG = {
