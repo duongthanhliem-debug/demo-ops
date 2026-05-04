@@ -1915,7 +1915,7 @@
       </div>
       <div class="fb">
         <button class="btn bo bsm" onclick="loadStaff()">🔄 Tải lại</button>
-        <button class="btn bp" onclick="openStaffModal()">+ Thêm nhân viên</button>
+        <button class="btn bp" id="add-staff-btn" onclick="openStaffModal()">+ Thêm nhân viên</button>
       </div>
     </div>
     <div class="filter-row">
@@ -2675,18 +2675,23 @@
         const cols = parseCSVLine(lines[i]);
         if (!cols || cols.length < 15) continue;
         const rowEmail   = (cols[4]  || '').trim().toLowerCase();   // col E
-        const rowRole    = (cols[9]  || '').trim();                  // col J – Phân quyền
-        const rowStatus  = (cols[12] || '').trim();                  // col M – Trạng thái
-        const rowPass    = (cols[14] || '').trim();                  // col O – Mật khẩu
+        const rowRole    = (cols[9]  || '').trim();   // col J – Phân quyền
+        const rowStatus  = (cols[12] || '').trim();   // col M – Trạng thái
+        const rowPass    = (cols[14] || '').trim();   // col O – Mật khẩu
+        const rowStore   = (cols[8]  || '').trim();   // col I – Cửa hàng
         if (rowEmail !== email.toLowerCase()) continue;
-        if (rowRole !== 'System') return { ok: false, msg: 'Tài khoản không có quyền truy cập hệ thống' };
+        // Chỉ tài khoản Cửa hàng = "Hệ Thống" mới được vào
+        if (rowStore !== 'Hệ Thống') return { ok: false, msg: 'Tài khoản này không thuộc bộ phận Hệ Thống, không được phép truy cập' };
+        // System, Admin, User đều được vào
+        const allowedRoles = ['System', 'Admin', 'User'];
+        if (!allowedRoles.includes(rowRole)) return { ok: false, msg: 'Phân quyền không hợp lệ' };
         if (rowStatus !== 'Đang cộng tác') return { ok: false, msg: 'Tài khoản không hoạt động' };
         if (rowPass !== password) return { ok: false, msg: 'Mật khẩu không đúng' };
         return {
           ok: true, user: {
             id: cols[0] || '', name: cols[1] || '', phone: cols[2] || '',
             email: cols[4] || '', position: cols[7] || '',
-            store: cols[8] || 'Hệ Thống', role: rowRole, status: rowStatus,
+            store: rowStore, role: rowRole, status: rowStatus,
             avatar: cols[13] || ''
           }
         };
@@ -3194,8 +3199,8 @@
       <td>${s.province || '–'}</td>
       <td style="max-width:150px;white-space:normal;font-size:12px">${s.address || '–'}</td>
       <td>
-        <button class="btn bo bsm" onclick="editStore('${s.storeId}')">✏️</button>
-        <button class="btn bd bsm" onclick="deleteStoreConfirm('${s.storeId}','${s.name}')">🗑</button>
+        ${(function(){ const p=getPermission(); return p.canEditStore ? '<button class="btn bo bsm" onclick="editStore(''+s.storeId+'')">✏️</button>' : ''; })()}
+        ${(function(){ const p=getPermission(); return p.canDeleteStore ? '<button class="btn bd bsm" onclick="deleteStoreConfirm(''+s.storeId+'',''+s.name+'')">🗑</button>' : ''; })()}
       </td>
     </tr>`;
       }).join('');
@@ -4315,17 +4320,32 @@
             img.src = pthumb;
             img.style.cssText = 'width:140px;height:140px;object-fit:cover;cursor:pointer;border-radius:8px;border:1px solid var(--border);display:block';
             img.title = 'Click để xem ảnh gốc';
-            img.addEventListener('click', (function(u){ return function(){ window.open(u,'_blank'); }; })(purl));
-            img.onerror = (function(u, c, i2){
+            img.addEventListener('click', (function(u){ return function(){ window.open(u,'_blank'); }; })(pviewUrl));
+            img.onerror = (function(fid, origUrl, viewUrl, c, i2, tried){
               return function(){
-                c.removeChild(i2);
+                if (!tried && fid) {
+                  // Fallback: try uc?export=view format
+                  i2.onerror = null;
+                  i2.src = 'https://drive.google.com/uc?export=view&id=' + fid;
+                  i2.onerror = function() {
+                    // All formats failed - show link
+                    if (c.contains(i2)) c.removeChild(i2);
+                    var lnk = document.createElement('a');
+                    lnk.href = viewUrl; lnk.target = '_blank';
+                    lnk.style.cssText = 'display:flex;width:140px;height:140px;align-items:center;justify-content:center;border:2px dashed var(--border);border-radius:8px;font-size:11px;color:var(--blue);text-decoration:none;background:var(--surface-l);flex-direction:column;gap:4px;text-align:center;padding:8px;box-sizing:border-box';
+                    lnk.innerHTML = '<span style="font-size:24px">🖼</span><span>Nhấn xem ảnh</span>';
+                    c.insertBefore(lnk, c.firstChild);
+                  };
+                  return;
+                }
+                if (c.contains(i2)) c.removeChild(i2);
                 var lnk = document.createElement('a');
-                lnk.href = u; lnk.target = '_blank';
-                lnk.style.cssText = 'display:flex;width:140px;height:140px;align-items:center;justify-content:center;border:2px dashed var(--border);border-radius:8px;font-size:11px;color:var(--blue);text-decoration:none;background:var(--white);flex-direction:column;gap:4px';
-                lnk.innerHTML = '<span style="font-size:24px">🖼</span><span>Xem ảnh</span>';
+                lnk.href = viewUrl; lnk.target = '_blank';
+                lnk.style.cssText = 'display:flex;width:140px;height:140px;align-items:center;justify-content:center;border:2px dashed var(--border);border-radius:8px;font-size:11px;color:var(--blue);text-decoration:none;background:var(--surface-l);flex-direction:column;gap:4px;text-align:center;padding:8px;box-sizing:border-box';
+                lnk.innerHTML = '<span style="font-size:24px">🖼</span><span>Nhấn xem ảnh</span>';
                 c.insertBefore(lnk, c.firstChild);
               };
-            })(purl, cell, img);
+            })(pfid, purl, pviewUrl, cell, img, false);
             cell.appendChild(img);
           } else {
             var lnk2 = document.createElement('a');
@@ -4857,6 +4877,40 @@ Dương Thanh Liêm – Operations Phúc Tea`;
       if (search) list = list.filter(s => (s.name + s.email + s.position).toLowerCase().includes(search));
       renderStaffGrid(list);
     }
+
+    // ── Phân quyền ─────────────────────────────────────────────
+    function getPermission() {
+      const role = _currentUser ? _currentUser.role : 'User';
+      const myEmail = _currentUser ? _currentUser.email : '';
+      return {
+        isSystem: role === 'System',
+        isAdmin:  role === 'Admin',
+        isUser:   role === 'User',
+        // Có thể sửa staff record không?
+        canEditStaff(s) {
+          if (role === 'System') return true;
+          if (role === 'Admin') {
+            // Admin chỉ sửa được User (không sửa System, Admin khác)
+            return s.role === 'User';
+          }
+          // User chỉ sửa chính mình
+          return s.email === myEmail;
+        },
+        canDeleteStaff(s) {
+          if (role === 'System') return true;
+          if (role === 'Admin') return s.role === 'User';
+          return false; // User không xóa được ai
+        },
+        canAddStaff:    role === 'System' || role === 'Admin',
+        canEditStore:   role === 'System' || role === 'Admin',
+        canDeleteStore: role === 'System' || role === 'Admin',
+        canSeeCCCD(s)  {
+          if (role === 'System') return true;
+          return s.email === myEmail; // Admin và User chỉ xem CCCD của chính mình
+        },
+      };
+    }
+
     function renderStaffGrid(list) {
       const grid = $('staff-grid');
       if (!list.length) { grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="ei">👥</div>Không có nhân viên phù hợp</div>'; return; }
@@ -4874,7 +4928,15 @@ Dương Thanh Liêm – Operations Phúc Tea`;
           + '<div style="font-size:11px;color:var(--gray);margin-top:2px">' + (s.position||'–') + ' · <code style="font-size:10px">' + (s.id||'–') + '</code></div>'
           + '<div style="margin-top:5px;display:flex;gap:4px;flex-wrap:wrap">' + roleBadge(s.role) + ' <span class="bdg ' + statusCls + '">' + (s.status||'–') + '</span></div>'
           + '</div>';
-        card.addEventListener('click', (function(sid){ return function(){ editStaff(sid); }; })(s.id));
+        const _perm = getPermission();
+        if (_perm.canEditStaff(s)) {
+          card.style.cursor = 'pointer';
+          card.addEventListener('click', (function(sid){ return function(){ editStaff(sid); }; })(s.id));
+        } else {
+          card.style.cursor = 'default';
+          card.style.opacity = '0.75';
+          card.title = 'Bạn không có quyền chỉnh sửa hồ sơ này';
+        }
         grid.appendChild(card);
       });
 
@@ -4894,6 +4956,10 @@ Dương Thanh Liêm – Operations Phúc Tea`;
       openModal('modal-staff');
     }
     function editStaff(id) {
+      const _s = D.staff.find(x => x.id === id);
+      if (_s && !getPermission().canEditStaff(_s)) {
+        toast('⚠️ Bạn không có quyền chỉnh sửa hồ sơ này', 'twarn'); return;
+      }
       const s = _allStaff.find(x => x.id === id); if (!s) return;
       currentStaffEdit = s;
       $('sf-id').value = s.id || ''; $('sf-name').value = s.name || '';
@@ -4909,23 +4975,29 @@ Dương Thanh Liêm – Operations Phúc Tea`;
       _avatarBase64 = null; _cccdFrontB64 = null; _cccdBackB64 = null;
       if ($('sf-cccd-front'))  $('sf-cccd-front').value = s.cccdFront || '';
       if ($('sf-cccd-back'))   $('sf-cccd-back').value  = s.cccdBack  || '';
-      // Load CCCD từ localStorage (ảnh không lưu trên GS)
-      const _editEmail = s.email || '';
+      // Load CCCD từ sheet (đã lưu Drive link qua GS)
+      // Chỉ hiển thị CCCD nếu: là chính mình HOẶC là System
+      const _canSeeCCCD = _currentUser && (
+        _currentUser.role === 'System' ||
+        (s.email && _currentUser.email === s.email)
+      );
       ['front','back'].forEach(side => {
-        const localSrc = _editEmail ? localStorage.getItem('ops_cccd_' + side + '_' + _editEmail) : null;
         const sheetUrl = side==='front' ? s.cccdFront : s.cccdBack;
-        const src = localSrc || sheetUrl || null;
         const prev = $('sf-cccd-'+side+'-preview');
-        if (prev) {
-          if (src) { prev.src = src; prev.style.display = 'block'; }
-          else { prev.src = ''; prev.style.display = 'none'; }
-        }
-        // Pre-fill _cccdXxxB64 so existing image is preserved if user doesn't re-upload
-        if (localSrc) {
-          if (side === 'front') _cccdFrontB64 = localSrc;
-          else _cccdBackB64 = localSrc;
+        const lbl  = prev ? prev.closest('div') : null;
+        if (_canSeeCCCD && sheetUrl) {
+          // Convert Drive URL to embeddable format
+          const fm = sheetUrl.match(/[?&]id=([a-zA-Z0-9_-]+)/) || sheetUrl.match(/\/d\/([a-zA-Z0-9_-]+)\//);
+          const fid = fm ? fm[1] : null;
+          const src = fid ? 'https://lh3.googleusercontent.com/d/' + fid + '=w400' : sheetUrl;
+          if (prev) { prev.src = src; prev.style.display = 'block'; }
+        } else {
+          if (prev) { prev.src = ''; prev.style.display = 'none'; }
         }
       });
+      // Hiển thị/ẩn CCCD section dựa vào quyền
+      const cccdSection = $('sf-cccd-front-file') ? $('sf-cccd-front-file').closest('.fr') : null;
+      if (cccdSection) cccdSection.style.display = _canSeeCCCD ? '' : 'none';
       // Show existing avatar
       const avPrev = $('sf-avatar-preview');
       if (avPrev) {
@@ -4960,8 +5032,8 @@ Dương Thanh Liêm – Operations Phúc Tea`;
         cccd:          ($('sf-cccd')||{value:''}).value,
         bankName:      ($('sf-bank-name')||{value:''}).value,
         bankAcct:      ($('sf-bank-acct')||{value:''}).value,
-        cccdFront:     '',  // stored in localStorage
-        cccdBack:      '',   // stored in localStorage
+        cccdFront:     _cccdFrontB64 || currentStaffEdit?.cccdFront || '',
+        cccdBack:      _cccdBackB64  || currentStaffEdit?.cccdBack  || '',
       };
       const res = await api({ action: 'saveStaff', data: d });
       unload();
@@ -4975,9 +5047,7 @@ Dương Thanh Liêm – Operations Phúc Tea`;
               _updateNavUser(_currentUser);
             }
           }
-          // Lưu CCCD localStorage (không qua GS để tránh timeout)
-          if (_cccdFrontB64) localStorage.setItem('ops_cccd_front_' + sfEmail, _cccdFrontB64);
-          if (_cccdBackB64)  localStorage.setItem('ops_cccd_back_'  + sfEmail, _cccdBackB64);
+          // CCCD đã được upload lên Drive qua GS (không cần localStorage)
         }
         toast('✅ Đã lưu: ' + name);
         closeModal('modal-staff');
@@ -6641,6 +6711,10 @@ Operations Leader`;
       setTimeout(() => {
         if (!D.auditCriteria.length && $('audit-criteria-container')) renderAuditForm();
       }, 1000);
+
+      // Ẩn/hiện nút Thêm nhân viên theo phân quyền
+      const addStaffBtn = $('add-staff-btn');
+      if (addStaffBtn) addStaffBtn.style.display = getPermission().canAddStaff ? '' : 'none';
     }
   </script>
 </body>
