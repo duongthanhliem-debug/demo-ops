@@ -4329,11 +4329,11 @@
         var photoGrid = document.createElement('div');
         photoGrid.style.cssText = 'display:flex;flex-wrap:wrap;gap:10px';
         photos.forEach(function(purl, pidx) {
-          var pm = purl.match(/[?&]id=([a-zA-Z0-9_-]+)/) || purl.match(/\/d\/([a-zA-Z0-9_-]+)\//);
-          var pfid = pm ? pm[1] : null;
-          var pthumb = pfid
-            ? 'https://drive.google.com/thumbnail?id=' + pfid + '&sz=w400'
-            : (purl.startsWith('http') ? purl : '');
+          var pm     = purl.match(/[?&]id=([a-zA-Z0-9_-]+)/) || purl.match(/\/d\/([a-zA-Z0-9_-]+)\//);
+          var pfid   = pm ? pm[1] : null;
+          var pthumb   = pfid ? 'https://drive.google.com/thumbnail?id=' + pfid + '&sz=w400'
+                               : (purl.startsWith('http') ? purl : '');
+          var pviewUrl = pfid ? 'https://drive.google.com/file/d/' + pfid + '/view' : purl;
           var cell = document.createElement('div');
           cell.style.cssText = 'text-align:center;flex:0 0 auto';
           if (pthumb) {
@@ -4341,7 +4341,7 @@
             img.src = pthumb;
             img.style.cssText = 'width:140px;height:140px;object-fit:cover;cursor:pointer;border-radius:8px;border:1px solid var(--border);display:block';
             img.title = 'Click để xem ảnh gốc';
-            img.addEventListener('click', (function(u){ return function(){ window.open(u,'_blank'); }; })(pviewUrl));
+            img.addEventListener('click', (function(u){ return function(){ window.open(u,'_blank'); }; })(pviewUrl)); }; })(pviewUrl));
             img.onerror = (function(fid, origUrl, viewUrl, c, i2, tried){
               return function(){
                 if (!tried && fid) {
