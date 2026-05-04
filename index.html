@@ -2610,8 +2610,13 @@
     // ════════════════════════════════════════
     //  CONFIG & STATE — v2 (bootstrapConfig)
     // ════════════════════════════════════════
-    const DEFAULT_SHEET_ID = '1tImeHSb1BacVVhJPzQxh2LHffOhqjnX7OVuTrygPJKo';
-    let OPS_API_URL = localStorage.getItem('ops_script_url') || '';
+    const DEFAULT_SHEET_ID  = '1tImeHSb1BacVVhJPzQxh2LHffOhqjnX7OVuTrygPJKo';
+    // ─────────────────────────────────────────────────────────────────────
+    //  Apps Script URL: hardcode an toàn (đây là public endpoint, không phải secret)
+    //  API Key & mọi config khác: đọc qua Apps Script → getConfig (bảo mật)
+    // ─────────────────────────────────────────────────────────────────────
+    const DEFAULT_SCRIPT_URL = 'PLACEHOLDER_SCRIPT_URL';
+    let OPS_API_URL = localStorage.getItem('ops_script_url') || DEFAULT_SCRIPT_URL;
     let CFG = {
       get scriptUrl() { return OPS_API_URL; },
       set scriptUrl(v) { OPS_API_URL = v; localStorage.setItem('ops_script_url', v); },
@@ -2619,105 +2624,60 @@
       sheetId: localStorage.getItem('ops_sheet_id') || DEFAULT_SHEET_ID,
     };
 
-    // ── bootstrap: đọc Config sheet qua CSV public ──────────────
-    // ── parseCSVLine: xử lý đúng CSV có dấu ngoặc kép ─────────
-    function _parseCSVLine(line) {
-      const result = [];
-      let cur = '', inQ = false;
-      for (let i = 0; i < line.length; i++) {
-        const c = line[i];
-        if (c === '"') {
-          if (inQ && line[i+1] === '"') { cur += '"'; i++; }
-          else inQ = !inQ;
-        } else if (c === ',' && !inQ) { result.push(cur); cur = ''; }
-        else cur += c;
-      }
-      result.push(cur);
-      return result;
-    }
-
+    // ── bootstrapConfig: đọc API Key & config qua Apps Script getConfig ──
+    // Không dùng gviz/tq (yêu cầu sheet public) — dùng Apps Script thay thế
     async function bootstrapConfig() {
-      // Luôn thử đọc từ database trước (không dùng cache nếu chưa có scriptUrl)
+      // Apps Script URL đã hardcode → gọi getConfig để lấy API Key và các config khác
+      if (!OPS_API_URL || !OPS_API_URL.startsWith('https://')) return;
       const cached = localStorage.getItem('ops_config_cache');
       const cachedAt = parseInt(localStorage.getItem('ops_config_cache_at') || '0');
-      const CACHE_TTL = 10 * 60 * 1000; // 10 phút
+      const CACHE_TTL = 30 * 60 * 1000; // 30 phút
       if (cached && (Date.now() - cachedAt < CACHE_TTL)) {
-        try {
-          const cfg = JSON.parse(cached);
-          // Chỉ dùng cache nếu đã có Apps Script URL hợp lệ
-          if (cfg['apps script url'] && cfg['apps script url'].startsWith('https://')) {
-            _applyCfg(cfg);
-            console.log('[Config] loaded from cache, scriptUrl:', OPS_API_URL ? '✓' : '✗');
-            return;
-          }
-        } catch(_) {}
+        try { _applyCfg(JSON.parse(cached)); return; } catch(_) {}
       }
       try {
-        const url = `https://docs.google.com/spreadsheets/d/${DEFAULT_SHEET_ID}/gviz/tq?tqx=out:csv&sheet=Config`;
-        const resp = await fetch(url, { cache: 'no-store' });
-        const text = await resp.text();
-        const cfg = {};
-        // Bỏ header row (dòng đầu), parse đúng CSV chuẩn
-        const lines = text.split('\n');
-        lines.slice(1).forEach(line => {
-          if (!line.trim()) return;
-          const parts = _parseCSVLine(line);
-          const key = (parts[0] || '').trim().toLowerCase(); // lowercase để match linh hoạt
-          const val = (parts[1] || '').trim();
-          if (key && val) cfg[key] = val;
-        });
-        console.log('[Config] fetched from sheet, keys:', Object.keys(cfg));
-        _applyCfg(cfg);
-        localStorage.setItem('ops_config_cache', JSON.stringify(cfg));
-        localStorage.setItem('ops_config_cache_at', String(Date.now()));
-        console.log('[Config] scriptUrl after apply:', OPS_API_URL ? '✓' : '✗');
+        const res = await fetch(OPS_API_URL + '?action=getConfig', { redirect: 'follow' });
+        const data = await res.json();
+        if (data.ok && data.config) {
+          _applyCfg(data.config);
+          localStorage.setItem('ops_config_cache', JSON.stringify(data.config));
+          localStorage.setItem('ops_config_cache_at', String(Date.now()));
+          console.log('[Config] loaded from Apps Script ✓');
+        }
       } catch(e) {
         console.warn('[Config] bootstrapConfig failed:', e.message);
       }
     }
 
     function _applyCfg(cfg) {
-      // Match key linh hoạt: lowercase, có thể dùng space hoặc underscore
-      const get = (...keys) => { for (const k of keys) { const v = cfg[k]; if (v && v.startsWith && v.length > 3) return v; } return ''; };
-      const scriptUrl = get('apps script url', 'apps_script_url', 'appsscripturl');
-      const sheetId   = get('google sheet id', 'google_sheet_id', 'googlesheetid');
-      const apiKey    = get('anthropic api key', 'anthropic_api_key', 'anthropicapikey');
-      if (scriptUrl) { OPS_API_URL = scriptUrl; localStorage.setItem('ops_script_url', OPS_API_URL); }
-      if (sheetId)   { CFG.sheetId = sheetId;   localStorage.setItem('ops_sheet_id', CFG.sheetId); }
-      if (apiKey)    { CFG.apiKey  = apiKey;     localStorage.setItem('ops_api_key', CFG.apiKey); }
+      // cfg từ getConfig: { 'Apps Script URL': '...', 'anthropic_api_key': '...', ... }
+      const get = (...keys) => {
+        for (const k of keys) {
+          const v = cfg[k] || cfg[k.toLowerCase()] || cfg[k.replace(/ /g,'_')] || cfg[k.replace(/_/g,' ')];
+          if (v && String(v).length > 3) return String(v);
+        }
+        return '';
+      };
+      const apiKey  = get('anthropic_api_key', 'Anthropic API Key', 'anthropic api key');
+      const sheetId = get('Google Sheet ID', 'google_sheet_id', 'google sheet id');
+      if (apiKey)  { CFG.apiKey  = apiKey;  localStorage.setItem('ops_api_key',  CFG.apiKey); }
+      if (sheetId) { CFG.sheetId = sheetId; localStorage.setItem('ops_sheet_id', CFG.sheetId); }
     }
 
-    // ── Client-side login via NhanSu CSV ────────────────────────
+    // ── Login qua Apps Script (không cần sheet public) ──────────
     async function doLoginCSV(email, password) {
-      const url = `https://docs.google.com/spreadsheets/d/${DEFAULT_SHEET_ID}/gviz/tq?tqx=out:csv&sheet=NhanSu`;
-      const resp = await fetch(url, { cache: 'no-store' });
-      const text = await resp.text();
-      const lines = text.split('\n').filter(l => l.trim());
-      // Skip header (row 0)
-      for (let i = 1; i < lines.length; i++) {
-        const cols = parseCSVLine(lines[i]);
-        if (!cols || cols.length < 15) continue;
-        const rowEmail   = (cols[4]  || '').trim().toLowerCase();   // col E
-        const rowRole    = (cols[9]  || '').trim();                  // col J – Phân quyền
-        const rowStatus  = (cols[12] || '').trim();                  // col M – Trạng thái
-        const rowPass    = (cols[14] || '').trim();                  // col O – Mật khẩu
-        const rowStore   = (cols[8]  || '').trim();                  // col I – Cửa hàng
-        if (rowEmail !== email.toLowerCase()) continue;
-        const allowedRoles = ['System', 'Admin', 'User'];
-        if (!allowedRoles.includes(rowRole)) return { ok: false, msg: 'Tài khoản không có quyền truy cập hệ thống' };
-        if (rowStore !== 'Hệ Thống') return { ok: false, msg: 'Tài khoản không thuộc bộ phận Hệ Thống, không được phép truy cập' };
-        if (rowStatus !== 'Đang cộng tác') return { ok: false, msg: 'Tài khoản không hoạt động' };
-        if (rowPass !== password) return { ok: false, msg: 'Mật khẩu không đúng' };
-        return {
-          ok: true, user: {
-            id: cols[0] || '', name: cols[1] || '', phone: cols[2] || '',
-            email: cols[4] || '', position: cols[7] || '',
-            store: cols[8] || 'Hệ Thống', role: rowRole, status: rowStatus,
-            avatar: cols[13] || ''
-          }
-        };
+      try {
+        const qs = new URLSearchParams({ action: 'login', email, password }).toString();
+        const res = await fetch(OPS_API_URL + '?' + qs, { redirect: 'follow' });
+        const data = await res.json();
+        if (data.success) {
+          const u = data.user || {};
+          return { ok: true, user: u };
+        }
+        return { ok: false, msg: data.message || 'Đăng nhập thất bại' };
+      } catch(e) {
+        return { ok: false, msg: 'Lỗi kết nối: ' + e.message };
       }
-      return { ok: false, msg: 'Email không tồn tại trong hệ thống' };
     }
 
     function parseCSVLine(line) {
