@@ -2904,7 +2904,7 @@
     //  SETTINGS
     // ════════════════════════════════════════
     // Populate profile modal from session
-    document.getElementById('nav-avatar').addEventListener('click', function() {
+    var _navAv = document.getElementById('nav-avatar'); if (_navAv) _navAv.addEventListener('click', function() {
       if (_currentUser) {
         const e = $('profile-email'); if (e) e.textContent = _currentUser.email || '';
         const n = $('profile-name'); if (n) n.textContent = _currentUser.name || '';
@@ -4341,7 +4341,7 @@
             img.src = pthumb;
             img.style.cssText = 'width:140px;height:140px;object-fit:cover;cursor:pointer;border-radius:8px;border:1px solid var(--border);display:block';
             img.title = 'Click để xem ảnh gốc';
-            img.addEventListener('click', (function(u){ return function(){ window.open(u,'_blank'); }; })(pviewUrl)); }; })(pviewUrl));
+            img.addEventListener('click', (function(u){ return function(){ window.open(u,'_blank'); }; })(pviewUrl));
             img.onerror = (function(fid, origUrl, viewUrl, c, i2, tried){
               return function(){
                 if (!tried && fid) {
