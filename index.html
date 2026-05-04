@@ -2620,16 +2620,34 @@
     };
 
     // ── bootstrap: đọc Config sheet qua CSV public ──────────────
+    // ── parseCSVLine: xử lý đúng CSV có dấu ngoặc kép ─────────
+    function _parseCSVLine(line) {
+      const result = [];
+      let cur = '', inQ = false;
+      for (let i = 0; i < line.length; i++) {
+        const c = line[i];
+        if (c === '"') {
+          if (inQ && line[i+1] === '"') { cur += '"'; i++; }
+          else inQ = !inQ;
+        } else if (c === ',' && !inQ) { result.push(cur); cur = ''; }
+        else cur += c;
+      }
+      result.push(cur);
+      return result;
+    }
+
     async function bootstrapConfig() {
+      // Luôn thử đọc từ database trước (không dùng cache nếu chưa có scriptUrl)
       const cached = localStorage.getItem('ops_config_cache');
       const cachedAt = parseInt(localStorage.getItem('ops_config_cache_at') || '0');
       const CACHE_TTL = 10 * 60 * 1000; // 10 phút
       if (cached && (Date.now() - cachedAt < CACHE_TTL)) {
         try {
           const cfg = JSON.parse(cached);
-          // Chỉ dùng cache nếu đã có Apps Script URL — tránh kẹt với cache cũ bị trống
-          if (cfg['Apps Script URL'] && cfg['Apps Script URL'] !== '') {
+          // Chỉ dùng cache nếu đã có Apps Script URL hợp lệ
+          if (cfg['apps script url'] && cfg['apps script url'].startsWith('https://')) {
             _applyCfg(cfg);
+            console.log('[Config] loaded from cache, scriptUrl:', OPS_API_URL ? '✓' : '✗');
             return;
           }
         } catch(_) {}
@@ -2639,32 +2657,34 @@
         const resp = await fetch(url, { cache: 'no-store' });
         const text = await resp.text();
         const cfg = {};
-        text.split('\n').forEach(line => {
-          // Parse CSV line: "Key","Value"
-          const m = line.match(/^"?([^",]+)"?,?"?([^"]*)"?/);
-          if (m && m[1] && m[1].trim()) cfg[m[1].trim()] = (m[2]||'').trim();
+        // Bỏ header row (dòng đầu), parse đúng CSV chuẩn
+        const lines = text.split('\n');
+        lines.slice(1).forEach(line => {
+          if (!line.trim()) return;
+          const parts = _parseCSVLine(line);
+          const key = (parts[0] || '').trim().toLowerCase(); // lowercase để match linh hoạt
+          const val = (parts[1] || '').trim();
+          if (key && val) cfg[key] = val;
         });
+        console.log('[Config] fetched from sheet, keys:', Object.keys(cfg));
         _applyCfg(cfg);
         localStorage.setItem('ops_config_cache', JSON.stringify(cfg));
         localStorage.setItem('ops_config_cache_at', String(Date.now()));
+        console.log('[Config] scriptUrl after apply:', OPS_API_URL ? '✓' : '✗');
       } catch(e) {
-        console.warn('bootstrapConfig failed:', e);
+        console.warn('[Config] bootstrapConfig failed:', e.message);
       }
     }
 
     function _applyCfg(cfg) {
-      if (cfg['Apps Script URL'] && cfg['Apps Script URL'] !== '') {
-        OPS_API_URL = cfg['Apps Script URL'];
-        localStorage.setItem('ops_script_url', OPS_API_URL);
-      }
-      if (cfg['Google Sheet ID'] && cfg['Google Sheet ID'] !== '') {
-        CFG.sheetId = cfg['Google Sheet ID'];
-        localStorage.setItem('ops_sheet_id', CFG.sheetId);
-      }
-      if (cfg['Anthropic API Key'] && cfg['Anthropic API Key'] !== '') {
-        CFG.apiKey = cfg['Anthropic API Key'];
-        localStorage.setItem('ops_api_key', CFG.apiKey);
-      }
+      // Match key linh hoạt: lowercase, có thể dùng space hoặc underscore
+      const get = (...keys) => { for (const k of keys) { const v = cfg[k]; if (v && v.startsWith && v.length > 3) return v; } return ''; };
+      const scriptUrl = get('apps script url', 'apps_script_url', 'appsscripturl');
+      const sheetId   = get('google sheet id', 'google_sheet_id', 'googlesheetid');
+      const apiKey    = get('anthropic api key', 'anthropic_api_key', 'anthropicapikey');
+      if (scriptUrl) { OPS_API_URL = scriptUrl; localStorage.setItem('ops_script_url', OPS_API_URL); }
+      if (sheetId)   { CFG.sheetId = sheetId;   localStorage.setItem('ops_sheet_id', CFG.sheetId); }
+      if (apiKey)    { CFG.apiKey  = apiKey;     localStorage.setItem('ops_api_key', CFG.apiKey); }
     }
 
     // ── Client-side login via NhanSu CSV ────────────────────────
@@ -6577,7 +6597,7 @@ Operations Leader`;
           if (res.ok) {
             _saveSession(res.user);
             if (errEl) errEl.style.display = 'none';
-            initApp();
+            await initApp();
           } else {
             if (errEl) { errEl.textContent = res.msg || 'Đăng nhập thất bại'; errEl.style.display = 'block'; }
           }
@@ -6599,7 +6619,7 @@ Operations Leader`;
       const saved = _loadSession();
       if (saved) {
         _applyLoginUI(saved);
-        initApp();
+        await initApp();
       } else {
         showLoginScreen();
       }
