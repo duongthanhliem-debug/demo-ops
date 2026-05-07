@@ -11,30 +11,27 @@
   <style>
     :root {
       /* ── Ops Center v3 – Sidebar tối, nội dung sáng ── */
-      --nav-bg: #2F3136;        /* Sidebar/Nav – Charcoal giữ nguyên */
+      --nav-bg: #2F3136;
       --nav-text: rgba(255,255,255,.82);
       --nav-text-muted: rgba(255,255,255,.45);
       --nav-border: rgba(255,255,255,.08);
-      --nav-active: #D4A017;    /* Accent vàng cho active item */
+      --nav-active: #D4A017;
 
-      --primary: #F0F2F5;       /* Nền tổng – xám trắng nhạt */
-      --primary-d: #E4E6EA;     /* Nền hơi đậm hơn */
-      --primary-l: #F8F9FB;     /* Nền sáng nhất */
-      --accent: #D4A017;        /* Vàng ấm chủ đạo */
+      --primary: #F0F2F5;
+      --primary-d: #E4E6EA;
+      --primary-l: #F8F9FB;
+      --accent: #D4A017;
       --accent-l: rgba(212,160,23,.12);
       --accent-m: #E8B820;
-
-      --surface: #FFFFFF;       /* Card – trắng */
-      --surface-l: #F8F9FB;     /* Card hover */
-      --surface-d: #F0F2F5;     /* Table header / input bg */
+      --surface: #FFFFFF;
+      --surface-l: #F8F9FB;
+      --surface-d: #F0F2F5;
       --cream: #F0F2F5;
       --white: #FFFFFF;
-
-      --text: #1A1C1F;          /* Text chính – gần đen */
-      --text-muted: #6B7280;    /* Text phụ – xám */
+      --text: #1A1C1F;
+      --text-muted: #6B7280;
       --text-bright: #111318;
 
-      /* Semantic */
       --gold: #D4A017;
       --gold-l: rgba(212,160,23,.12);
       --gold-m: #E8B820;
@@ -54,7 +51,7 @@
       --purple-l: rgba(124,58,237,.10);
       --gray: #6B7280;
       --gray-l: #F3F4F6;
-      --border: #E5E7EB;        /* Border nhạt trên nền trắng */
+      --border: #E5E7EB;
 
       --sh: 0 1px 4px rgba(0,0,0,.08), 0 2px 8px rgba(0,0,0,.06);
       --shm: 0 4px 16px rgba(0,0,0,.12);
@@ -167,7 +164,7 @@
 
     .twarn {
       background: var(--gold);
-      color: var(--brown)
+      color: var(--text)
     }
 
     .hidden {
@@ -180,7 +177,7 @@
       position: sticky;
       top: 0;
       z-index: 200;
-      border-bottom: 2px solid var(--accent)
+      border-bottom: 2px solid var(--nav-active)
     }
 
     .nav-top {
@@ -201,7 +198,7 @@
     .nlogo {
       width: 28px;
       height: 28px;
-      background: var(--nav-active);
+      background: var(--accent);
       border-radius: 7px;
       display: flex;
       align-items: center;
@@ -218,7 +215,7 @@
     }
 
     .ntitle span {
-      color: var(--nav-active)
+      color: var(--accent)
     }
 
     .nright {
@@ -231,8 +228,8 @@
 
     .nbtn {
       background: transparent;
-      border: 1px solid var(--nav-border);
-      color: var(--nav-text-muted);
+      border: 1px solid rgba(255, 255, 255, .15);
+      color: rgba(255, 255, 255, .65);
       padding: 4px 9px;
       border-radius: 6px;
       font-size: 11px;
@@ -243,8 +240,8 @@
     }
 
     .nbtn:hover {
-      border-color: var(--nav-active);
-      color: var(--nav-active)
+      border-color: var(--accent);
+      color: var(--accent)
     }
 
     .nbtn-gold {
@@ -279,7 +276,7 @@
       height: 30px;
       border-radius: 50%;
       background: var(--accent);
-      border: 2px solid rgba(255,255,255,.2);
+      border: 2px solid rgba(255,255,255,.15);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -307,7 +304,7 @@
       padding: 8px 11px;
       font-size: 12px;
       font-weight: 500;
-      color: var(--nav-text-muted);
+      color: rgba(255, 255, 255, .45);
       cursor: pointer;
       border-bottom: 3px solid transparent;
       margin-bottom: -3px;
@@ -321,12 +318,12 @@
     }
 
     .ntab:hover {
-      color: var(--nav-text)
+      color: rgba(255, 255, 255, .85)
     }
 
     .ntab.on {
-      color: var(--nav-active);
-      border-bottom-color: var(--nav-active)
+      color: var(--accent);
+      border-bottom-color: var(--accent)
     }
 
     .sdot {
@@ -395,7 +392,7 @@
     .pt {
       font-size: 20px;
       font-weight: 700;
-      color: var(--text)
+      color: var(--text-bright)
     }
 
     .ps {
@@ -432,12 +429,11 @@
     }
 
     .bp:hover {
-      background: var(--accent-m);
-      filter: brightness(1.05)
+      background: var(--accent-m)
     }
 
     .bo {
-      background: var(--white);
+      background: var(--surface-l);
       color: var(--text);
       border: 1px solid var(--border)
     }
@@ -491,8 +487,7 @@
       border-radius: var(--r);
       padding: 14px 16px;
       border: 1px solid var(--border);
-      box-shadow: var(--sh);
-      color: var(--text)
+      box-shadow: var(--sh)
     }
 
     .kl {
@@ -507,7 +502,7 @@
     .kv {
       font-size: 26px;
       font-weight: 700;
-      color: var(--text);
+      color: var(--text-bright);
       line-height: 1;
       margin-bottom: 5px
     }
@@ -626,8 +621,7 @@
       border: 1px solid var(--border);
       overflow: hidden;
       margin-bottom: 14px;
-      box-shadow: var(--sh);
-      color: var(--text)
+      box-shadow: var(--sh)
     }
 
     .ch {
@@ -643,7 +637,7 @@
     .ct {
       font-size: 13px;
       font-weight: 700;
-      color: var(--text)
+      color: var(--text-bright)
     }
 
     .cb {
@@ -667,16 +661,14 @@
       text-transform: uppercase;
       background: var(--surface-d);
       border-bottom: 1px solid var(--border);
-      white-space: nowrap;
-      color: var(--text-muted)
+      white-space: nowrap
     }
 
     .tbl td {
       padding: 9px 10px;
       border-bottom: 1px solid var(--border);
       color: var(--text);
-      vertical-align: middle;
-      background: transparent
+      vertical-align: middle
     }
 
     .tbl tr:last-child td {
@@ -684,7 +676,7 @@
     }
 
     .tbl tr:hover td {
-      background: var(--primary-d)
+      background: var(--surface-l)
     }
 
     .tbl-wrap {
@@ -790,9 +782,8 @@
       padding: 8px 10px;
       border: 1.5px solid var(--border);
       border-radius: var(--rs);
-      background: var(--white);
+      background: var(--surface-d);
       color: var(--text);
-      border: 1.5px solid var(--border);
       transition: border-color .15s;
       outline: none
     }
@@ -834,7 +825,7 @@
 
     .prog-bg {
       height: 5px;
-      background: var(--primary-d);
+      background: var(--surface-d);
       border-radius: 99px;
       overflow: hidden;
       border: 1px solid var(--border)
@@ -866,7 +857,7 @@
     }
 
     .chk-item:hover {
-      background: var(--primary-d);
+      background: var(--surface-l);
       margin: 0 -4px;
       padding: 8px 4px;
       border-radius: 6px
@@ -960,7 +951,7 @@
       padding: 4px;
       border: 1.5px solid var(--border);
       border-radius: var(--rs);
-      background: var(--white);
+      background: var(--surface-d);
       color: var(--text);
       outline: none
     }
@@ -970,7 +961,7 @@
     }
 
     .audit-score-box {
-      background: var(--primary-d);
+      background: var(--surface-d);
       border-radius: var(--r);
       padding: 16px;
       text-align: center;
@@ -982,7 +973,7 @@
     .overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,.5);
+      background: rgba(0, 0, 0, .75);
       z-index: 500;
       display: none;
       align-items: center;
@@ -996,7 +987,6 @@
 
     .modal {
       background: var(--surface);
-      color: var(--text);
       border-radius: 16px;
       padding: 22px;
       max-width: 540px;
@@ -1037,20 +1027,20 @@
     .mt {
       font-size: 16px;
       font-weight: 700;
-      color: var(--text)
+      color: var(--text-bright)
     }
 
     .mx {
       background: none;
       border: none;
       font-size: 22px;
-      color: var(--gray);
+      color: var(--text-muted);
       cursor: pointer;
       line-height: 1
     }
 
     .mx:hover {
-      color: var(--text)
+      color: var(--text-bright)
     }
 
     /* MISC */
@@ -1069,8 +1059,8 @@
       border-radius: 20px;
       cursor: pointer;
       border: 1px solid var(--border);
-      background: var(--white);
-      color: var(--gray);
+      background: var(--surface-l);
+      color: var(--text-muted);
       transition: all .2s
     }
 
@@ -1084,7 +1074,6 @@
       font-size: 11px;
       font-weight: 700;
       color: var(--text-muted);
-      border-color: var(--border);
       text-transform: uppercase;
       letter-spacing: .05em;
       padding: 9px 0 5px;
@@ -1096,7 +1085,7 @@
     .empty-state {
       text-align: center;
       padding: 36px 20px;
-      color: var(--gray)
+      color: var(--text-muted)
     }
 
     .empty-state .ei {
@@ -1178,7 +1167,7 @@
     }
 
     .setup-card {
-      background: var(--white);
+      background: var(--surface);
       border-radius: var(--r);
       border: 1.5px solid var(--border);
       padding: 16px;
@@ -1207,7 +1196,7 @@
     }
 
     .ai-box {
-      background: linear-gradient(135deg, var(--nav-bg), #3a3d42);
+      background: linear-gradient(135deg, var(--primary-d), #3a3d42);
       border-radius: var(--r);
       padding: 16px;
       color: #fff;
@@ -1246,7 +1235,7 @@
       max-height: 280px;
       overflow-y: auto;
       padding: 10px;
-      background: var(--primary-d);
+      background: #2B2D31;
       border-radius: var(--rs);
       border: 1px solid var(--border);
       margin-bottom: 10px
@@ -1276,9 +1265,9 @@
     }
 
     .ai-msg-ai .ai-bbl {
-      background: var(--surface);
-      color: var(--text);
-      border: 1px solid var(--border)
+      background: #3D4350;
+      color: #F2F3F5;
+      border: 1px solid #50535C
     }
 
     .ai-input-row {
@@ -1291,9 +1280,9 @@
       font-family: inherit;
       font-size: 13px;
       padding: 7px 10px;
-      border: 1.5px solid var(--border);
+      border: 1px solid var(--border);
       border-radius: var(--rs);
-      background: var(--white);
+      background: #3A3D45;
       color: var(--text);
       outline: none
     }
@@ -1303,7 +1292,7 @@
     }
 
     .staff-card {
-      background: var(--white);
+      background: var(--surface);
       border-radius: var(--r);
       border: 1.5px solid var(--border);
       padding: 14px;
@@ -1332,7 +1321,6 @@
       font-weight: 700;
       color: var(--accent);
       flex-shrink: 0;
-      flex-shrink: 0;
       overflow: hidden
     }
 
@@ -1343,300 +1331,73 @@
     }
 
     code {
-      background: var(--primary-d);
-      padding: 2px 6px;
-      border-radius: 4px;
-      color: var(--blue);
-      font-size: 11px;
-      border: 1px solid var(--border)
+      background: var(--surface-d);
+      padding: 1px 5px;
+      border-radius: 3px;
+      color: var(--accent);
+      font-size: 11px
     }
 
-    /* ══ MOBILE RESPONSIVE ══════════════════════════════════ */
-    /* Hamburger button – chỉ hiện trên mobile */
-    .hamburger {
-      display: none;
-      background: none;
-      border: none;
-      color: var(--nav-text);
-      font-size: 22px;
-      cursor: pointer;
-      padding: 4px 8px;
-      line-height: 1;
-      flex-shrink: 0
-    }
+    /* ══ MOBILE DRAWER ══════════════════════════════════════ */
+    .hamburger { display:none;background:none;border:none;color:var(--nav-text);font-size:22px;cursor:pointer;padding:4px 8px;line-height:1;flex-shrink:0 }
+    .drawer-overlay { display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:500;opacity:0;transition:opacity .25s }
+    .drawer-overlay.open { display:block;opacity:1 }
+    .mobile-drawer { position:fixed;top:0;left:0;width:260px;height:100%;background:var(--nav-bg);z-index:600;transform:translateX(-100%);transition:transform .28s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;overflow-y:auto }
+    .mobile-drawer.open { transform:translateX(0) }
+    .drawer-header { padding:18px 16px 12px;border-bottom:1px solid var(--nav-border);display:flex;align-items:center;gap:10px }
+    .drawer-logo { width:32px;height:32px;background:var(--nav-active);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0 }
+    .drawer-brand-name { font-size:14px;font-weight:700;color:#fff }
+    .drawer-brand-sub { font-size:11px;color:var(--nav-text-muted) }
+    .drawer-menu { flex:1;padding:8px 0 }
+    .drawer-item { display:flex;align-items:center;gap:12px;padding:11px 18px;color:var(--nav-text-muted);font-size:14px;font-weight:500;cursor:pointer;transition:all .15s;border:none;background:none;width:100%;text-align:left;font-family:inherit }
+    .drawer-item:hover { background:rgba(255,255,255,.07);color:var(--nav-text) }
+    .drawer-item.on { background:rgba(212,160,23,.15);color:var(--nav-active);font-weight:600 }
+    .drawer-item svg { width:18px;height:18px;flex-shrink:0 }
+    .drawer-sep { height:1px;background:var(--nav-border);margin:6px 16px }
+    .drawer-footer { padding:12px 16px;border-top:1px solid var(--nav-border) }
+    .drawer-user { display:flex;align-items:center;gap:10px;padding:8px 0 }
+    .drawer-av { width:36px;height:36px;border-radius:50%;background:var(--nav-active);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0 }
+    .drawer-uname { font-size:13px;font-weight:600;color:var(--nav-text) }
+    .drawer-uemail { font-size:11px;color:var(--nav-text-muted) }
 
-    /* Drawer overlay */
-    .drawer-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,.45);
-      z-index: 500;
-      opacity: 0;
-      transition: opacity .25s
-    }
-    .drawer-overlay.open {
-      display: block;
-      opacity: 1
-    }
-
-    /* Mobile drawer sidebar */
-    .mobile-drawer {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 260px;
-      height: 100%;
-      background: var(--nav-bg);
-      z-index: 600;
-      transform: translateX(-100%);
-      transition: transform .28s cubic-bezier(.4,0,.2,1);
-      display: flex;
-      flex-direction: column;
-      overflow-y: auto
-    }
-    .mobile-drawer.open {
-      transform: translateX(0)
-    }
-    .drawer-header {
-      padding: 18px 16px 12px;
-      border-bottom: 1px solid var(--nav-border);
-      display: flex;
-      align-items: center;
-      gap: 10px
-    }
-    .drawer-logo {
-      width: 32px;
-      height: 32px;
-      background: var(--nav-active);
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 14px;
-      flex-shrink: 0
-    }
-    .drawer-brand-name {
-      font-size: 14px;
-      font-weight: 700;
-      color: #fff
-    }
-    .drawer-brand-sub {
-      font-size: 11px;
-      color: var(--nav-text-muted)
-    }
-    .drawer-menu {
-      flex: 1;
-      padding: 8px 0
-    }
-    .drawer-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 11px 18px;
-      color: var(--nav-text-muted);
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all .15s;
-      border: none;
-      background: none;
-      width: 100%;
-      text-align: left;
-      font-family: inherit
-    }
-    .drawer-item:hover {
-      background: rgba(255,255,255,.07);
-      color: var(--nav-text)
-    }
-    .drawer-item.on {
-      background: rgba(212,160,23,.15);
-      color: var(--nav-active);
-      font-weight: 600
-    }
-    .drawer-item svg {
-      width: 18px;
-      height: 18px;
-      flex-shrink: 0
-    }
-    .drawer-sep {
-      height: 1px;
-      background: var(--nav-border);
-      margin: 6px 16px
-    }
-    .drawer-footer {
-      padding: 12px 16px;
-      border-top: 1px solid var(--nav-border)
-    }
-    .drawer-user {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 8px 0
-    }
-    .drawer-av {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background: var(--nav-active);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 12px;
-      font-weight: 700;
-      color: #fff;
-      flex-shrink: 0
-    }
-    .drawer-uname {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--nav-text)
-    }
-    .drawer-uemail {
-      font-size: 11px;
-      color: var(--nav-text-muted)
-    }
-
-    /* Notification bell */
-    .notif-btn {
-      position: relative;
-      background: none;
-      border: none;
-      color: var(--nav-text-muted);
-      cursor: pointer;
-      padding: 4px 6px;
-      font-size: 18px;
-      line-height: 1;
-      border-radius: 6px;
-      transition: color .15s
-    }
-    .notif-btn:hover { color: var(--nav-text) }
-    .notif-badge {
-      position: absolute;
-      top: -1px;
-      right: -1px;
-      background: var(--red);
-      color: #fff;
-      border-radius: 99px;
-      font-size: 9px;
-      font-weight: 700;
-      min-width: 16px;
-      height: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0 3px;
-      line-height: 1;
-      display: none
-    }
-    .notif-badge.show { display: flex }
-    .notif-panel {
-      position: absolute;
-      top: calc(100% + 8px);
-      right: 0;
-      width: 320px;
-      max-width: calc(100vw - 16px);
-      background: var(--surface);
-      border-radius: var(--r);
-      border: 1px solid var(--border);
-      box-shadow: var(--shm);
-      z-index: 1000;
-      display: none;
-      max-height: 420px;
-      flex-direction: column;
-      overflow: hidden
-    }
-    .notif-panel.open { display: flex }
-    .notif-panel-head {
-      padding: 12px 14px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between
-    }
-    .notif-list {
-      overflow-y: auto;
-      flex: 1
-    }
-    .notif-item {
-      display: flex;
-      gap: 10px;
-      padding: 10px 14px;
-      border-bottom: 1px solid var(--border);
-      transition: background .15s
-    }
-    .notif-item:hover { background: var(--primary-d) }
-    .notif-item.unread { background: rgba(212,160,23,.06) }
-    .notif-icon {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      background: var(--accent-l);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 14px;
-      flex-shrink: 0
-    }
-    .notif-body { flex: 1; min-width: 0 }
-    .notif-msg { font-size: 12px; color: var(--text); line-height: 1.4 }
-    .notif-time { font-size: 10px; color: var(--text-muted); margin-top: 2px }
-    .notif-empty {
-      padding: 28px;
-      text-align: center;
-      color: var(--text-muted);
-      font-size: 13px
-    }
-    .notif-wrapper {
-      position: relative
-    }
+    /* ══ NOTIFICATION BELL ══════════════════════════════════ */
+    .notif-btn { position:relative;background:none;border:none;color:var(--nav-text-muted);cursor:pointer;padding:4px 6px;font-size:18px;line-height:1;border-radius:6px;transition:color .15s }
+    .notif-btn:hover { color:var(--nav-text) }
+    .notif-badge { position:absolute;top:-1px;right:-1px;background:var(--red);color:#fff;border-radius:99px;font-size:9px;font-weight:700;min-width:16px;height:16px;display:none;align-items:center;justify-content:center;padding:0 3px }
+    .notif-badge.show { display:flex }
+    .notif-wrapper { position:relative }
+    .notif-panel { position:absolute;top:calc(100% + 8px);right:0;width:320px;max-width:calc(100vw - 16px);background:var(--surface);border-radius:var(--r);border:1px solid var(--border);box-shadow:var(--shm);z-index:1000;display:none;max-height:440px;flex-direction:column;overflow:hidden }
+    .notif-panel.open { display:flex }
+    .notif-panel-head { padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between }
+    .notif-list { overflow-y:auto;flex:1 }
+    .notif-item { display:flex;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border);transition:background .15s }
+    .notif-item:hover { background:var(--primary-d) }
+    .notif-item.unread { background:rgba(212,160,23,.06) }
+    .notif-item.deadline { background:rgba(220,38,38,.06) }
+    .notif-icon { width:32px;height:32px;border-radius:50%;background:var(--accent-l);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0 }
+    .notif-body { flex:1;min-width:0 }
+    .notif-msg { font-size:12px;color:var(--text);line-height:1.4 }
+    .notif-time { font-size:10px;color:var(--text-muted);margin-top:2px }
+    .notif-empty { padding:28px;text-align:center;color:var(--text-muted);font-size:13px }
 
     @media (max-width: 768px) {
-      /* Ẩn ntabs ngang trên mobile */
-      .ntabs { display: none }
-      /* Ẩn bớt items trên nav */
-      .nav-top .nbtn,
-      .nav-top #settings-btn,
-      .nav-top #pl-btn,
-      .nav-top .npl,
-      .nav-top #nav-user-label { display: none !important }
-      /* Hiện hamburger */
-      .hamburger { display: flex; align-items: center }
-      /* Ẩn navatar text - chỉ giữ icon */
-      .nav-top { padding: 0 12px }
-      /* Page padding nhỏ hơn */
-      .page { padding: 12px }
-      /* Card full width */
-      .kgrid { grid-template-columns: 1fr 1fr !important }
-      /* Table scroll ngang */
-      .tbl-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch }
-      /* Modal full screen */
-      .overlay .modal {
-        margin: 0;
-        width: 100% !important;
-        max-width: 100% !important;
-        max-height: 100vh;
-        border-radius: 16px 16px 0 0;
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0
-      }
-      /* Staff grid 1 cột */
-      .staff-grid { grid-template-columns: 1fr !important }
-      /* Audit form stack */
-      .fr { flex-direction: column }
-      /* ph (page header) stack */
-      .ph { flex-direction: column; gap: 10px; align-items: flex-start }
-      /* kgrid 2 col */
-      .kgrid { gap: 8px }
-      .kpi { padding: 12px }
-      .kv { font-size: 22px }
+      .ntabs { display:none }
+      .nav-top .nbtn, .nav-top #settings-btn, .nav-top #pl-btn, .nav-top .npl, .nav-top #nav-user-label { display:none !important }
+      .hamburger { display:flex;align-items:center }
+      .nav-top { padding:0 12px }
+      .page { padding:12px }
+      .kgrid { grid-template-columns:1fr 1fr !important }
+      .tbl-wrap { overflow-x:auto;-webkit-overflow-scrolling:touch }
+      .overlay .modal { margin:0;width:100% !important;max-width:100% !important;max-height:100vh;border-radius:16px 16px 0 0;position:fixed;bottom:0;left:0;right:0 }
+      .staff-grid { grid-template-columns:1fr !important }
+      .fr { flex-direction:column }
+      .ph { flex-direction:column;gap:10px;align-items:flex-start }
+      .kpi { padding:12px }
+      .kv { font-size:22px }
     }
-
     @media (max-width: 480px) {
-      .kgrid { grid-template-columns: 1fr }
-      .notif-panel { right: -8px }
+      .kgrid { grid-template-columns:1fr }
+      .notif-panel { right:-8px }
     }
   </style>
 </head>
@@ -1652,69 +1413,38 @@
   <!-- ═══ NAV ═══ -->
   <!-- Mobile drawer overlay -->
   <div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
-
-  <!-- Mobile drawer sidebar -->
+  <!-- Mobile drawer -->
   <div class="mobile-drawer" id="mobile-drawer">
     <div class="drawer-header">
       <div class="drawer-logo">⚡</div>
-      <div>
-        <div class="drawer-brand-name">Phúc Tea</div>
-        <div class="drawer-brand-sub">Ops Center</div>
-      </div>
+      <div><div class="drawer-brand-name">Phúc Tea</div><div class="drawer-brand-sub">Ops Center</div></div>
     </div>
     <div class="drawer-menu">
-      <button class="drawer-item on" id="di-dashboard" onclick="drawerNav('dashboard','di-dashboard')">
-        <i data-lucide="bar-chart-2"></i>Dashboard
-      </button>
-      <button class="drawer-item" id="di-stores" onclick="drawerNav('stores','di-stores');if(!_storesLoaded)loadStores()">
-        <i data-lucide="store"></i>Cửa hàng
-      </button>
-      <button class="drawer-item" id="di-setup" onclick="drawerNav('setup','di-setup');loadSetupPage()">
-        <i data-lucide="rocket"></i>Setup & KT
-      </button>
-      <button class="drawer-item" id="di-audit" onclick="drawerNav('audit','di-audit')">
-        <i data-lucide="shield-check"></i>Audit
-      </button>
-      <button class="drawer-item" id="di-nhansu" onclick="drawerNav('nhansu','di-nhansu')">
-        <i data-lucide="users"></i>Nhân sự
-      </button>
-      <button class="drawer-item" id="di-kehoach" onclick="drawerNav('kehoach','di-kehoach');loadPlans()">
-        <i data-lucide="target"></i>Kế hoạch
-      </button>
-      <button class="drawer-item" id="di-baocao" onclick="drawerNav('baocao','di-baocao')">
-        <i data-lucide="file-text"></i>Báo cáo
-      </button>
-      <button class="drawer-item" id="di-ai" onclick="drawerNav('ai','di-ai')">
-        <i data-lucide="bot"></i>AI
-      </button>
-      <button class="drawer-item" id="di-mytasks" onclick="drawerNav('mytasks','di-mytasks');loadMyTasks()">
-        <i data-lucide="pin"></i>Việc Cần Làm
-      </button>
+      <button class="drawer-item on" id="di-dashboard" onclick="drawerNav('dashboard','di-dashboard')"><i data-lucide="bar-chart-2"></i>Dashboard</button>
+      <button class="drawer-item" id="di-stores" onclick="drawerNav('stores','di-stores');if(!_storesLoaded)loadStores()"><i data-lucide="store"></i>Cửa hàng</button>
+      <button class="drawer-item" id="di-setup" onclick="drawerNav('setup','di-setup');loadSetupPage()"><i data-lucide="rocket"></i>Setup & KT</button>
+      <button class="drawer-item" id="di-audit" onclick="drawerNav('audit','di-audit')"><i data-lucide="shield-check"></i>Audit</button>
+      <button class="drawer-item" id="di-nhansu" onclick="drawerNav('nhansu','di-nhansu')"><i data-lucide="users"></i>Nhân sự</button>
+      <button class="drawer-item" id="di-kehoach" onclick="drawerNav('kehoach','di-kehoach');loadPlans()"><i data-lucide="target"></i>Kế hoạch</button>
+      <button class="drawer-item" id="di-baocao" onclick="drawerNav('baocao','di-baocao')"><i data-lucide="file-text"></i>Báo cáo</button>
+      <button class="drawer-item" id="di-ai" onclick="drawerNav('ai','di-ai')"><i data-lucide="bot"></i>AI</button>
+      <button class="drawer-item" id="di-mytasks" onclick="drawerNav('mytasks','di-mytasks');loadMyTasks()"><i data-lucide="pin"></i>Việc Cần Làm</button>
       <div class="drawer-sep"></div>
-      <button class="drawer-item" onclick="closeDrawer();syncAll()">
-        <i data-lucide="refresh-cw"></i>Đồng bộ
-      </button>
-      <button class="drawer-item" id="drawer-settings-btn" onclick="closeDrawer();openSettings()" style="display:none">
-        <i data-lucide="settings"></i>Cài đặt
-      </button>
+      <button class="drawer-item" onclick="closeDrawer();syncAll()"><i data-lucide="refresh-cw"></i>Đồng bộ</button>
+      <button class="drawer-item" id="drawer-settings-btn" onclick="closeDrawer();openSettings()" style="display:none"><i data-lucide="settings"></i>Cài đặt</button>
     </div>
     <div class="drawer-footer">
       <div class="drawer-user">
         <div class="drawer-av" id="drawer-avatar">?</div>
-        <div>
-          <div class="drawer-uname" id="drawer-uname">–</div>
-          <div class="drawer-uemail" id="drawer-uemail">–</div>
-        </div>
+        <div><div class="drawer-uname" id="drawer-uname">–</div><div class="drawer-uemail" id="drawer-uemail">–</div></div>
       </div>
-      <a href="https://phuctea-pl.vercel.app" target="_blank" class="npl" style="background:#B8860B;color:#fff;margin-top:6px;width:100%;justify-content:center">📊 P&L Hub</a>
-      <a href="https://hrm-one-delta.vercel.app" target="_blank" class="npl" style="background:#003399;color:#fff;margin-top:6px;width:100%;justify-content:center">🗄️ Data Core</a>
+      <button onclick="closeDrawer();doLogout()" style="margin-top:8px;width:100%;padding:8px;background:rgba(220,38,38,.12);border:1px solid rgba(220,38,38,.25);border-radius:var(--rs);color:#DC2626;font-family:inherit;font-size:13px;cursor:pointer">🚪 Đăng xuất</button>
     </div>
   </div>
 
   <nav class="nav" style="display:none">
     <div class="nav-top">
-      <!-- Hamburger – chỉ hiện mobile -->
-      <button class="hamburger" id="hamburger-btn" onclick="openDrawer()" aria-label="Menu">☰</button>
+      <button class="hamburger" onclick="openDrawer()">☰</button>
       <div class="nbrand">
         <div class="nlogo">⚡</div>
         <div class="ntitle">Phúc Tea · <span>Ops Center</span></div>
@@ -1726,21 +1456,17 @@
         <button class="nbtn" onclick="syncAll()">🔄 Đồng bộ</button>
         <button class="nbtn nbtn-gold" id="settings-btn" onclick="openSettings()">⚙️ Cài đặt</button>
         <a href="https://phuctea-pl.vercel.app" target="_blank" class="npl" id="pl-btn" style="background:#B8860B;color:#fff">📊 P&L Hub</a>
-        <a href="https://hrm-one-delta.vercel.app" target="_blank" class="npl" style="background:#003399;color:#fff">🗄️ Data Core</a>
-        <!-- Notification bell -->
+        <a href="https://phuctea-data-core.vercel.app" target="_blank" class="npl" style="background:#003399;color:#fff">🗄️ Data Core</a>
         <div class="notif-wrapper">
           <button class="notif-btn" id="notif-btn" onclick="toggleNotifPanel()" title="Thông báo">
-            🔔
-            <span class="notif-badge" id="notif-badge"></span>
+            🔔<span class="notif-badge" id="notif-badge"></span>
           </button>
           <div class="notif-panel" id="notif-panel">
             <div class="notif-panel-head">
               <span style="font-size:13px;font-weight:700;color:var(--text)">🔔 Thông báo</span>
               <button onclick="markAllRead()" style="background:none;border:none;font-size:11px;color:var(--accent);cursor:pointer;font-weight:600">Đánh dấu đọc</button>
             </div>
-            <div class="notif-list" id="notif-list">
-              <div class="notif-empty">Chưa có thông báo</div>
-            </div>
+            <div class="notif-list" id="notif-list"><div class="notif-empty">Chưa có thông báo</div></div>
           </div>
         </div>
         <div class="navatar" id="nav-avatar" title="Thông tin cá nhân">DL</div>
@@ -2301,7 +2027,7 @@
       </div>
       <div class="fb">
         <button class="btn bo bsm" onclick="loadStaff()">🔄 Tải lại</button>
-        <button class="btn bp" id="add-staff-btn" onclick="openStaffModal()">+ Thêm nhân viên</button>
+        <button class="btn bp" onclick="openStaffModal()">+ Thêm nhân viên</button>
       </div>
     </div>
     <div class="filter-row">
@@ -2957,26 +2683,26 @@
 
 
   <!-- ═══ LOGIN SCREEN ═══ -->
-  <div id="login-screen" style="display:none;position:fixed;inset:0;background:#2F3136;z-index:9999;align-items:center;justify-content:center;flex-direction:column">
+  <div id="login-screen" style="display:none;position:fixed;inset:0;background:var(--primary);z-index:9999;align-items:center;justify-content:center;flex-direction:column">
     <div style="width:100%;max-width:420px;padding:24px 16px">
       <div style="text-align:center;margin-bottom:28px">
         <img src="logo4.png" id="login-logo" style="height:60px;margin-bottom:14px" onerror="this.style.display='none'">
-        <div style="font-size:22px;font-weight:800;color:#FFFFFF">Phúc Tea · Ops Center</div>
-        <div style="font-size:13px;color:rgba(255,255,255,.55);margin-top:4px">Hệ thống quản lý vận hành nội bộ</div>
+        <div style="font-size:22px;font-weight:800;color:var(--text-bright)">Phúc Tea · Ops Center</div>
+        <div style="font-size:13px;color:var(--text-muted);margin-top:4px">Hệ thống quản lý vận hành nội bộ</div>
       </div>
-      <div style="background:#44474E;border-radius:16px;padding:28px;border:1px solid rgba(255,255,255,.08);box-shadow:var(--shm)">
+      <div style="background:var(--surface);border-radius:16px;padding:28px;border:1px solid var(--border);box-shadow:var(--shm)">
         <div id="login-err" style="display:none;background:var(--red-l);border:1px solid var(--red);border-radius:var(--rs);padding:10px 13px;margin-bottom:14px;font-size:13px;color:var(--red)"></div>
         <div style="margin-bottom:14px">
-          <label style="display:block;font-size:11px;font-weight:700;color:rgba(255,255,255,.5);margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em">Email</label>
+          <label style="display:block;font-size:11px;font-weight:700;color:var(--text-muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em">Email</label>
           <input id="login-email" type="email" placeholder="your@phuctea.com.vn"
-            style="width:100%;padding:10px 12px;border-radius:var(--rs);border:1.5px solid rgba(255,255,255,.12);background:#36393F;color:#F2F3F5;font-family:inherit;font-size:14px;outline:none;box-sizing:border-box;transition:border-color .15s"
+            style="width:100%;padding:10px 12px;border-radius:var(--rs);border:1.5px solid var(--border);background:var(--surface-d);color:var(--text);font-family:inherit;font-size:14px;outline:none;box-sizing:border-box;transition:border-color .15s"
             onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
         </div>
         <div style="margin-bottom:20px">
-          <label style="display:block;font-size:11px;font-weight:700;color:rgba(255,255,255,.5);margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em">Mật khẩu</label>
+          <label style="display:block;font-size:11px;font-weight:700;color:var(--text-muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em">Mật khẩu</label>
           <div style="position:relative">
             <input id="login-pass" type="password" placeholder="Nhập mật khẩu"
-              style="width:100%;padding:10px 40px 10px 12px;border-radius:var(--rs);border:1.5px solid rgba(255,255,255,.12);background:#36393F;color:#F2F3F5;font-family:inherit;font-size:14px;outline:none;box-sizing:border-box;transition:border-color .15s"
+              style="width:100%;padding:10px 40px 10px 12px;border-radius:var(--rs);border:1.5px solid var(--border);background:var(--surface-d);color:var(--text);font-family:inherit;font-size:14px;outline:none;box-sizing:border-box;transition:border-color .15s"
               onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
             <button id="login-eye" type="button" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:16px;padding:4px">🐵</button>
           </div>
@@ -2996,8 +2722,9 @@
     // ════════════════════════════════════════
     //  CONFIG & STATE — v2 (bootstrapConfig)
     // ════════════════════════════════════════
-    const DEFAULT_SHEET_ID = '1tImeHSb1BacVVhJPzQxh2LHffOhqjnX7OVuTrygPJKo';
-    let OPS_API_URL = localStorage.getItem('ops_script_url') || '';
+    const DEFAULT_SHEET_ID  = '1tImeHSb1BacVVhJPzQxh2LHffOhqjnX7OVuTrygPJKo';
+    const DEFAULT_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzEEwE3nEw8cv4nLxh7_cUz_byGCi_yAF_sqcmbwsv9p4Fg7Ee_Y3pZIXm_H5Z-rr98Qg/exec';
+    let OPS_API_URL = localStorage.getItem('ops_script_url') || DEFAULT_SCRIPT_URL;
     let CFG = {
       get scriptUrl() { return OPS_API_URL; },
       set scriptUrl(v) { OPS_API_URL = v; localStorage.setItem('ops_script_url', v); },
@@ -3005,78 +2732,92 @@
       sheetId: localStorage.getItem('ops_sheet_id') || DEFAULT_SHEET_ID,
     };
 
-    // ── bootstrap: đọc Config sheet qua CSV public ──────────────
+    // ── bootstrapConfig: đọc API Key & config qua Apps Script getConfig ──
+    // Không dùng gviz/tq (yêu cầu sheet public) — dùng Apps Script thay thế
     async function bootstrapConfig() {
-      // Luôn fetch mới từ sheet Config - không dùng cache
-      // để mọi người dùng, mọi trình duyệt đều tự động kết nối
+      // Apps Script URL đã hardcode → gọi getConfig để lấy API Key và các config khác
+      if (!OPS_API_URL || !OPS_API_URL.startsWith('https://')) return;
+      const cached = localStorage.getItem('ops_config_cache');
+      const cachedAt = parseInt(localStorage.getItem('ops_config_cache_at') || '0');
+      const CACHE_TTL = 30 * 60 * 1000; // 30 phút
+      if (cached && (Date.now() - cachedAt < CACHE_TTL)) {
+        try { _applyCfg(JSON.parse(cached)); return; } catch(_) {}
+      }
       try {
-        const url = 'https://docs.google.com/spreadsheets/d/' + DEFAULT_SHEET_ID + '/gviz/tq?tqx=out:csv&sheet=Config';
-        const resp = await fetch(url, { cache: 'no-store' });
-        const text = await resp.text();
-        const cfg = {};
-        text.split('\n').forEach(function(line) {
-          // Parse CSV: "Key","Value"
-          var m = line.match(/^"?([^",]+)"?,?"?([^"]*)"?/);
-          if (m && m[1] && m[1].trim()) cfg[m[1].trim()] = (m[2]||'').trim();
-        });
-        _applyCfg(cfg);
-        console.log('bootstrapConfig OK, scriptUrl:', OPS_API_URL ? 'set' : 'empty');
+        const res = await fetch(OPS_API_URL + '?action=getConfig', { redirect: 'follow' });
+        const data = await res.json();
+        if (data.ok && data.config) {
+          _applyCfg(data.config);
+          localStorage.setItem('ops_config_cache', JSON.stringify(data.config));
+          localStorage.setItem('ops_config_cache_at', String(Date.now()));
+          console.log('[Config] loaded from Apps Script ✓');
+        }
       } catch(e) {
-        // Fallback: dùng localStorage nếu có
-        console.warn('bootstrapConfig fetch failed, using localStorage fallback:', e.message);
-        var fallback = localStorage.getItem('ops_script_url');
-        if (fallback) OPS_API_URL = fallback;
+        console.warn('[Config] bootstrapConfig failed:', e.message);
       }
     }
 
     function _applyCfg(cfg) {
-      if (cfg['Apps Script URL'] && cfg['Apps Script URL'] !== '') {
-        OPS_API_URL = cfg['Apps Script URL'];
-        localStorage.setItem('ops_script_url', OPS_API_URL);
-      }
-      if (cfg['Google Sheet ID'] && cfg['Google Sheet ID'] !== '') {
-        CFG.sheetId = cfg['Google Sheet ID'];
-        localStorage.setItem('ops_sheet_id', CFG.sheetId);
-      }
-      if (cfg['Anthropic API Key'] && cfg['Anthropic API Key'] !== '') {
-        CFG.apiKey = cfg['Anthropic API Key'];
-        localStorage.setItem('ops_api_key', CFG.apiKey);
-      }
+      // cfg từ getConfig: { 'Apps Script URL': '...', 'anthropic_api_key': '...', ... }
+      const get = (...keys) => {
+        for (const k of keys) {
+          const v = cfg[k] || cfg[k.toLowerCase()] || cfg[k.replace(/ /g,'_')] || cfg[k.replace(/_/g,' ')];
+          if (v && String(v).length > 3) return String(v);
+        }
+        return '';
+      };
+      const apiKey  = get('anthropic_api_key', 'Anthropic API Key', 'anthropic api key');
+      const sheetId = get('Google Sheet ID', 'google_sheet_id', 'google sheet id');
+      if (apiKey)  { CFG.apiKey  = apiKey;  localStorage.setItem('ops_api_key',  CFG.apiKey); }
+      if (sheetId) { CFG.sheetId = sheetId; localStorage.setItem('ops_sheet_id', CFG.sheetId); }
     }
 
-    // ── Client-side login via NhanSu CSV ────────────────────────
+    // ── Login: thử Apps Script trước, fallback sang CSV nếu lỗi ──
     async function doLoginCSV(email, password) {
-      const url = `https://docs.google.com/spreadsheets/d/${DEFAULT_SHEET_ID}/gviz/tq?tqx=out:csv&sheet=NhanSu`;
-      const resp = await fetch(url, { cache: 'no-store' });
-      const text = await resp.text();
-      const lines = text.split('\n').filter(l => l.trim());
-      // Skip header (row 0)
-      for (let i = 1; i < lines.length; i++) {
-        const cols = parseCSVLine(lines[i]);
-        if (!cols || cols.length < 15) continue;
-        const rowEmail   = (cols[4]  || '').trim().toLowerCase();   // col E
-        const rowRole    = (cols[9]  || '').trim();   // col J – Phân quyền
-        const rowStatus  = (cols[12] || '').trim();   // col M – Trạng thái
-        const rowPass    = (cols[14] || '').trim();   // col O – Mật khẩu
-        const rowStore   = (cols[8]  || '').trim();   // col I – Cửa hàng
-        if (rowEmail !== email.toLowerCase()) continue;
-        // Chỉ tài khoản Cửa hàng = "Hệ Thống" mới được vào
-        if (rowStore !== 'Hệ Thống') return { ok: false, msg: 'Tài khoản này không thuộc bộ phận Hệ Thống, không được phép truy cập' };
-        // System, Admin, User đều được vào
-        const allowedRoles = ['System', 'Admin', 'User'];
-        if (!allowedRoles.includes(rowRole)) return { ok: false, msg: 'Phân quyền không hợp lệ' };
-        if (rowStatus !== 'Đang cộng tác') return { ok: false, msg: 'Tài khoản không hoạt động' };
-        if (rowPass !== password) return { ok: false, msg: 'Mật khẩu không đúng' };
-        return {
-          ok: true, user: {
-            id: cols[0] || '', name: cols[1] || '', phone: cols[2] || '',
-            email: cols[4] || '', position: cols[7] || '',
-            store: rowStore, role: rowRole, status: rowStatus,
-            avatar: cols[13] || ''
-          }
-        };
-      }
-      return { ok: false, msg: 'Email không tồn tại trong hệ thống' };
+      // Cách 1: Apps Script (hoạt động trên mọi trình duyệt kể cả Cốc Cốc)
+      try {
+        const qs = new URLSearchParams({ action: 'login', email, password }).toString();
+        const res = await fetch(OPS_API_URL + '?' + qs, { redirect: 'follow', cache: 'no-store' });
+        const data = await res.json();
+        if (data.success) return { ok: true, user: data.user || {} };
+        if (data.message) return { ok: false, msg: data.message };
+      } catch(_) {}
+
+      // Cách 2: fallback đọc CSV (hoạt động khi sheet public, Chrome OK)
+      try {
+        const url = `https://docs.google.com/spreadsheets/d/${DEFAULT_SHEET_ID}/gviz/tq?tqx=out:csv&sheet=NhanSu`;
+        const resp = await fetch(url, { cache: 'no-store' });
+        const text = await resp.text();
+        // Nếu trả về HTML (lỗi) thì bỏ qua
+        if (!text.trim().startsWith('"')) throw new Error('not csv');
+        const lines = text.split('\n').filter(l => l.trim());
+        for (let i = 1; i < lines.length; i++) {
+          const cols = _parseCSVLine(lines[i]);
+          if (!cols || cols.length < 15) continue;
+          const rowEmail  = (cols[4]  || '').trim().toLowerCase();
+          const rowRole   = (cols[9]  || '').trim();
+          const rowStatus = (cols[12] || '').trim();
+          const rowPass   = (cols[14] || '').trim();
+          const rowStore  = (cols[8]  || '').trim();
+          if (rowEmail !== email.toLowerCase()) continue;
+          const allowedRoles = ['System', 'Admin', 'User'];
+          if (!allowedRoles.includes(rowRole)) return { ok: false, msg: 'Tài khoản không có quyền truy cập hệ thống' };
+          if (rowStore !== 'Hệ Thống') return { ok: false, msg: 'Tài khoản không thuộc bộ phận Hệ Thống' };
+          if (rowStatus !== 'Đang cộng tác') return { ok: false, msg: 'Tài khoản không hoạt động' };
+          if (rowPass !== password) return { ok: false, msg: 'Mật khẩu không đúng' };
+          return {
+            ok: true, user: {
+              id: cols[0]||'', name: cols[1]||'', phone: cols[2]||'',
+              email: cols[4]||'', position: cols[7]||'',
+              store: cols[8]||'Hệ Thống', role: rowRole, status: rowStatus,
+              avatar: cols[13]||''
+            }
+          };
+        }
+        return { ok: false, msg: 'Email không tồn tại trong hệ thống' };
+      } catch(_) {}
+
+      return { ok: false, msg: 'Không thể kết nối. Vui lòng dùng Chrome hoặc kiểm tra mạng.' };
     }
 
     function parseCSVLine(line) {
@@ -3102,12 +2843,12 @@
       _currentUser = user;
       localStorage.setItem(SESSION_KEY, JSON.stringify(user));
       _applyLoginUI(user);
-      // Log login notification (async, không block)
+      // Update mobile drawer
+      setTimeout(function() { if (typeof updateDrawerUser === 'function') updateDrawerUser(user); }, 100);
+      // Log login
       setTimeout(function() {
         var device = typeof getDeviceInfo === 'function' ? getDeviceInfo() : 'Unknown';
-        if (typeof logNotification === 'function') {
-          logNotification('login', 'đã đăng nhập từ ' + device, '🔑');
-        }
+        if (typeof logNotification === 'function') logNotification('login', 'đã đăng nhập từ ' + device, '🔑');
       }, 3000);
     }
 
@@ -3139,13 +2880,10 @@
         const firstName = (user.name || '').split(' ').pop();
         greetEl.textContent = getH() + ', ' + firstName + ' 👋';
       }
-      // Nav avatar + user label (always reflects current user)
+      // Nav avatar + user label
       _updateNavUser(user);
-      // Update mobile drawer user
-      if (typeof updateDrawerUser === 'function') updateDrawerUser(user);
-      // Sync drawer settings btn
-      var dsb = document.getElementById('drawer-settings-btn');
-      if (dsb) dsb.style.display = (user.email === 'duongthanhliem@phuctea.com.vn') ? '' : 'none';
+      // Update mobile drawer
+      if (typeof updateDrawerUser === "function") updateDrawerUser(user);
     }
 
     function _updateNavUser(user) {
@@ -3296,7 +3034,7 @@
     //  SETTINGS
     // ════════════════════════════════════════
     // Populate profile modal from session
-    var _navAv = document.getElementById('nav-avatar'); if (_navAv) _navAv.addEventListener('click', function() {
+    document.getElementById('nav-avatar').addEventListener('click', function() {
       if (_currentUser) {
         const e = $('profile-email'); if (e) e.textContent = _currentUser.email || '';
         const n = $('profile-name'); if (n) n.textContent = _currentUser.name || '';
@@ -3355,6 +3093,13 @@
     //  SYNC ALL
     // ════════════════════════════════════════
     async function syncAll() {
+      // Nếu chưa có scriptUrl → thử đọc lại từ database (bỏ cache cũ)
+      if (!CFG.scriptUrl) {
+        setSyncStatus(false, 'Đang tải cấu hình...');
+        localStorage.removeItem('ops_config_cache');
+        localStorage.removeItem('ops_config_cache_at');
+        await bootstrapConfig();
+      }
       if (!CFG.scriptUrl) { $('cfg-alert').style.display = 'flex'; setSyncStatus(false, 'Chưa cấu hình'); return; }
       $('cfg-alert').style.display = 'none';
       load('Đang đồng bộ Google Sheets...');
@@ -3575,48 +3320,27 @@
     }
     function renderStores(list) {
       const tbody = $('stores-tbody');
-      tbody.innerHTML = '';
-      if (!list.length) {
-        tbody.innerHTML = '<tr><td colspan="12"><div class="empty-state">Không có dữ liệu</div></td></tr>';
-        return;
-      }
-      const perm = getPermission();
-      list.forEach(function(s) {
-        const prog = s.setupProgress != null
-          ? '<div class="prog-bg" style="width:80px"><div class="prog-bar" style="width:' + s.setupProgress + '%;background:var(--accent)"></div></div><small>' + s.setupProgress + '%</small>'
-          : '–';
-        const tr = document.createElement('tr');
-        tr.innerHTML = '<td><code>' + (s.storeId || '–') + '</code></td>'
-          + '<td style="font-weight:600">' + (s.name || '') + '</td>'
-          + '<td>' + (s.brand || '–') + '</td>'
-          + '<td>' + (s.owner || '–') + '<br><small style="color:var(--text-muted)">' + (s.phone || '') + '</small></td>'
-          + '<td>' + (s.model || '–') + '</td>'
-          + '<td>' + (s.type || '–') + '</td>'
-          + '<td>' + statusBadge(s.status) + '</td>'
-          + '<td>' + (s.status === 'Đang setup' ? prog : '–') + '</td>'
-          + '<td>' + (s.launchDate || '–') + '</td>'
-          + '<td>' + (s.province || '–') + '</td>'
-          + '<td style="max-width:150px;white-space:normal;font-size:12px">' + (s.address || '–') + '</td>'
-          + '<td></td>';
-        // Add action buttons safely
-        const actionTd = tr.lastElementChild;
-        if (perm.canEditStore) {
-          const btnEdit = document.createElement('button');
-          btnEdit.className = 'btn bo bsm';
-          btnEdit.textContent = '✏️';
-          btnEdit.addEventListener('click', (function(id){ return function(){ editStore(id); }; })(s.storeId));
-          actionTd.appendChild(btnEdit);
-        }
-        if (perm.canDeleteStore) {
-          const btnDel = document.createElement('button');
-          btnDel.className = 'btn bd bsm';
-          btnDel.textContent = '🗑';
-          btnDel.style.marginLeft = '4px';
-          btnDel.addEventListener('click', (function(id,n){ return function(){ deleteStoreConfirm(id,n); }; })(s.storeId, s.name));
-          actionTd.appendChild(btnDel);
-        }
-        tbody.appendChild(tr);
-      });
+      if (!list.length) { tbody.innerHTML = '<tr><td colspan="12"><div class="empty-state">Không có dữ liệu</div></td></tr>'; return; }
+      tbody.innerHTML = list.map(s => {
+        const prog = s.setupProgress != null ? `<div class="prog-bg" style="width:80px"><div class="prog-bar" style="width:${s.setupProgress}%;background:var(--gold)"></div></div><small>${s.setupProgress}%</small>` : '–';
+        return `<tr>
+      <td><code>${s.storeId || '–'}</code></td>
+      <td style="font-weight:600">${s.name}</td>
+      <td>${s.brand || '–'}</td>
+      <td>${s.owner || '–'}<br><small style="color:var(--gray)">${s.phone || ''}</small></td>
+      <td>${s.model || '–'}</td>
+      <td>${s.type || '–'}</td>
+      <td>${statusBadge(s.status)}</td>
+      <td>${s.status === 'Đang setup' ? prog : '–'}</td>
+      <td>${s.launchDate || '–'}</td>
+      <td>${s.province || '–'}</td>
+      <td style="max-width:150px;white-space:normal;font-size:12px">${s.address || '–'}</td>
+      <td>
+        <button class="btn bo bsm" onclick="editStore('${s.storeId}')">✏️</button>
+        <button class="btn bd bsm" onclick="deleteStoreConfirm('${s.storeId}','${s.name}')">🗑</button>
+      </td>
+    </tr>`;
+      }).join('');
     }
     function updateAllStoreDropdowns() {
       const names = _allStores.map(s => s.name);
@@ -4721,47 +4445,36 @@
         var photoGrid = document.createElement('div');
         photoGrid.style.cssText = 'display:flex;flex-wrap:wrap;gap:10px';
         photos.forEach(function(purl, pidx) {
-          var pm     = purl.match(/[?&]id=([a-zA-Z0-9_-]+)/) || purl.match(/\/d\/([a-zA-Z0-9_-]+)\//);
-          var pfid   = pm ? pm[1] : null;
-          var pthumb   = pfid ? 'https://drive.google.com/thumbnail?id=' + pfid + '&sz=w400'
-                               : (purl.startsWith('http') ? purl : '');
-          var pviewUrl = pfid ? 'https://drive.google.com/file/d/' + pfid + '/view' : purl;
+          var pm = purl.match(/[?&]id=([a-zA-Z0-9_-]+)/) || purl.match(/\/d\/([a-zA-Z0-9_-]+)\//);
+          var pfid = pm ? pm[1] : null;
+          var pthumb = pfid
+            ? 'https://drive.google.com/thumbnail?id=' + pfid + '&sz=w400'
+            : (purl.startsWith('http') ? purl : '');
           var cell = document.createElement('div');
           cell.style.cssText = 'text-align:center;flex:0 0 auto';
-          // Always show something - either image or link
-          {
+          if (pthumb) {
             var img = document.createElement('img');
-            img.src = pthumb || pviewUrl;
-            img.crossOrigin = 'anonymous';
+            img.src = pthumb;
             img.style.cssText = 'width:140px;height:140px;object-fit:cover;cursor:pointer;border-radius:8px;border:1px solid var(--border);display:block';
             img.title = 'Click để xem ảnh gốc';
-            img.addEventListener('click', (function(u){ return function(){ window.open(u,'_blank'); }; })(pviewUrl));
-            img.onerror = (function(fid, origUrl, viewUrl, c, i2, tried){
+            img.addEventListener('click', (function(u){ return function(){ window.open(u,'_blank'); }; })(purl));
+            img.onerror = (function(u, c, i2){
               return function(){
-                if (!tried && fid) {
-                  // Fallback: try uc?export=view format
-                  i2.onerror = null;
-                  i2.src = 'https://drive.google.com/uc?export=view&id=' + fid;
-                  i2.onerror = function() {
-                    // All formats failed - show link
-                    if (c.contains(i2)) c.removeChild(i2);
-                    var lnk = document.createElement('a');
-                    lnk.href = viewUrl; lnk.target = '_blank';
-                    lnk.style.cssText = 'display:flex;width:140px;height:140px;align-items:center;justify-content:center;border:2px dashed var(--border);border-radius:8px;font-size:11px;color:var(--blue);text-decoration:none;background:var(--surface-l);flex-direction:column;gap:4px;text-align:center;padding:8px;box-sizing:border-box';
-                    lnk.innerHTML = '<span style="font-size:22px">🖼</span><span style="font-size:10px;margin-top:4px">Nhấn xem ảnh</span>';
-                    c.insertBefore(lnk, c.firstChild);
-                  };
-                  return;
-                }
-                if (c.contains(i2)) c.removeChild(i2);
+                c.removeChild(i2);
                 var lnk = document.createElement('a');
-                lnk.href = viewUrl; lnk.target = '_blank';
-                lnk.style.cssText = 'display:flex;width:140px;height:140px;align-items:center;justify-content:center;border:2px dashed var(--accent);border-radius:8px;font-size:11px;color:var(--accent);text-decoration:none;background:var(--surface-d);flex-direction:column;gap:4px;text-align:center;padding:8px;box-sizing:border-box';
-                lnk.innerHTML = '<span style="font-size:22px">🖼</span><span style="font-size:10px;margin-top:4px">Nhấn xem ảnh</span>';
+                lnk.href = u; lnk.target = '_blank';
+                lnk.style.cssText = 'display:flex;width:140px;height:140px;align-items:center;justify-content:center;border:2px dashed var(--border);border-radius:8px;font-size:11px;color:var(--blue);text-decoration:none;background:var(--white);flex-direction:column;gap:4px';
+                lnk.innerHTML = '<span style="font-size:24px">🖼</span><span>Xem ảnh</span>';
                 c.insertBefore(lnk, c.firstChild);
               };
-            })(pfid, purl, pviewUrl, cell, img, false);
+            })(purl, cell, img);
             cell.appendChild(img);
+          } else {
+            var lnk2 = document.createElement('a');
+            lnk2.href = purl; lnk2.target = '_blank';
+            lnk2.style.cssText = 'display:flex;width:140px;height:140px;align-items:center;justify-content:center;border:2px dashed var(--border);border-radius:8px;font-size:11px;color:var(--blue);text-decoration:none;background:var(--white);flex-direction:column;gap:4px';
+            lnk2.innerHTML = '<span style="font-size:24px">🔗</span><span>Ảnh ' + (pidx+1) + '</span>';
+            cell.appendChild(lnk2);
           }
           var lbl = document.createElement('div');
           lbl.style.cssText = 'font-size:10px;color:var(--gray);margin-top:4px';
@@ -5286,37 +4999,6 @@ Dương Thanh Liêm – Operations Phúc Tea`;
       if (search) list = list.filter(s => (s.name + s.email + s.position).toLowerCase().includes(search));
       renderStaffGrid(list);
     }
-
-    // ── Phân quyền ─────────────────────────────────────────────
-    function getPermission() {
-      var role    = _currentUser ? _currentUser.role : 'User';
-      var myEmail = _currentUser ? _currentUser.email : '';
-      var isSystem = role === 'System';
-      var isAdmin  = role === 'Admin';
-      return {
-        isSystem: isSystem,
-        isAdmin:  isAdmin,
-        isUser:   role === 'User',
-        canEditStaff: function(s) {
-          if (isSystem) return true;
-          if (isAdmin)  return s.role === 'User';
-          return s.email === myEmail;
-        },
-        canDeleteStaff: function(s) {
-          if (isSystem) return true;
-          if (isAdmin)  return s.role === 'User';
-          return false;
-        },
-        canAddStaff:    isSystem || isAdmin,
-        canEditStore:   isSystem || isAdmin,
-        canDeleteStore: isSystem || isAdmin,
-        canSeeCCCD: function(s) {
-          if (isSystem) return true;
-          return s.email === myEmail;
-        }
-      };
-    }
-
     function renderStaffGrid(list) {
       const grid = $('staff-grid');
       if (!list.length) { grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="ei">👥</div>Không có nhân viên phù hợp</div>'; return; }
@@ -5334,8 +5016,6 @@ Dương Thanh Liêm – Operations Phúc Tea`;
           + '<div style="font-size:11px;color:var(--gray);margin-top:2px">' + (s.position||'–') + ' · <code style="font-size:10px">' + (s.id||'–') + '</code></div>'
           + '<div style="margin-top:5px;display:flex;gap:4px;flex-wrap:wrap">' + roleBadge(s.role) + ' <span class="bdg ' + statusCls + '">' + (s.status||'–') + '</span></div>'
           + '</div>';
-        // Tất cả đều có thể click xem, nhưng modal sẽ readonly nếu không có quyền sửa
-        card.style.cursor = 'pointer';
         card.addEventListener('click', (function(sid){ return function(){ editStaff(sid); }; })(s.id));
         grid.appendChild(card);
       });
@@ -5356,8 +5036,6 @@ Dương Thanh Liêm – Operations Phúc Tea`;
       openModal('modal-staff');
     }
     function editStaff(id) {
-      const _s = _allStaff.find(x => x.id === id);
-      const _canEdit = !_s || getPermission().canEditStaff(_s);
       const s = _allStaff.find(x => x.id === id); if (!s) return;
       currentStaffEdit = s;
       $('sf-id').value = s.id || ''; $('sf-name').value = s.name || '';
@@ -5373,29 +5051,23 @@ Dương Thanh Liêm – Operations Phúc Tea`;
       _avatarBase64 = null; _cccdFrontB64 = null; _cccdBackB64 = null;
       if ($('sf-cccd-front'))  $('sf-cccd-front').value = s.cccdFront || '';
       if ($('sf-cccd-back'))   $('sf-cccd-back').value  = s.cccdBack  || '';
-      // Load CCCD từ sheet (đã lưu Drive link qua GS)
-      // Chỉ hiển thị CCCD nếu: là chính mình HOẶC là System
-      const _canSeeCCCD = _currentUser && (
-        _currentUser.role === 'System' ||
-        (s.email && _currentUser.email === s.email)
-      );
+      // Load CCCD từ localStorage (ảnh không lưu trên GS)
+      const _editEmail = s.email || '';
       ['front','back'].forEach(side => {
+        const localSrc = _editEmail ? localStorage.getItem('ops_cccd_' + side + '_' + _editEmail) : null;
         const sheetUrl = side==='front' ? s.cccdFront : s.cccdBack;
+        const src = localSrc || sheetUrl || null;
         const prev = $('sf-cccd-'+side+'-preview');
-        const lbl  = prev ? prev.closest('div') : null;
-        if (_canSeeCCCD && sheetUrl) {
-          // Convert Drive URL to embeddable format
-          const fm = sheetUrl.match(/[?&]id=([a-zA-Z0-9_-]+)/) || sheetUrl.match(/\/d\/([a-zA-Z0-9_-]+)\//);
-          const fid = fm ? fm[1] : null;
-          const src = fid ? 'https://lh3.googleusercontent.com/d/' + fid + '=w400' : sheetUrl;
-          if (prev) { prev.src = src; prev.style.display = 'block'; }
-        } else {
-          if (prev) { prev.src = ''; prev.style.display = 'none'; }
+        if (prev) {
+          if (src) { prev.src = src; prev.style.display = 'block'; }
+          else { prev.src = ''; prev.style.display = 'none'; }
+        }
+        // Pre-fill _cccdXxxB64 so existing image is preserved if user doesn't re-upload
+        if (localSrc) {
+          if (side === 'front') _cccdFrontB64 = localSrc;
+          else _cccdBackB64 = localSrc;
         }
       });
-      // Hiển thị/ẩn CCCD section dựa vào quyền
-      const cccdSection = $('sf-cccd-front-file') ? $('sf-cccd-front-file').closest('.fr') : null;
-      if (cccdSection) cccdSection.style.display = _canSeeCCCD ? '' : 'none';
       // Show existing avatar
       const avPrev = $('sf-avatar-preview');
       if (avPrev) {
@@ -5405,28 +5077,8 @@ Dương Thanh Liêm – Operations Phúc Tea`;
       $('sf-pw').value = '';
       if (s.dob) $('sf-dob').value = s.dob.split('/').reverse().join('-');
       if (s.startDate) $('sf-start').value = s.startDate.split('/').reverse().join('-');
-      // Set tiêu đề & readonly mode theo quyền
-      if (_canEdit) {
-        $('staff-modal-title').textContent = '✏️ Sửa: ' + s.name;
-      } else {
-        $('staff-modal-title').textContent = '🔍 Xem hồ sơ: ' + s.name;
-      }
+      $('staff-modal-title').textContent = '✏️ Sửa: ' + s.name;
       openModal('modal-staff');
-      // Apply readonly nếu không có quyền sửa
-      setTimeout(function() {
-        var isRO = !_canEdit;
-        document.querySelectorAll('#modal-staff input:not([type=file]), #modal-staff select, #modal-staff textarea').forEach(function(el) {
-          el.readOnly = isRO;
-          if (el.tagName === 'SELECT') el.disabled = isRO;
-        });
-        var saveBtn = document.querySelector('#modal-staff button.btn.bp');
-        if (saveBtn) saveBtn.style.display = isRO ? 'none' : '';
-        // Ẩn CCCD upload nếu readonly
-        ['sf-cccd-front-file','sf-cccd-back-file','sf-avatar-file'].forEach(function(id) {
-          var el = document.getElementById(id); if (el) el.disabled = isRO;
-          var lbl = el ? el.closest('label') : null; if (lbl) lbl.style.display = isRO ? 'none' : '';
-        });
-      }, 50);
     }
     async function saveStaffForm() {
       const name = $('sf-name').value.trim(), email = $('sf-email').value.trim();
@@ -5450,8 +5102,8 @@ Dương Thanh Liêm – Operations Phúc Tea`;
         cccd:          ($('sf-cccd')||{value:''}).value,
         bankName:      ($('sf-bank-name')||{value:''}).value,
         bankAcct:      ($('sf-bank-acct')||{value:''}).value,
-        cccdFront:     _cccdFrontB64 || currentStaffEdit?.cccdFront || '',
-        cccdBack:      _cccdBackB64  || currentStaffEdit?.cccdBack  || '',
+        cccdFront:     '',  // stored in localStorage
+        cccdBack:      '',   // stored in localStorage
       };
       const res = await api({ action: 'saveStaff', data: d });
       unload();
@@ -5465,7 +5117,9 @@ Dương Thanh Liêm – Operations Phúc Tea`;
               _updateNavUser(_currentUser);
             }
           }
-          // CCCD đã được upload lên Drive qua GS (không cần localStorage)
+          // Lưu CCCD localStorage (không qua GS để tránh timeout)
+          if (_cccdFrontB64) localStorage.setItem('ops_cccd_front_' + sfEmail, _cccdFrontB64);
+          if (_cccdBackB64)  localStorage.setItem('ops_cccd_back_'  + sfEmail, _cccdBackB64);
         }
         toast('✅ Đã lưu: ' + name);
         closeModal('modal-staff');
@@ -7059,7 +6713,7 @@ Operations Leader`;
           if (res.ok) {
             _saveSession(res.user);
             if (errEl) errEl.style.display = 'none';
-            initApp();
+            await initApp();
           } else {
             if (errEl) { errEl.textContent = res.msg || 'Đăng nhập thất bại'; errEl.style.display = 'block'; }
           }
@@ -7081,12 +6735,12 @@ Operations Leader`;
       const saved = _loadSession();
       if (saved) {
         _applyLoginUI(saved);
-        initApp();
+        await initApp();
       } else {
         showLoginScreen();
       }
 
-      // Wire 🐵 eye buttons cho profile modal (static DOM)
+      // Wire 🐵 monkey buttons cho profile modal (static DOM)
       wireEyeBtn('eye-newpw',     'p-newpw');
       wireEyeBtn('eye-confirmpw', 'p-confirmpw');
 
@@ -7095,7 +6749,7 @@ Operations Leader`;
       if (avFile) avFile.addEventListener('change', function() { previewAvatar(this); });
     });
 
-    function initApp() {
+    async function initApp() {
       // Greeting & date
       const days = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
       const now = new Date();
@@ -7116,35 +6770,30 @@ Operations Leader`;
       // Re-init lucide icons after nav shown
       if (typeof lucide !== 'undefined') lucide.createIcons();
 
-      // Luôn thử bootstrapConfig trước khi sync
-      // đảm bảo mọi user/browser đều tự lấy URL từ sheet Config
-      bootstrapConfig().then(function() {
-        const ca = $('cfg-alert');
-        if (CFG.scriptUrl) {
-          if (ca) ca.style.display = 'none';
-          syncAll();
-        } else {
-          if (ca) ca.style.display = 'flex';
-          setSyncStatus(false, 'Chưa cấu hình Apps Script URL trong sheet Config');
-          // Chỉ hiện hướng dẫn cho owner
-          if (_currentUser && _currentUser.email === 'duongthanhliem@phuctea.com.vn') {
-            toast('⚙️ Dán Apps Script URL vào sheet Config → cột B dòng "Apps Script URL"', 'twarn');
-          }
+      // Luôn đọc lại Config từ database khi scriptUrl chưa có
+      // Đảm bảo tự động kết nối trên mọi trình duyệt sau khi đăng nhập
+      if (!CFG.scriptUrl) {
+        localStorage.removeItem('ops_config_cache');
+        localStorage.removeItem('ops_config_cache_at');
+        await bootstrapConfig();
+      }
+
+      // Start sync or show config alert
+      if (CFG.scriptUrl) { const ca=$('cfg-alert'); if(ca) ca.style.display='none'; syncAll(); }
+      else {
+        const ca=$('cfg-alert'); if(ca) ca.style.display='flex';
+        setSyncStatus(false, 'Chưa cấu hình');
+        if (_currentUser && _currentUser.email === 'duongthanhliem@phuctea.com.vn') {
+          toast('⚙️ Chưa cấu hình Apps Script URL. Nhấn ⚙️ Cài đặt.', 'twarn');
         }
-      });
+      }
 
       setTimeout(() => {
         if (!D.auditCriteria.length && $('audit-criteria-container')) renderAuditForm();
       }, 1000);
 
-      // Start notification polling
-      if (typeof startNotifPoll === 'function') {
-        setTimeout(startNotifPoll, 2000);
-      }
-
-      // Ẩn/hiện nút Thêm nhân viên theo phân quyền
-      const addStaffBtn = $('add-staff-btn');
-      if (addStaffBtn) addStaffBtn.style.display = getPermission().canAddStaff ? '' : 'none';
+      // Start notification polling + deadline check
+      if (typeof startNotifPoll === 'function') setTimeout(startNotifPoll, 2500);
     }
 
     // ════════════════════════════════════════
@@ -7156,6 +6805,7 @@ Operations Leader`;
       if (d) d.classList.add('open');
       if (o) o.classList.add('open');
       document.body.style.overflow = 'hidden';
+      if (typeof lucide !== 'undefined') lucide.createIcons();
     }
     function closeDrawer() {
       var d = document.getElementById('mobile-drawer');
@@ -7166,26 +6816,11 @@ Operations Leader`;
     }
     function drawerNav(page, itemId) {
       closeDrawer();
-      // Update active drawer item
       document.querySelectorAll('.drawer-item').forEach(function(el) { el.classList.remove('on'); });
       var el = document.getElementById(itemId);
       if (el) el.classList.add('on');
-      // Update desktop ntab active
-      var tabs = document.querySelectorAll('.ntab');
-      tabs.forEach(function(t) { t.classList.remove('on'); });
       goPage(page, null);
     }
-    // Sync drawer active state with desktop nav
-    var _origGoPage = window.goPage;
-    window.goPage = function(page, tabEl) {
-      if (_origGoPage) _origGoPage(page, tabEl);
-      // Sync drawer
-      document.querySelectorAll('.drawer-item').forEach(function(el) {
-        el.classList.toggle('on', el.id === 'di-' + page);
-      });
-    };
-
-    // Update drawer user info
     function updateDrawerUser(user) {
       if (!user) return;
       var av = document.getElementById('drawer-avatar');
@@ -7197,35 +6832,29 @@ Operations Leader`;
           ? (parts[parts.length-1][0] + parts[parts.length-2][0]).toUpperCase()
           : (parts[0] ? parts[0].slice(0,2).toUpperCase() : '?');
         var savedAv = localStorage.getItem('ops_avatar_' + (user.email || ''));
-        if (savedAv) {
-          av.innerHTML = '<img src="' + savedAv + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
-        } else {
-          av.textContent = init;
-        }
+        av.innerHTML = savedAv
+          ? '<img src="' + savedAv + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%">'
+          : init;
       }
       if (un) un.textContent = user.name || '–';
       if (ue) ue.textContent = user.email || '–';
-      // Settings btn in drawer
       var dsb = document.getElementById('drawer-settings-btn');
       if (dsb) dsb.style.display = (user.email === 'duongthanhliem@phuctea.com.vn') ? '' : 'none';
     }
 
     // ════════════════════════════════════════
-    //  NOTIFICATIONS
+    //  NOTIFICATIONS + DEADLINE REMINDER
     // ════════════════════════════════════════
     var _notifReadKey = 'ops_notif_read_ts';
     var _notifPollInterval = null;
-    var _lastNotifFetch = 0;
 
     function getDeviceInfo() {
       var ua = navigator.userAgent;
-      var browser = 'Browser';
-      var os = 'Unknown OS';
+      var browser = 'Browser', os = 'Unknown OS';
       if (/Chrome\//.test(ua) && !/Chromium|Edge|OPR/.test(ua)) browser = 'Chrome';
       else if (/Firefox\//.test(ua)) browser = 'Firefox';
       else if (/Safari\//.test(ua) && !/Chrome/.test(ua)) browser = 'Safari';
       else if (/Edg\//.test(ua)) browser = 'Edge';
-      else if (/OPR\//.test(ua)) browser = 'Opera';
       if (/Windows/.test(ua)) os = 'Windows';
       else if (/Mac OS/.test(ua)) os = 'macOS';
       else if (/Android/.test(ua)) os = 'Android';
@@ -7237,7 +6866,11 @@ Operations Leader`;
     async function logNotification(type, message, icon) {
       if (!CFG.scriptUrl) return;
       try {
-        await api({ action: 'addNotification', data: { type, message, icon, user: _currentUser ? _currentUser.name : 'Hệ thống', email: _currentUser ? _currentUser.email : '' } });
+        await api({ action: 'addNotification', data: {
+          type: type, message: message, icon: icon || '🔔',
+          user: _currentUser ? _currentUser.name : 'Hệ thống',
+          email: _currentUser ? _currentUser.email : ''
+        }});
       } catch(e) { console.warn('logNotif failed:', e); }
     }
 
@@ -7255,7 +6888,7 @@ Operations Leader`;
       if (!panel) return;
       var readTs = parseInt(localStorage.getItem(_notifReadKey) || '0');
       var unread = 0;
-      if (!list.length) {
+      if (!list || !list.length) {
         panel.innerHTML = '<div class="notif-empty">Chưa có thông báo</div>';
         if (badge) { badge.textContent = ''; badge.classList.remove('show'); }
         return;
@@ -7264,8 +6897,11 @@ Operations Leader`;
         var ts = n.timestamp ? new Date(n.timestamp).getTime() : 0;
         var isUnread = ts > readTs;
         if (isUnread) unread++;
-        var timeStr = n.timestamp ? new Date(n.timestamp).toLocaleString('vi-VN', {hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'}) : '–';
-        return '<div class="notif-item' + (isUnread ? ' unread' : '') + '">'
+        var isDeadline = n.type === 'deadline';
+        var timeStr = n.timestamp
+          ? new Date(n.timestamp).toLocaleString('vi-VN', {hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'})
+          : '–';
+        return '<div class="notif-item' + (isUnread ? ' unread' : '') + (isDeadline ? ' deadline' : '') + '">'
           + '<div class="notif-icon">' + (n.icon || '🔔') + '</div>'
           + '<div class="notif-body">'
           + '<div class="notif-msg"><strong>' + (n.user || '') + '</strong> ' + (n.message || '') + '</div>'
@@ -7273,7 +6909,7 @@ Operations Leader`;
           + '</div></div>';
       }).join('');
       if (badge) {
-        if (unread > 0) { badge.textContent = unread > 9 ? '9+' : unread; badge.classList.add('show'); }
+        if (unread > 0) { badge.textContent = unread > 9 ? '9+' : String(unread); badge.classList.add('show'); }
         else { badge.textContent = ''; badge.classList.remove('show'); }
       }
     }
@@ -7283,16 +6919,16 @@ Operations Leader`;
       if (!p) return;
       var isOpen = p.classList.toggle('open');
       if (isOpen) fetchNotifications();
-      // Close when clicking outside
       if (isOpen) {
         setTimeout(function() {
           document.addEventListener('click', function _cls(e) {
-            if (!p.contains(e.target) && e.target.id !== 'notif-btn') {
+            var btn = document.getElementById('notif-btn');
+            if (!p.contains(e.target) && e.target !== btn && !btn.contains(e.target)) {
               p.classList.remove('open');
               document.removeEventListener('click', _cls);
             }
           });
-        }, 10);
+        }, 50);
       }
     }
 
@@ -7303,33 +6939,77 @@ Operations Leader`;
       document.querySelectorAll('.notif-item.unread').forEach(function(el) { el.classList.remove('unread'); });
     }
 
-    function startNotifPoll() {
-      if (_notifPollInterval) clearInterval(_notifPollInterval);
-      fetchNotifications(); // fetch ngay lần đầu
-      _notifPollInterval = setInterval(fetchNotifications, 30000); // poll 30s
+    // ── Nhắc deadline task sắp đến hạn (chỉ task của mình) ──────
+    async function checkDeadlineTasks() {
+      if (!CFG.scriptUrl || !_currentUser) return;
+      try {
+        var res = await api({ action: 'getMyTasks', userName: _currentUser.name || '' });
+        if (!res.ok || !res.tasks) return;
+        var tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        var tomorrowStr = tomorrow.toLocaleDateString('vi-VN'); // dd/MM/yyyy
+        // Also check same-day deadline
+        var todayStr = new Date().toLocaleDateString('vi-VN');
+        var alerted = JSON.parse(localStorage.getItem('ops_deadline_alerted') || '{}');
+        var todayKey = new Date().toISOString().split('T')[0];
+
+        res.tasks.forEach(function(t) {
+          if (!t.deadline) return;
+          var dl = t.deadline; // dd/MM/yyyy from GS
+          var isDueTomorrow = dl === tomorrowStr;
+          var isDueToday    = dl === todayStr;
+          if (!isDueTomorrow && !isDueToday) return;
+          // Only alert once per day per task
+          var alertKey = todayKey + '_' + t.taskId;
+          if (alerted[alertKey]) return;
+          alerted[alertKey] = true;
+          var msg = isDueToday
+            ? 'Task "' + t.task + '" (' + t.storeName + ') đến hạn HÔM NAY!'
+            : 'Task "' + t.task + '" (' + t.storeName + ') sẽ đến hạn vào NGÀY MAI';
+          var icon = isDueToday ? '🚨' : '⏰';
+          // Log to notification sheet
+          logNotification('deadline', msg, icon);
+          // Show toast in-app
+          if (typeof toast === 'function') toast(icon + ' ' + msg, isDueToday ? 'terr' : 'twarn');
+        });
+        // Save alerted state (keep only today's keys)
+        var cleaned = {};
+        Object.keys(alerted).forEach(function(k) { if (k.startsWith(todayKey)) cleaned[k] = true; });
+        localStorage.setItem('ops_deadline_alerted', JSON.stringify(cleaned));
+      } catch(e) { console.warn('checkDeadlineTasks error:', e); }
     }
 
-    // ══ Wrap các action quan trọng để tự log thông báo ══
-    // Wrap api() để intercept các action cần log
-    var _origApi = window.api || null;
+    function startNotifPoll() {
+      if (_notifPollInterval) clearInterval(_notifPollInterval);
+      // Fetch notifications + check deadlines ngay lập tức
+      fetchNotifications();
+      checkDeadlineTasks();
+      // Poll mỗi 30s
+      _notifPollInterval = setInterval(function() {
+        fetchNotifications();
+      }, 30000);
+      // Check deadline mỗi 10 phút
+      setInterval(checkDeadlineTasks, 10 * 60 * 1000);
+    }
+
+    // ── Các action cần log thông báo ────────────────────────
     var _notifActions = {
-      'saveStore':    function(p) { return { icon:'🏪', msg: 'đã lưu cửa hàng ' + ((p.data||p).name||'') }; },
-      'deleteStore':  function(p) { return { icon:'🗑', msg: 'đã xóa cửa hàng ' + (p.storeId||'') }; },
-      'saveStaff':    function(p) { return { icon:'👤', msg: 'đã cập nhật nhân sự ' + ((p.data||p).name||'') }; },
-      'deleteStaff':  function(p) { return { icon:'🗑', msg: 'đã xóa nhân sự ' + (p.staffId||'') }; },
-      'saveAudit':    function(p) { return { icon:'✅', msg: 'đã lưu audit ' + ((p.data||p).store||'') }; },
-      'savePlan':     function(p) { return { icon:'📋', msg: 'đã lưu kế hoạch ' + ((p.data||p).month||'') }; },
-      'saveReport':   function(p) { return { icon:'📊', msg: 'đã lưu báo cáo ' + ((p.data||p).month||'') }; },
-      'updateTaskStatus': function(p) { return { icon:'☑️', msg: 'đã cập nhật trạng thái task' }; },
+      'saveStore':    function(p) { return { icon:'🏪', msg:'đã lưu cửa hàng ' + ((p.data||p).name||'') }; },
+      'deleteStore':  function(p) { return { icon:'🗑', msg:'đã xóa cửa hàng ' + (p.storeId||'') }; },
+      'saveStaff':    function(p) { return { icon:'👤', msg:'đã cập nhật nhân sự ' + ((p.data||p).name||'') }; },
+      'deleteStaff':  function(p) { return { icon:'🗑', msg:'đã xóa nhân sự ' + (p.staffId||'') }; },
+      'saveAudit':    function(p) { return { icon:'✅', msg:'đã lưu audit ' + ((p.data||p).store||'') }; },
+      'savePlan':     function(p) { return { icon:'📋', msg:'đã lưu kế hoạch ' + ((p.data||p).month||'') }; },
+      'saveReport':   function(p) { return { icon:'📊', msg:'đã lưu báo cáo ' + ((p.data||p).month||'') }; },
+      'updateTaskStatus': function() { return { icon:'☑️', msg:'đã cập nhật trạng thái task' }; },
     };
 
-    // Hook vào api function sau khi nó được định nghĩa
+    // Hook vào api để tự log notification sau mỗi action thành công
     document.addEventListener('DOMContentLoaded', function() {
       var _baseApi = window.api;
       if (!_baseApi) return;
       window.api = async function(payload) {
         var result = await _baseApi(payload);
-        // Log notification nếu action thành công
         if (result && result.ok && _notifActions[payload.action] && _currentUser) {
           var info = _notifActions[payload.action](payload);
           logNotification(payload.action, info.msg, info.icon).catch(function(){});
