@@ -5108,6 +5108,7 @@ Dương Thanh Liêm – Operations Phúc Tea`;
       const res = await api({ action: 'saveStaff', data: d });
       unload();
       if (res.ok) {
+        try{ if(typeof logNotification==='function') logNotification('saveStaff','đã cập nhật nhân sự '+name,'👤'); }catch(_){}
         const sfEmail = $('sf-email') ? $('sf-email').value.trim() : '';
         if (sfEmail) {
           // Lưu avatar localStorage
@@ -5543,6 +5544,7 @@ Dương Thanh Liêm – Operations Phúc Tea`;
       if (res.ok) {
         _currentPlanId = res.planId;
         if ($('plan-id-label')) $('plan-id-label').textContent = 'ID: ' + res.planId;
+        try{ if(typeof logNotification==='function') logNotification('savePlan','đã lưu kế hoạch','📋'); }catch(_){}
         toast('✅ Đã lưu kế hoạch! Đang tạo việc cần làm...');
         // Auto-create PLAN_TASKS from content immediately on save
         const tasks = [];
@@ -5810,6 +5812,7 @@ Trả về JSON thuần, không markdown, không backtick. 4 nhóm: Setup&KT, Au
       if (res.ok) {
         _currentRptId = res.reportId;
         if ($('rpt-id-label')) $('rpt-id-label').textContent = 'ID: ' + res.reportId;
+        try{ if(typeof logNotification==='function') logNotification('saveReport','đã lưu báo cáo','📊'); }catch(_){}
         toast('✅ Đã lưu báo cáo!');
         await loadReports();
       } else toast('❌ ' + (res.error || 'Lỗi'), 'terr');
@@ -6617,6 +6620,7 @@ Operations Leader`;
       }
       if (res && res.ok) {
         toast('✅ Đã đánh dấu hoàn thành!');
+        try{ if(typeof logNotification==='function') logNotification('updateTaskStatus','đã hoàn thành task: '+(doneTask?doneTask.task:''),'☑️'); }catch(_){}
         if (!D._completedTasks) D._completedTasks = [];
         if (doneTask) D._completedTasks.unshift({ ...doneTask, _doneAt: new Date().toLocaleString('vi-VN') });
         _saveCompletedTasks(); // persist to localStorage
@@ -7004,19 +7008,7 @@ Operations Leader`;
       'updateTaskStatus': function() { return { icon:'☑️', msg:'đã cập nhật trạng thái task' }; },
     };
 
-    // Hook vào api để tự log notification sau mỗi action thành công
-    document.addEventListener('DOMContentLoaded', function() {
-      var _baseApi = window.api;
-      if (!_baseApi) return;
-      window.api = async function(payload) {
-        var result = await _baseApi(payload);
-        if (result && result.ok && _notifActions[payload.action] && _currentUser) {
-          var info = _notifActions[payload.action](payload);
-          logNotification(payload.action, info.msg, info.icon).catch(function(){});
-        }
-        return result;
-      };
-    });
+    // (hook removed - using direct injection instead)
 
   </script>
 </body>
