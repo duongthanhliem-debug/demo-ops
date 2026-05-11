@@ -2515,8 +2515,23 @@
             <option>Tạm ngưng</option>
             <option>Đã ngưng cộng tác</option>
           </select></div>
-        <div class="fg"><label class="fl">Mật khẩu</label><input class="fc" type="password" id="sf-pw"
-            placeholder="Mật khẩu đăng nhập"></div>
+        <div class="fg" id="sf-pw-group">
+          <label class="fl">Mật khẩu</label>
+          <div style="position:relative">
+            <input class="fc" type="password" id="sf-pw" placeholder="Mật khẩu đăng nhập" style="padding-right:38px">
+            <button type="button" onclick="togglePwVis('sf-pw','eye-sf-pw')" id="eye-sf-pw"
+              style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:15px;color:var(--text-muted)">👁</button>
+          </div>
+          <div style="margin-top:6px;position:relative" id="sf-pw-confirm-wrap">
+            <label class="fl" style="margin-bottom:4px">Xác nhận mật khẩu</label>
+            <div style="position:relative">
+              <input class="fc" type="password" id="sf-pw-confirm" placeholder="Nhập lại mật khẩu" style="padding-right:38px">
+              <button type="button" onclick="togglePwVis('sf-pw-confirm','eye-sf-pw-confirm')" id="eye-sf-pw-confirm"
+                style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:15px;color:var(--text-muted)">👁</button>
+            </div>
+          </div>
+          <div id="sf-pw-match-err" style="display:none;color:var(--red);font-size:12px;margin-top:4px">⚠️ Mật khẩu xác nhận không khớp</div>
+        </div>
       </div>
       <div class="fg"><label class="fl">Ghi chú</label><textarea class="fc" id="sf-note" rows="2"></textarea></div>
       <hr style="border:none;border-top:1px solid var(--border);margin:10px 0">
@@ -2552,9 +2567,17 @@
           </div>
         </div>
       </div>
-      <div style="display:flex;gap:7px;margin-top:8px">
-        <button class="btn bp" style="flex:1" onclick="saveStaffForm()">💾 Lưu lên Sheets</button>
-        <button class="btn bo" onclick="closeModal('modal-staff')">Hủy</button>
+      <div style="display:flex;gap:7px;margin-top:8px" id="staff-modal-footer">
+        <!-- Chế độ xem: hiện nút Edit (chỉ System) -->
+        <div id="staff-view-btns" style="display:flex;gap:7px;width:100%">
+          <button class="btn bp" id="staff-edit-btn" style="flex:1;display:none" onclick="enableStaffEdit()">✏️ Chỉnh sửa</button>
+          <button class="btn bo" style="flex:1" onclick="closeModal('modal-staff')">Đóng</button>
+        </div>
+        <!-- Chế độ sửa: hiện nút Lưu + Hủy -->
+        <div id="staff-edit-btns" style="display:none;gap:7px;width:100%">
+          <button class="btn bp" style="flex:1" onclick="saveStaffForm()">💾 Lưu lên Sheets</button>
+          <button class="btn bo" onclick="closeModal('modal-staff')">Hủy</button>
+        </div>
       </div>
     </div>
   </div>
@@ -5023,7 +5046,19 @@ Dương Thanh Liêm – Operations Phúc Tea`;
       // Training section removed — element no longer in DOM
     }
 
+
+    // ── Toggle hiện/ẩn mật khẩu chung ──────────────────────
+    function togglePwVis(inputId, btnId) {
+      const inp = $(inputId); const btn = $(btnId);
+      if (!inp) return;
+      const isHidden = inp.type === 'password';
+      inp.type = isHidden ? 'text' : 'password';
+      if (btn) btn.textContent = isHidden ? '🙈' : '👁';
+    }
     function openStaffModal(data) {
+      if (!_currentUser || _currentUser.role !== 'System') {
+        toast('⚠️ Chỉ System mới được thêm nhân viên', 'twarn'); return;
+      }
       currentStaffEdit = null;
       _avatarBase64 = null; _cccdFrontB64 = null; _cccdBackB64 = null;
       const avPrev = $('sf-avatar-preview'); if (avPrev) avPrev.innerHTML = '?';
@@ -5034,6 +5069,8 @@ Dương Thanh Liêm – Operations Phúc Tea`;
       $('sf-gender').value = 'Nam'; $('sf-role').value = 'User'; $('sf-status').value = 'Đang cộng tác'; $('sf-pw').value = '';
       $('staff-modal-title').textContent = '+ Thêm nhân viên';
       openModal('modal-staff');
+      _setStaffModalReadonly(false);
+      $('staff-modal-title').textContent = '+ Thêm nhân viên';
     }
     function editStaff(id) {
       const s = _allStaff.find(x => x.id === id); if (!s) return;
@@ -5077,12 +5114,60 @@ Dương Thanh Liêm – Operations Phúc Tea`;
       $('sf-pw').value = '';
       if (s.dob) $('sf-dob').value = s.dob.split('/').reverse().join('-');
       if (s.startDate) $('sf-start').value = s.startDate.split('/').reverse().join('-');
-      $('staff-modal-title').textContent = '✏️ Sửa: ' + s.name;
+      // Mở ở chế độ XEM (readonly)
+      $('staff-modal-title').textContent = '👁 Xem: ' + s.name;
+      _setStaffModalReadonly(true);
       openModal('modal-staff');
+    }
+
+    // Bật chế độ chỉnh sửa (chỉ System)
+    function enableStaffEdit() {
+      if (!_currentUser || _currentUser.role !== 'System') {
+        toast('⚠️ Chỉ System mới được chỉnh sửa nhân sự', 'twarn'); return;
+      }
+      $('staff-modal-title').textContent = '✏️ Sửa: ' + (currentStaffEdit ? currentStaffEdit.name : '');
+      _setStaffModalReadonly(false);
+    }
+
+    function _setStaffModalReadonly(isRO) {
+      // Tất cả input/select/textarea trong modal
+      document.querySelectorAll('#modal-staff .fc').forEach(el => {
+        el.readOnly = isRO;
+        if (el.tagName === 'SELECT') el.disabled = isRO;
+        el.style.opacity = isRO ? '0.75' : '';
+        el.style.cursor  = isRO ? 'default' : '';
+      });
+      // File inputs
+      ['sf-avatar-file','sf-cccd-front-file','sf-cccd-back-file'].forEach(id => {
+        const el = $(id); if (el) el.disabled = isRO;
+      });
+      // Avatar click wrapper
+      const avWrap = document.querySelector('#modal-staff [onclick*="sf-avatar-file"]');
+      if (avWrap) avWrap.style.pointerEvents = isRO ? 'none' : '';
+      // Mật khẩu: ẩn hoàn toàn khi xem, hiện khi sửa
+      const pwGroup = $('sf-pw-group');
+      if (pwGroup) pwGroup.style.display = isRO ? 'none' : '';
+      // Footer buttons
+      const viewBtns = $('staff-view-btns');
+      const editBtns = $('staff-edit-btns');
+      const editBtn  = $('staff-edit-btn');
+      if (viewBtns) viewBtns.style.display = isRO ? 'flex' : 'none';
+      if (editBtns) editBtns.style.display  = isRO ? 'none' : 'flex';
+      // Nút Edit chỉ hiện với System
+      if (editBtn) editBtn.style.display = (isRO && _currentUser && _currentUser.role === 'System') ? '' : 'none';
     }
     async function saveStaffForm() {
       const name = $('sf-name').value.trim(), email = $('sf-email').value.trim();
       if (!name || !email) { toast('⚠️ Nhập họ tên và email', 'twarn'); return; }
+      // Kiểm tra xác nhận mật khẩu
+      const pw = ($('sf-pw') ? $('sf-pw').value.trim() : '');
+      const pwConfirm = ($('sf-pw-confirm') ? $('sf-pw-confirm').value.trim() : '');
+      if (pw && pw !== pwConfirm) {
+        const errEl = $('sf-pw-match-err');
+        if (errEl) errEl.style.display = 'block';
+        toast('⚠️ Mật khẩu xác nhận không khớp', 'twarn'); return;
+      }
+      if ($('sf-pw-match-err')) $('sf-pw-match-err').style.display = 'none';
       let id = $('sf-id').value.trim();
       if (!id) {
         const max = _allStaff.reduce((m, s) => { const n = parseInt((s.id || '').replace(/\D/g, '')) || 0; return n > m ? n : m; }, 0);
@@ -6943,40 +7028,63 @@ Operations Leader`;
       document.querySelectorAll('.notif-item.unread').forEach(function(el) { el.classList.remove('unread'); });
     }
 
-    // ── Nhắc deadline task sắp đến hạn (chỉ task của mình) ──────
+    // ── Nhắc deadline task sắp đến hạn (tất cả loại task của mình) ──
     async function checkDeadlineTasks() {
       if (!CFG.scriptUrl || !_currentUser) return;
       try {
-        var res = await api({ action: 'getMyTasks', userName: _currentUser.name || '' });
-        if (!res.ok || !res.tasks) return;
-        var tomorrow = new Date();
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        var tomorrowStr = tomorrow.toLocaleDateString('vi-VN'); // dd/MM/yyyy
-        // Also check same-day deadline
-        var todayStr = new Date().toLocaleDateString('vi-VN');
-        var alerted = JSON.parse(localStorage.getItem('ops_deadline_alerted') || '{}');
-        var todayKey = new Date().toISOString().split('T')[0];
+        // Gọi loadMyTasks để lấy tất cả tasks (Setup + Audit + KH)
+        // loadMyTasks lưu kết quả vào D._myTasks
+        const res = await api({ action: 'getMyTasks', userName: _currentUser.name || '' });
+        if (!res.ok) return;
 
-        res.tasks.forEach(function(t) {
-          if (!t.deadline) return;
-          var dl = t.deadline; // dd/MM/yyyy from GS
-          var isDueTomorrow = dl === tomorrowStr;
-          var isDueToday    = dl === todayStr;
-          if (!isDueTomorrow && !isDueToday) return;
-          // Only alert once per day per task
-          var alertKey = todayKey + '_' + t.taskId;
+        // Parse deadline hỗ trợ dd/MM/yyyy và yyyy-MM-dd
+        function _parseDL(dl) {
+          if (!dl) return null;
+          try {
+            const p = dl.split('/');
+            if (p.length === 3) return new Date(parseInt(p[2]), parseInt(p[1])-1, parseInt(p[0]));
+            return new Date(dl);
+          } catch(_) { return null; }
+        }
+
+        // Gộp tất cả task từ mọi nguồn
+        var allTasks = (res.tasks || []);
+        // Thêm audit tasks và plan tasks nếu đã load
+        if (D._myTasks && D._myTasks.length) {
+          // D._myTasks là kết quả từ buildMyTaskList (gộp cả 3 nguồn)
+          allTasks = D._myTasks;
+        }
+
+        var today    = new Date(); today.setHours(0,0,0,0);
+        var tomorrow = new Date(today); tomorrow.setDate(tomorrow.getDate()+1);
+
+        var alerted  = JSON.parse(localStorage.getItem('ops_deadline_alerted') || '{}');
+        var todayKey = today.toISOString().split('T')[0];
+
+        allTasks.forEach(function(t) {
+          if (!t.deadline || t.done) return;
+          var dl = _parseDL(t.deadline);
+          if (!dl) return;
+          dl.setHours(0,0,0,0);
+          var isToday    = dl.getTime() === today.getTime();
+          var isTomorrow = dl.getTime() === tomorrow.getTime();
+          if (!isToday && !isTomorrow) return;
+
+          var alertKey = todayKey + '_' + (t.taskId || t.id || t.task);
           if (alerted[alertKey]) return;
           alerted[alertKey] = true;
-          var msg = isDueToday
-            ? 'Task "' + t.task + '" (' + t.storeName + ') đến hạn HÔM NAY!'
-            : 'Task "' + t.task + '" (' + t.storeName + ') sẽ đến hạn vào NGÀY MAI';
-          var icon = isDueToday ? '🚨' : '⏰';
-          // Log to notification sheet
+
+          var typeLabel = t._source === 'audit' ? '[Audit] ' : t._source === 'plan' ? '[KH] ' : '[Setup] ';
+          var storeName = t.storeName || t.store || '';
+          var msg = isToday
+            ? typeLabel + '"' + t.task + '"' + (storeName ? ' (' + storeName + ')' : '') + ' đến hạn HÔM NAY!'
+            : typeLabel + '"' + t.task + '"' + (storeName ? ' (' + storeName + ')' : '') + ' đến hạn NGÀY MAI';
+          var icon = isToday ? '🚨' : '⏰';
+
           logNotification('deadline', msg, icon);
-          // Show toast in-app
-          if (typeof toast === 'function') toast(icon + ' ' + msg, isDueToday ? 'terr' : 'twarn');
+          if (typeof toast === 'function') toast(icon + ' ' + msg, isToday ? 'terr' : 'twarn');
         });
-        // Save alerted state (keep only today's keys)
+
         var cleaned = {};
         Object.keys(alerted).forEach(function(k) { if (k.startsWith(todayKey)) cleaned[k] = true; });
         localStorage.setItem('ops_deadline_alerted', JSON.stringify(cleaned));
