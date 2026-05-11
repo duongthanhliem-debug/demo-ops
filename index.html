@@ -2027,7 +2027,7 @@
       </div>
       <div class="fb">
         <button class="btn bo bsm" onclick="loadStaff()">🔄 Tải lại</button>
-        <button class="btn bp" onclick="openStaffModal()">+ Thêm nhân viên</button>
+        <button class="btn bp" id="add-staff-btn" onclick="openStaffModal()">+ Thêm nhân viên</button>
       </div>
     </div>
     <div class="filter-row">
@@ -5056,8 +5056,9 @@ Dương Thanh Liêm – Operations Phúc Tea`;
       if (btn) btn.textContent = isHidden ? '🙈' : '👁';
     }
     function openStaffModal(data) {
-      if (!_currentUser || _currentUser.role !== 'System') {
-        toast('⚠️ Chỉ System mới được thêm nhân viên', 'twarn'); return;
+      const r = _currentUser ? _currentUser.role : '';
+      if (r !== 'System' && r !== 'Admin') {
+        toast('⚠️ Bạn không có quyền thêm nhân viên', 'twarn'); return;
       }
       currentStaffEdit = null;
       _avatarBase64 = null; _cccdFrontB64 = null; _cccdBackB64 = null;
@@ -5122,8 +5123,17 @@ Dương Thanh Liêm – Operations Phúc Tea`;
 
     // Bật chế độ chỉnh sửa (chỉ System)
     function enableStaffEdit() {
-      if (!_currentUser || _currentUser.role !== 'System') {
-        toast('⚠️ Chỉ System mới được chỉnh sửa nhân sự', 'twarn'); return;
+      const role = _currentUser ? _currentUser.role : '';
+      const targetRole = currentStaffEdit ? currentStaffEdit.role : '';
+      if (role === 'System') {
+        // System: sửa tất cả
+      } else if (role === 'Admin' && targetRole === 'User') {
+        // Admin: chỉ sửa User
+      } else {
+        const msg = role === 'Admin'
+          ? '⚠️ Admin chỉ được sửa thông tin nhân viên có phân quyền User'
+          : '⚠️ Bạn không có quyền chỉnh sửa thông tin nhân sự';
+        toast(msg, 'twarn'); return;
       }
       $('staff-modal-title').textContent = '✏️ Sửa: ' + (currentStaffEdit ? currentStaffEdit.name : '');
       _setStaffModalReadonly(false);
@@ -5144,17 +5154,32 @@ Dương Thanh Liêm – Operations Phúc Tea`;
       // Avatar click wrapper
       const avWrap = document.querySelector('#modal-staff [onclick*="sf-avatar-file"]');
       if (avWrap) avWrap.style.pointerEvents = isRO ? 'none' : '';
-      // Mật khẩu: ẩn hoàn toàn khi xem, hiện khi sửa
+      // Mật khẩu: ẩn khi xem
       const pwGroup = $('sf-pw-group');
       if (pwGroup) pwGroup.style.display = isRO ? 'none' : '';
+      // CCCD section: ẩn với non-System khi readonly
+      const myRole = _currentUser ? _currentUser.role : '';
+      const canSeeCCCD = myRole === 'System' ||
+        (currentStaffEdit && _currentUser && _currentUser.email === currentStaffEdit.email);
+      document.querySelectorAll('#modal-staff .fg label').forEach(lbl => {
+        if (lbl.textContent.includes('CCCD') || lbl.textContent.includes('Ngân hàng') || lbl.textContent.includes('Tài khoản')) {
+          const fg = lbl.closest('.fg');
+          if (fg) fg.style.display = (!isRO || canSeeCCCD) ? '' : 'none';
+        }
+      });
       // Footer buttons
       const viewBtns = $('staff-view-btns');
       const editBtns = $('staff-edit-btns');
       const editBtn  = $('staff-edit-btn');
       if (viewBtns) viewBtns.style.display = isRO ? 'flex' : 'none';
       if (editBtns) editBtns.style.display  = isRO ? 'none' : 'flex';
-      // Nút Edit chỉ hiện với System
-      if (editBtn) editBtn.style.display = (isRO && _currentUser && _currentUser.role === 'System') ? '' : 'none';
+      // Nút Edit: System luôn thấy, Admin thấy khi target là User
+      if (editBtn) {
+        const myRole  = _currentUser ? _currentUser.role : '';
+        const tgtRole = currentStaffEdit ? currentStaffEdit.role : '';
+        const canEdit = myRole === 'System' || (myRole === 'Admin' && tgtRole === 'User');
+        editBtn.style.display = (isRO && canEdit) ? '' : 'none';
+      }
     }
     async function saveStaffForm() {
       const name = $('sf-name').value.trim(), email = $('sf-email').value.trim();
@@ -6881,6 +6906,9 @@ Operations Leader`;
         if (!D.auditCriteria.length && $('audit-criteria-container')) renderAuditForm();
       }, 1000);
 
+      // Ẩn/hiện nút + Thêm nhân viên theo role
+      const _addBtn = $('add-staff-btn');
+      if (_addBtn) _addBtn.style.display = (_currentUser && ['System','Admin'].includes(_currentUser.role)) ? '' : 'none';
       // Start notification polling + deadline check
       if (typeof startNotifPoll === 'function') setTimeout(startNotifPoll, 2500);
     }
